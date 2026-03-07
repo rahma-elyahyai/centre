@@ -17,7 +17,7 @@ export const studentAPI = {
         sortDir = 'desc'
       } = params;
       
-      const response = await api.get('/students', {
+      const response = await api.get('/api/students', {
         params: {
           niveau: niveau === 'all' || !niveau ? '' : niveau,
           filiere: filiere === 'all' || !filiere ? '' : filiere,
@@ -41,7 +41,7 @@ export const studentAPI = {
    */
   getStats: async () => {
     try {
-      const response = await api.get('/students/stats');
+      const response = await api.get('/api/students/stats');
       return response.data;
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -54,7 +54,7 @@ export const studentAPI = {
    */
   getNiveaux: async () => {
     try {
-      const response = await api.get('/students/options/niveaux');
+      const response = await api.get('/api/students/options/niveaux');
       return response.data;
     } catch (error) {
       console.error('Error fetching niveaux:', error);
@@ -67,7 +67,7 @@ export const studentAPI = {
    */
   getFilieres: async () => {
     try {
-      const response = await api.get('/students/options/filieres');
+      const response = await api.get('/api/students/options/filieres');
       return response.data;
     } catch (error) {
       console.error('Error fetching filieres:', error);
@@ -80,7 +80,7 @@ export const studentAPI = {
    */
   createStudent: async (studentData) => {
     try {
-      const response = await api.post('/students', studentData);
+      const response = await api.post('/api/students', studentData);
       return response.data;
     } catch (error) {
       console.error('Error creating student:', error);
@@ -93,7 +93,7 @@ export const studentAPI = {
    */
   updateStudent: async (id, studentData) => {
     try {
-      const response = await api.put(`/students/${id}`, studentData);
+      const response = await api.put(`/api/students/${id}`, studentData);
       return response.data;
     } catch (error) {
       console.error('Error updating student:', error);
@@ -106,7 +106,7 @@ export const studentAPI = {
    */
   getStudent: async (id) => {
     try {
-      const response = await api.get(`/students/${id}`);
+      const response = await api.get(`/api/students/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching student:', error);
@@ -119,7 +119,7 @@ export const studentAPI = {
    */
   deleteStudent: async (id) => {
     try {
-      const response = await api.delete(`/students/${id}`);
+      const response = await api.delete(`/api/students/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error deleting student:', error);
@@ -132,7 +132,7 @@ export const studentAPI = {
    */
   getStudentsByGroup: async (niveau, filiere) => {
     try {
-      const response = await api.get(`/students/group/${niveau}/${filiere}`);
+      const response = await api.get(`/api/students/group/${niveau}/${filiere}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching students by group:', error);

@@ -7,7 +7,7 @@ export const professorAPI = {
   getAllProfessors: async (params = {}) => {
     const { specialite = '', search = '' } = params;
     
-    const response = await axiosInstance.get('/professors', { // <- Changer ici
+    const response = await axiosInstance.get('/api/professors', { // <- Changer ici
       params: {
         specialite: specialite === 'all' ? '' : specialite,
         search
@@ -18,13 +18,13 @@ export const professorAPI = {
   
   // Récupérer les statistiques
   getStats: async () => {
-    const response = await axiosInstance.get('/professors/stats'); // <- Changer ici
+    const response = await axiosInstance.get('/api/professors/stats'); // <- Changer ici
     return response.data;
   },
   
   // Récupérer les spécialités
   getSpecialites: async () => {
-    const response = await axiosInstance.get('/professors/options/specialites'); // <- Changer ici
+    const response = await axiosInstance.get('/api/professors/options/specialites'); // <- Changer ici
     return response.data;
   },
 
@@ -44,7 +44,7 @@ createProfessor: async (professorData, photoFile) => {
         formData.append('photo', photoFile);
       }
       
-      const response = await axiosInstance.post('/professors', formData, {
+      const response = await axiosInstance.post('/api/professors', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -71,7 +71,7 @@ createProfessor: async (professorData, photoFile) => {
         formData.append('photo', photoFile);
       }
       
-      const response = await axiosInstance.put(`/professors/${id}`, formData, {
+      const response = await axiosInstance.put(`/api/professors/${id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -85,13 +85,13 @@ createProfessor: async (professorData, photoFile) => {
   
   // Récupérer un professeur par ID
   getProfessor: async (id) => {
-    const response = await axiosInstance.get(`/professors/${id}`);
+    const response = await axiosInstance.get(`/api/professors/${id}`);
     return response.data;
   },
   
   // Supprimer un professeur
   deleteProfessor: async (id) => {
-    const response = await axiosInstance.delete(`/professors/${id}`);
+    const response = await axiosInstance.delete(`/api/professors/${id}`);
     return response.data;
   }
 };

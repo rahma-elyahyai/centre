@@ -6,27 +6,27 @@ export const dashboardAPI = {
   // axios retourne { data: { success, message, data } }
   // on unwrap ici pour que le composant reçoive directement { success, data }
   getDashboardData: async () => {
-    const response = await api.get('/dashboard');
+    const response = await api.get('/api/dashboard');
     return response.data; // { success: true, data: { stats, recentStudents, ... } }
   },
 
   getStats: async () => {
-    const response = await api.get('/dashboard/stats');
+    const response = await api.get('/api/dashboard/stats');
     return response.data;
   },
 
   getRecentStudents: async () => {
-    const response = await api.get('/dashboard/recent-students');
+    const response = await api.get('/api/dashboard/recent-students');
     return response.data;
   },
 
   getRecentActivities: async () => {
-    const response = await api.get('/dashboard/recent-activities');
+    const response = await api.get('/api/dashboard/recent-activities');
     return response.data;
   },
 
   getUpcomingEvents: async () => {
-    const response = await api.get('/dashboard/upcoming-events');
+    const response = await api.get('/api/dashboard/upcoming-events');
     return response.data;
   },
 };

@@ -12,7 +12,7 @@ export const courseAPI = {
       if (professorId) queryParams.professorId = professorId;
       if (search) queryParams.search = search;
       
-      const response = await api.get('/courses', { params: queryParams });
+      const response = await api.get('/api/courses', { params: queryParams });
       return response.data;
     } catch (error) {
       console.error('Error in getAllCourses:', error);
@@ -23,7 +23,7 @@ export const courseAPI = {
   // Récupérer les statistiques
   getStats: async () => {
     try {
-      const response = await api.get('/courses/stats');
+      const response = await api.get('/api/courses/stats');
       return response.data;
     } catch (error) {
       console.error('Error in getStats:', error);
@@ -34,7 +34,7 @@ export const courseAPI = {
   // Récupérer les matières
   getSubjects: async () => {
     try {
-      const response = await api.get('/courses/options/subjects');
+      const response = await api.get('/api/courses/options/subjects');
       return response.data;
     } catch (error) {
       console.error('Error in getSubjects:', error);
@@ -45,7 +45,7 @@ export const courseAPI = {
   // Récupérer les niveaux
   getLevels: async () => {
     try {
-      const response = await api.get('/courses/options/levels');
+      const response = await api.get('/api/courses/options/levels');
       return response.data;
     } catch (error) {
       console.error('Error in getLevels:', error);
@@ -56,7 +56,7 @@ export const courseAPI = {
   // Créer un cours
   createCourse: async (courseData) => {
     try {
-      const response = await api.post('/courses', courseData);
+      const response = await api.post('/api/courses', courseData);
       return response.data;
     } catch (error) {
       console.error('Error in createCourse:', error);
@@ -67,7 +67,7 @@ export const courseAPI = {
   // Mettre à jour un cours
   updateCourse: async (id, courseData) => {
     try {
-      const response = await api.put(`/courses/${id}`, courseData);
+      const response = await api.put(`/api/courses/${id}`, courseData);
       return response.data;
     } catch (error) {
       console.error('Error in updateCourse:', error);
@@ -78,7 +78,7 @@ export const courseAPI = {
   // Récupérer un cours par ID
   getCourse: async (id) => {
     try {
-      const response = await api.get(`/courses/${id}`);
+      const response = await api.get(`/api/courses/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error in getCourse:', error);
@@ -89,7 +89,7 @@ export const courseAPI = {
   // Supprimer un cours
   deleteCourse: async (id) => {
     try {
-      const response = await api.delete(`/courses/${id}`);
+      const response = await api.delete(`/api/courses/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error in deleteCourse:', error);

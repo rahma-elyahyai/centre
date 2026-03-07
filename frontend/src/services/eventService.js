@@ -7,23 +7,23 @@ export const eventAPI = {
     if (status && status !== 'all') q.status = status;
     if (type && type !== 'all') q.type = type;
     if (search) q.search = search;
-    const res = await api.get('/events', { params: q });
+    const res = await api.get('/api/events', { params: q });
     return res.data;
   },
   getStats: async () => {
-    const res = await api.get('/events/stats');
+    const res = await api.get('/api/events/stats');
     return res.data;
   },
   createEvent: async (data) => {
-    const res = await api.post('/events', data);
+    const res = await api.post('/api/events', data);
     return res.data;
   },
   updateEvent: async (id, data) => {
-    const res = await api.put(`/events/${id}`, data);
+    const res = await api.put(`/api/events/${id}`, data);
     return res.data;
   },
   deleteEvent: async (id) => {
-    const res = await api.delete(`/events/${id}`);
+    const res = await api.delete(`/api/events/${id}`);
     return res.data;
   }
 };
