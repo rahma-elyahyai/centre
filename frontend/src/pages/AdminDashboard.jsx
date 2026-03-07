@@ -1,7 +1,7 @@
 // src/components/AdminDashboard.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { dashboardAPI } from '../services/dashboardService';
+import { dashboardAPI } from '../services/Dashboardservice';
 import { getAuthToken } from '../services/api';
 import Sidebar from './Sidebar';
 
