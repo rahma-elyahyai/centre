@@ -28,13 +28,10 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    public FilterRegistrationBean<CorsFilter> corsFilterRegistration() {
-        FilterRegistrationBean<CorsFilter> bean =
-            new FilterRegistrationBean<>(new CorsFilter(corsConfigurationSource()));
-        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-        return bean;
+    private final JwtAuthenticationFilter jwtAuthFilter;  // ← AJOUTER
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {  // ← AJOUTER
+        this.jwtAuthFilter = jwtAuthFilter;
     }
 
     @Bean
@@ -52,8 +49,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/events/**").permitAll()
                 .requestMatchers("/api/students/stats").permitAll()
                 .anyRequest().authenticated()
-
-            );
+            )
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);  // ← AJOUTER
         return http.build();
     }
 
