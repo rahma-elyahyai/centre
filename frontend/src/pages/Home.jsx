@@ -23,10 +23,10 @@ if (!document.getElementById('home-warriors-style')) {
 }
 
 /* ─── API calls ─── */
-const fetchProfessors = () => api.get('/professors').then(r => r.data);
-const fetchEvents     = () => api.get('/events/upcoming').then(r => r.data);
-const fetchStats      = () => api.get('/students/stats').then(r => r.data);
-const fetchCourses    = () => api.get('/courses').then(r => r.data);
+const fetchProfessors = () => api.get('/api/professors').then(r => r.data);
+const fetchEvents     = () => api.get('/api/events/upcoming').then(r => r.data);
+const fetchStats      = () => api.get('/api/students/stats').then(r => r.data);
+const fetchCourses    = () => api.get('/api/courses').then(r => r.data);
 
 /* ─── Skeleton loader ─── */
 const Skeleton = ({ w = '100%', h = '1rem', rounded = 'rounded-lg', className = '' }) => (
@@ -37,8 +37,7 @@ const Skeleton = ({ w = '100%', h = '1rem', rounded = 'rounded-lg', className = 
 );
 
 /* ─── Professor Card ─── */
-const BASE_URL = 'http://localhost:8080';
-
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 const ProfessorCard = ({ prof }) => {
   const hasPhoto = prof.avatarType === 'photo' && prof.photoUrl;
   const photoSrc = hasPhoto

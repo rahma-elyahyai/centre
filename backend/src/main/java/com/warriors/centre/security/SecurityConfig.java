@@ -48,6 +48,9 @@ public class SecurityConfig {
                 .requestMatchers("/api/courses/**").permitAll()
                 .requestMatchers("/api/events/**").permitAll()
                 .requestMatchers("/api/students/stats").permitAll()
+                .requestMatchers("/api/stats/**").permitAll()
+                .requestMatchers("/api/upcoming/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);  // ← AJOUTER
