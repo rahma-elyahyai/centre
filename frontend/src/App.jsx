@@ -11,6 +11,7 @@ import EventsList from './pages/EventsList';
 import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './routes/ProtectedRoute';
 import { isAuthenticated } from './services/api';
+import Unauthorized from './pages/Unauthorized';
 
 // Redirige vers le dashboard si déjà connecté
 const PublicRoute = ({ children }) => {
@@ -101,6 +102,7 @@ function App() {
         />
 
         {/* Catch all */}
+        <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
