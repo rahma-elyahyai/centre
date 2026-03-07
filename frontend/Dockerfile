@@ -8,6 +8,10 @@ ENV VITE_API_URL=$VITE_API_URL
 COPY package*.json ./
 RUN npm ci
 COPY . .
+
+# Créer le .env avec la bonne URL
+RUN echo "VITE_API_URL=$VITE_API_URL" > .env.production
+
 RUN npm run build
 
 # ─── Run stage ────────────────────────────────────────────
