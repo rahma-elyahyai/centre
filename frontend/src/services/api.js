@@ -40,7 +40,7 @@ axiosInstance.interceptors.response.use(
 export const authAPI = {
   login: async (email, password) => {
     try {
-      const response = await axiosInstance.post("/auth/login", {
+      const response = await axiosInstance.post("/api/auth/login", {
         email,
         password,
       });
@@ -57,7 +57,7 @@ export const authAPI = {
   },
 
   validateToken: async () => {
-    const response = await axiosInstance.post("/auth/validate");
+    const response = await axiosInstance.post("/api/auth/validate");
     return response.data;
   },
 };
