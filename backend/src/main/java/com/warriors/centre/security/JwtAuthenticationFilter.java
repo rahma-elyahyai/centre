@@ -31,6 +31,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        // Laisser passer les preflight CORS sans vérifier le JWT
+        return request.getMethod().equals("OPTIONS");
+    }
+
+    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
@@ -63,8 +69,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // Token invalide, expiré ou mal signé → on laisse passer comme anonyme
-            // Spring Security gèrera le 401/403 selon la route
             logger.debug("JWT rejeté : {}", e.getMessage());
         }
 

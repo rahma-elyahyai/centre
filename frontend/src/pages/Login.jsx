@@ -33,25 +33,11 @@ const Login = () => {
     }
   }, [navigate, location]);
 
+// Remplacer checkBackendConnection entièrement
   const checkBackendConnection = async () => {
-    try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'OPTIONS',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      
-      if (response.ok || response.status === 0) {
-        setConnectionStatus('connected');
-      } else {
-        setConnectionStatus('error');
-        setApiError('Le serveur backend ne répond pas. Assurez-vous qu\'il est démarré.');
-      }
-    } catch (error) {
-      setConnectionStatus('error');
-      console.error('Backend connection check failed:', error);
-    }
+    // En production, on ne fait pas de vérification séparée
+    // La tentative de login suffira
+    setConnectionStatus('unknown');
   };
 
   const handleChange = (e) => {
@@ -119,8 +105,9 @@ const Login = () => {
       
       let errorMessage = 'Erreur de connexion';
       
-      if (error.message.includes('Network Error') || error.message.includes('Failed to fetch')) {
-        errorMessage = 'Impossible de se connecter au serveur. Vérifiez que le backend est démarré sur http://localhost:8080';
+      // Dans handleSubmit, remplacer le message d'erreur réseau
+      if (error.message.includes('Network Error') || error.message.includes('Failed to fetch') || error.message.includes('ne répond pas')) {
+        errorMessage = 'Impossible de joindre le serveur. Veuillez réessayer dans quelques instants.';
       } else if (error.message.includes('timeout')) {
         errorMessage = 'La requête a expiré. Le serveur met trop de temps à répondre.';
       } else if (error.message.includes('401') || error.message.includes('incorrect')) {
@@ -135,33 +122,31 @@ const Login = () => {
     }
   };
 
-  const handleTestConnection = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: 'test@test.com', password: 'test' })
-      });
-      
-      if (response.status !== 401 && response.status !== 400) {
-        setConnectionStatus('connected');
-        setApiError('');
-        alert('Connexion au serveur réussie !');
-      } else {
-        setConnectionStatus('connected');
-        setApiError('');
-        alert('Serveur accessible mais identifiants incorrects (c\'est normal pour ce test)');
-      }
-    } catch (error) {
+// Remplacer handleTestConnection entièrement  
+const handleTestConnection = async () => {
+  try {
+    setIsLoading(true);
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'test@test.com', password: 'test' })
+    });
+
+    if (response.status === 401 || response.status === 400 || response.ok) {
+      setConnectionStatus('connected');
+      setApiError('');
+      alert('Serveur accessible !');
+    } else {
       setConnectionStatus('error');
-      setApiError('Erreur de connexion au serveur: ' + error.message);
-    } finally {
-      setIsLoading(false);
+      setApiError('Serveur inaccessible (status: ' + response.status + ')');
     }
-  };
+  } catch (error) {
+    setConnectionStatus('error');
+    setApiError('Erreur de connexion au serveur: ' + error.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="relative min-h-screen bg-[#0a1628] text-white overflow-hidden font-['Inter'] flex items-center justify-center">
