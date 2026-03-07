@@ -67,10 +67,7 @@ jobs:
         run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/warriors-centre-backend:latest -f backend/Dockerfile backend
 
       - name: Build frontend image
-        run: docker build \
-          --build-arg VITE_API_URL=https://centre-backend.onrender.com \
-          -t ${{ secrets.DOCKERHUB_USERNAME }}/warriors-centre-frontend:latest \
-          -f frontend/Dockerfile frontend
+        run: docker build --build-arg VITE_API_URL=https://centre-backend.onrender.com -t ${{ secrets.DOCKERHUB_USERNAME }}/warriors-centre-frontend:latest -f frontend/Dockerfile frontend
           
       - name: Push images
         run: |
