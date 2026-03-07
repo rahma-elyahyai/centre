@@ -20,6 +20,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import com.warriors.centre.security.JwtAuthenticationFilter;
+
 import java.util.List;
 
 @Configuration
@@ -51,7 +53,12 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/professors/**").permitAll()
+                .requestMatchers("/api/courses/**").permitAll()
+                .requestMatchers("/api/events/**").permitAll()
+                .requestMatchers("/api/students/stats").permitAll()
                 .anyRequest().authenticated()
+
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
