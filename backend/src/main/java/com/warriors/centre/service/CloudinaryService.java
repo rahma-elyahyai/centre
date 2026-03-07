@@ -28,7 +28,21 @@ public class CloudinaryService {
         return (String) result.get("secure_url");
     }
 
-    public void deleteImage(String publicId) throws IOException {
-        cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+    public void deleteImage(String url) {
+        try {
+            String publicId = extractPublicId(url);
+            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+        } catch (IOException e) {
+            System.err.println("Warning: could not delete image from Cloudinary: " + e.getMessage());
+        }
+    }
+
+    private String extractPublicId(String url) {
+        String withoutExtension = url.substring(0, url.lastIndexOf('.'));
+        String afterUpload = withoutExtension.substring(withoutExtension.indexOf("/upload/") + 8);
+        if (afterUpload.matches("v\\d+/.*")) {
+            afterUpload = afterUpload.substring(afterUpload.indexOf('/') + 1);
+        }
+        return afterUpload;
     }
 }

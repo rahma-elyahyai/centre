@@ -89,12 +89,12 @@ public class ProfessorService {
         professor.setAvatarType(request.getAvatarType());
 
         if ("emoji".equals(request.getAvatarType())) {
-            if (oldPhotoUrl != null) fileStorageService.deleteFile(oldPhotoUrl);
+            if (oldPhotoUrl != null) cloudinaryService.deleteImage(oldPhotoUrl);
             professor.setPhotoUrl(null);
             professor.setAvatarEmoji(request.getAvatarEmoji());
         } else if ("photo".equals(request.getAvatarType())) {
             if (photo != null && !photo.isEmpty()) {
-                if (oldPhotoUrl != null) fileStorageService.deleteFile(oldPhotoUrl);
+                if (oldPhotoUrl != null) cloudinaryService.deleteImage(oldPhotoUrl);
                 try {
                     professor.setPhotoUrl(cloudinaryService.uploadImage(photo, "warriors/professors"));                } catch (IOException e) {
                     throw new RuntimeException("Erreur upload photo: " + e.getMessage());
@@ -152,8 +152,7 @@ public class ProfessorService {
     public void deleteProfessor(Long id) {
         Professor professor = professorRepository.findByIdWithMatieres(id)
                 .orElseThrow(() -> new ProfessorNotFoundException(id));
-        if (professor.getPhotoUrl() != null) fileStorageService.deleteFile(professor.getPhotoUrl());
-        professorRepository.deleteById(id);
+        if (professor.getPhotoUrl() != null) cloudinaryService.deleteImage(professor.getPhotoUrl());        professorRepository.deleteById(id);
     }
 
     @Transactional(readOnly = true)
