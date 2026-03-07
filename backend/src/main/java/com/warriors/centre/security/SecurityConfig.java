@@ -83,4 +83,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }   
 }
->>>>>>> 106f9d6 (fix: use import.meta.env for Vite API URL)
