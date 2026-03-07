@@ -20,6 +20,7 @@ jobs:
           java-version: "17"
 
       - name: Build backend
+        working-directory: backend
         run: mvn clean package -DskipTests -B
 
   docker-build-push:
@@ -37,6 +38,7 @@ jobs:
           java-version: "17"
 
       - name: Build backend jar
+        working-directory: backend
         run: mvn clean package -DskipTests -B
 
       - name: Log in to Docker Hub
@@ -46,7 +48,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/warriors-centre:latest .
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/warriors-centre:latest -f backend/Dockerfile backend
 
       - name: Push Docker image
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/warriors-centre:latest
