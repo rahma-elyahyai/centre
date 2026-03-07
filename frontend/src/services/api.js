@@ -1,7 +1,6 @@
 import axios from "axios";
 
-// APRÈS (Vite syntax)
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || "https://centre-backend.onrender.com";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
@@ -11,7 +10,6 @@ const axiosInstance = axios.create({
   timeout: 100000,
 });
 
-// Intercepteur pour ajouter le token
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("authToken");
@@ -20,24 +18,18 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-
-// Intercepteur pour gérer les erreurs de réponse
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expiré ou invalide côté serveur
       removeAuthToken();
       window.location.href = "/login?session=expired";
     }
 
     if (error.response?.status === 403) {
-      // Connecté mais pas le bon rôle
       window.location.href = "/unauthorized";
     }
 
@@ -45,8 +37,6 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-
-// API Functions
 export const authAPI = {
   login: async (email, password) => {
     try {
@@ -59,24 +49,19 @@ export const authAPI = {
       if (error.response) {
         throw new Error(error.response.data.error || "Erreur de connexion");
       } else if (error.request) {
-        throw new Error("Le serveur ne répond pas. Vérifiez qu'il est démarré sur http://localhost:8080");
+        throw new Error(`Le serveur ne répond pas. Backend utilisé : ${API_URL}`);
       } else {
-        throw new Error("Erreur lors de la requête: " + error.message);
+        throw new Error("Erreur lors de la requête : " + error.message);
       }
     }
   },
 
   validateToken: async () => {
-    try {
-      const response = await axiosInstance.post("/auth/validate");
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+    const response = await axiosInstance.post("/auth/validate");
+    return response.data;
   },
 };
 
-// Helper functions
 export const setAuthToken = (token) => {
   localStorage.setItem("authToken", token);
 };
@@ -99,26 +84,25 @@ export const getUserInfo = () => {
   return userInfo ? JSON.parse(userInfo) : null;
 };
 
-// Remplace l'actuelle isAuthenticated()
 export const isAuthenticated = () => {
   const token = getAuthToken();
   const userInfo = getUserInfo();
-  
+
   if (!token || !userInfo) return false;
-  
-  // Vérifier l'expiration côté client (sans appel réseau)
+
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const payload = JSON.parse(atob(token.split(".")[1]));
     const isExpired = payload.exp * 1000 < Date.now();
+
     if (isExpired) {
-      removeAuthToken(); // Nettoie automatiquement
+      removeAuthToken();
       return false;
     }
   } catch (e) {
     removeAuthToken();
     return false;
   }
-  
+
   return true;
 };
 
