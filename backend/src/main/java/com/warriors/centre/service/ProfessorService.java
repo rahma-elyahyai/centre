@@ -19,12 +19,12 @@ import java.util.stream.Collectors;
 public class ProfessorService {
 
     private final ProfessorRepository professorRepository;
-    private final FileStorageService fileStorageService;
+    private final CloudinaryService cloudinaryService;
 
     public ProfessorService(ProfessorRepository professorRepository,
-                            FileStorageService fileStorageService) {
+                            CloudinaryService cloudinaryService) {  // ← REMPLACER
         this.professorRepository = professorRepository;
-        this.fileStorageService = fileStorageService;
+        this.cloudinaryService = cloudinaryService;
     }
 
     @Transactional
@@ -52,8 +52,7 @@ public class ProfessorService {
 
         if ("photo".equals(request.getAvatarType()) && photo != null && !photo.isEmpty()) {
             try {
-                String photoUrl = fileStorageService.storeFile(photo, saved.getId().toString());
-                saved.setPhotoUrl(photoUrl);
+                String photoUrl = cloudinaryService.uploadImage(photo, "warriors/professors");                saved.setPhotoUrl(photoUrl);
                 saved = professorRepository.save(saved);
             } catch (IOException e) {
                 throw new RuntimeException("Erreur upload photo: " + e.getMessage());
@@ -97,8 +96,7 @@ public class ProfessorService {
             if (photo != null && !photo.isEmpty()) {
                 if (oldPhotoUrl != null) fileStorageService.deleteFile(oldPhotoUrl);
                 try {
-                    professor.setPhotoUrl(fileStorageService.storeFile(photo, id.toString()));
-                } catch (IOException e) {
+                    professor.setPhotoUrl(cloudinaryService.uploadImage(photo, "warriors/professors"));                } catch (IOException e) {
                     throw new RuntimeException("Erreur upload photo: " + e.getMessage());
                 }
             } else if (request.getPhotoUrl() != null) {
