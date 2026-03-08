@@ -269,7 +269,7 @@ const Home = () => {
           </ul>
 
           <Link to="/login"
-            className="hidden md:block px-7 py-2.5 bg-gradient-to-br from-[#d4a747] to-[#f4d677] text-[#0a1628] rounded-full font-bold text-[0.9rem] no-underline transition-all duration-250 shadow-[0_4px_12px_rgba(212,167,71,0.3)] hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(212,167,71,0.4)]">
+            className="px-5 py-2.5 bg-gradient-to-br from-[#d4a747] to-[#f4d677] text-[#0a1628] rounded-full font-bold text-[0.85rem] no-underline transition-all duration-250 shadow-[0_4px_12px_rgba(212,167,71,0.3)] hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(212,167,71,0.4)]">
             Connexion
           </Link>
         </div>
