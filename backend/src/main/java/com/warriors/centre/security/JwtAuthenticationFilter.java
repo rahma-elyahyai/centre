@@ -30,12 +30,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
-    @Override
+   @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        // Laisser passer les preflight CORS sans vérifier le JWT
-        return request.getMethod().equals("OPTIONS");
-    }
+        String path = request.getServletPath();
 
+        return "OPTIONS".equalsIgnoreCase(request.getMethod())
+                || "/api/cours".equals(path)
+                || path.startsWith("/api/cours/");
+    }
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,

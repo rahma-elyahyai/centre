@@ -12,6 +12,7 @@ import ProfilePage from './pages/ProfilePage';
 import ProtectedRoute from './routes/ProtectedRoute';
 import { isAuthenticated } from './services/api';
 import Unauthorized from './pages/Unauthorized';
+import CoursDistance from './pages/CoursDistance'; 
 
 // Redirige vers le dashboard si déjà connecté
 const PublicRoute = ({ children }) => {
@@ -100,6 +101,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/cours-distance" element={<CoursDistance />} />
 
         {/* Catch all */}
         <Route path="/unauthorized" element={<Unauthorized />} />

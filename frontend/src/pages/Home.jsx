@@ -265,7 +265,17 @@ const Home = () => {
                   {label}
                 </a>
               </li>
+              
             ))}
+            <li>
+              <Link
+                to="/cours-distance"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold no-underline transition-all duration-250 border border-yellow-500/30 text-[#f4d677] hover:bg-yellow-500/10 hover:border-[#d4a747] hover:-translate-y-0.5"
+                style={{ background: 'rgba(212,167,71,0.05)' }}
+              >
+                <span></span> Cours à Distance
+              </Link>
+            </li>
           </ul>
 
           <Link to="/login"
