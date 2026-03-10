@@ -280,6 +280,7 @@ export default function CoursDistance() {
   const [lvlId,    setLvlId]    = useState(null);
   const [matId,    setMatId]    = useState(null);
   const [scrolled, setScrolled] = useState(false);
+  const [setMenuOpen] = useState(false);  
 
   /* ── Fetch data ── */
   useEffect(() => {
@@ -325,61 +326,62 @@ export default function CoursDistance() {
         <div style={{ position: 'absolute', width: 500, height: 500, bottom: '-10%', right: '-12%', background: '#6366f1', filter: 'blur(110px)', opacity: .045, animation: 'cdFloat 27s ease-in-out infinite 9s', borderRadius: '50%' }} />
       </div>
 
+      {/* ══ NAVBAR ══ */}  
+
       {/* ══ NAVBAR ══ */}
-      <nav className={`cd-nav ${scrolled ? 'scrolled' : 'top'}`}>
-        <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24 }}>
-          <a href="#" className="flex items-center gap-4 no-underline hover:-translate-y-0.5 transition-transform duration-250">
-                      <img src={warriosImg} alt="Centre Warriors" className="h-[50px] w-auto drop-shadow-[0_4px_8px_rgba(212,167,71,0.3)]" />
-                      <span className="font-['Space_Grotesk'] text-xl font-bold bg-gradient-to-br from-[#d4a747] to-[#f4d677] bg-clip-text text-transparent">
-                        Centre Warriors
-                      </span>
-                    </a>
+<nav className={`cd-nav ${scrolled ? 'scrolled' : 'top'}`}>
+  <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+    <a href="#" className="flex items-center gap-3 no-underline">
+      <img src={warriosImg} alt="Centre Warriors" style={{ height: 42, width: 'auto' }} />
+      <span className="cd-font" style={{ fontSize: '1.1rem', fontWeight: 700, background: 'linear-gradient(135deg,#d4a747,#f4d677)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+        Centre Warriors
+      </span>
+    </a>
 
-          {/* Level dropdowns */}
-          <div className="hidden md:flex items-center" style={{ gap: 4 }}>
-            {loading
-              ? [1, 2, 3].map(i => <Skel key={i} w={110} h={38} r={50} style={{ margin: '0 2px' }} />)
-              : niveaux.map(lv => (
-                <div key={lv.id} className="cd-nav-item">
-                  <button
-                    className={`cd-nav-pill ${lvlId === lv.id ? 'on' : 'idle'}`}
-                    onClick={() => { setLvlId(lv.id); setMatId(null); }}
-                    style={lvlId === lv.id ? { background: `linear-gradient(135deg,${lv.colorHex || '#d4a747'},#f4d677)`, color: '#0a1628', boxShadow: `0 8px 22px -4px ${lv.colorHex || '#d4a747'}50` } : {}}>
-                    {lv.emoji && <span>{lv.emoji}</span>}
-                    {lv.label}
-                    <span className="arr">▼</span>
-                  </button>
-                  <div className="cd-dropdown">
-                    <div className="cd-drop-lbl">{lv.fullLabel}</div>
-                    <div className="cd-drop-div" />
-                    {lv.matieres?.map(m => (
-                      <div key={m.id}
-                        className={`cd-drop-item ${lvlId === lv.id && effMat === m.id ? 'active' : ''}`}
-                        onClick={() => { setLvlId(lv.id); setMatId(m.id); }}>
-                        <span className="cd-drop-dot" />
-                        {m.icon && <span style={{ fontSize: '1.1rem' }}>{m.icon}</span>}
-                        {m.nom}
-                      </div>
-                    ))}
-                  </div>
+    {/* Desktop level pills — cachés sur mobile */}
+    <div className="hidden md:flex items-center" style={{ gap: 4 }}>
+      {loading
+        ? [1,2,3].map(i => <Skel key={i} w={110} h={38} r={50} style={{ margin: '0 2px' }} />)
+        : niveaux.map(lv => (
+          <div key={lv.id} className="cd-nav-item">
+            <button className={`cd-nav-pill ${lvlId === lv.id ? 'on' : 'idle'}`}
+              onClick={() => { setLvlId(lv.id); setMatId(null); }}
+              style={lvlId === lv.id ? { background: `linear-gradient(135deg,${lv.colorHex || '#d4a747'},#f4d677)`, color: '#0a1628', boxShadow: `0 8px 22px -4px ${lv.colorHex || '#d4a747'}50` } : {}}>
+              {lv.emoji && <span>{lv.emoji}</span>}
+              {lv.label}
+              <span className="arr">▼</span>
+            </button>
+            <div className="cd-dropdown">
+              <div className="cd-drop-lbl">{lv.fullLabel}</div>
+              <div className="cd-drop-div" />
+              {lv.matieres?.map(m => (
+                <div key={m.id} className={`cd-drop-item ${lvlId === lv.id && effMat === m.id ? 'active' : ''}`}
+                  onClick={() => { setLvlId(lv.id); setMatId(m.id); }}>
+                  <span className="cd-drop-dot" />
+                  {m.icon && <span style={{ fontSize: '1.1rem' }}>{m.icon}</span>}
+                  {m.nom}
                 </div>
-              ))
-            }
+              ))}
+            </div>
           </div>
+        ))
+      }
+    </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
-            <Link to="/" style={{ fontSize: '.85rem', fontWeight: 500, color: '#64748b', textDecoration: 'none' }}
-              onMouseEnter={e => e.target.style.color = '#cbd5e1'} onMouseLeave={e => e.target.style.color = '#64748b'}>
-              ← Accueil
-            </Link>
-            <Link to="/login" style={{ padding: '9px 20px', borderRadius: 50, fontWeight: 700, fontSize: '.82rem', textDecoration: 'none', color: '#0a1628', background: 'linear-gradient(135deg,#d4a747,#f4d677)', boxShadow: '0 4px 16px rgba(212,167,71,.3)', fontFamily: 'Syne,sans-serif' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(212,167,71,.4)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 16px rgba(212,167,71,.3)'; }}>
-              Connexion
-            </Link>
-          </div>
-        </div>
-      </nav>
+    {/* Droite : Accueil (desktop) + Connexion */}
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+      <Link to="/" 
+        style={{ fontSize: '.85rem', fontWeight: 500, color: '#64748b', textDecoration: 'none' }}
+        onMouseEnter={e => e.target.style.color = '#cbd5e1'}
+        onMouseLeave={e => e.target.style.color = '#64748b'}>
+        ← Accueil
+      </Link>
+      <Link to="/login" style={{ padding: '9px 20px', borderRadius: 50, fontWeight: 700, fontSize: '.82rem', textDecoration: 'none', color: '#0a1628', background: 'linear-gradient(135deg,#d4a747,#f4d677)', boxShadow: '0 4px 16px rgba(212,167,71,.3)', fontFamily: 'Syne,sans-serif', whiteSpace: 'nowrap' }}>
+        Connexion
+      </Link>
+    </div>
+  </div>
+</nav>
 
       {/* ══ HERO ══ */}
       <section className="cd-fade-up relative" style={{ zIndex: 1, padding: '140px 5% 56px', textAlign: 'center' }}>
@@ -411,7 +413,55 @@ export default function CoursDistance() {
         </div>
       </section>
 
-      
+      {/* ══ MOBILE NIVEAU + MATIERE SELECTOR ══ */}
+{!loading && !error && (
+  <div className="md:hidden" style={{ position: 'relative', zIndex: 10, padding: '0 5% 24px' }}>
+    
+    {/* Niveau pills */}
+    <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 12, marginBottom: 12 }}
+      className="cd-no-scroll">
+      {niveaux.map(lv => (
+        <button key={lv.id}
+          onClick={() => { setLvlId(lv.id); setMatId(null); }}
+          style={{
+            padding: '8px 18px', borderRadius: 50, fontWeight: 700, fontSize: '.82rem',
+            border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'Syne,sans-serif',
+            flexShrink: 0, transition: 'all 0.2s',
+            background: lvlId === lv.id
+              ? `linear-gradient(135deg,${lv.colorHex || '#d4a747'},#f4d677)`
+              : 'rgba(255,255,255,0.06)',
+            color: lvlId === lv.id ? '#0a1628' : '#94a3b8',
+            boxShadow: lvlId === lv.id ? `0 6px 18px -4px ${lv.colorHex || '#d4a747'}55` : 'none',
+          }}>
+          {lv.emoji} {lv.label}
+        </button>
+      ))}
+    </div>
+
+    {/* Matières list */}
+    {lvl?.matieres && (
+      <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}
+        className="cd-no-scroll">
+        {lvl.matieres.map(m => (
+          <button key={m.id}
+            onClick={() => setMatId(m.id)}
+            style={{
+              padding: '8px 16px', borderRadius: 50, fontWeight: 600, fontSize: '.8rem',
+              border: '1px solid', cursor: 'pointer', whiteSpace: 'nowrap',
+              fontFamily: 'Inter,sans-serif', flexShrink: 0, transition: 'all 0.2s',
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: effMat === m.id ? 'rgba(212,167,71,0.12)' : 'rgba(255,255,255,0.03)',
+              borderColor: effMat === m.id ? 'rgba(212,167,71,0.4)' : 'rgba(255,255,255,0.08)',
+              color: effMat === m.id ? '#f4d677' : '#64748b',
+            }}>
+            {m.icon && <span>{m.icon}</span>}
+            {m.nom}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+)}
 
       {/* ══ CONTENT ══ */}
       <section style={{ position: 'relative', zIndex: 1, padding: '36px 5% 24px', maxWidth: 1400, margin: '0 auto', width: '100%' }}>

@@ -154,6 +154,7 @@ const Home = () => {
   const [courses, setCourses]       = useState([]);
   const [statsData, setStatsData]   = useState(null);
   const [loading, setLoading]       = useState({ professors: true, events: true, stats: true, courses: true });
+  const [menuOpen, setMenuOpen]           = useState(false);
 
   /* ── Scroll handler ── */
   useEffect(() => {
@@ -239,51 +240,83 @@ const Home = () => {
       </div>
 
       {/* ══ NAVBAR ══ */}
-      <nav className={`fixed top-0 w-full z-[1000] transition-all duration-300 backdrop-blur-[20px] border-b border-yellow-500/10 ${
-        isScrolled ? 'bg-[rgba(10,22,40,0.95)] shadow-lg py-3' : 'bg-[rgba(10,22,40,0.85)] py-4'
-      }`}>
-        <div className="max-w-[1400px] mx-auto px-8 flex justify-between items-center">
-          <a href="#" className="flex items-center gap-4 no-underline hover:-translate-y-0.5 transition-transform duration-250">
-            <img src={warriosImg} alt="Centre Warriors" className="h-[50px] w-auto drop-shadow-[0_4px_8px_rgba(212,167,71,0.3)]" />
-            <span className="font-['Space_Grotesk'] text-xl font-bold bg-gradient-to-br from-[#d4a747] to-[#f4d677] bg-clip-text text-transparent">
-              Centre Warriors
-            </span>
+
+<nav className={`fixed top-0 w-full z-[1000] transition-all duration-300 backdrop-blur-[20px] border-b border-yellow-500/10 ${
+  isScrolled ? 'bg-[rgba(10,22,40,0.95)] shadow-lg py-3' : 'bg-[rgba(10,22,40,0.85)] py-4'
+}`}>
+  <div className="max-w-[1400px] mx-auto px-6 flex justify-between items-center">
+    <a href="#" className="flex items-center gap-3 no-underline">
+      <img src={warriosImg} alt="Centre Warriors" className="h-[42px] w-auto drop-shadow-[0_4px_8px_rgba(212,167,71,0.3)]" />
+      <span className="font-['Space_Grotesk'] text-lg font-bold bg-gradient-to-br from-[#d4a747] to-[#f4d677] bg-clip-text text-transparent">
+        Centre Warriors
+      </span>
+    </a>
+
+    {/* Desktop nav */}
+    <ul className="hidden md:flex gap-10 list-none items-center m-0 p-0">
+      {[
+        { label: 'À Propos',    href: '#about' },
+        { label: 'Professeurs', href: '#professeurs' },
+        { label: 'Programmes',  href: '#programmes' },
+        { label: 'Événements',  href: '#evenements' },
+        { label: 'Contact',     href: '#contact' },
+      ].map(({ label, href }) => (
+        <li key={label}>
+          <a href={href} className="text-[#cbd5e1] no-underline font-medium text-[0.95rem] hover:text-white transition-colors duration-250">
+            {label}
           </a>
+        </li>
+      ))}
+      <li>
+        <Link to="/cours-distance" className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold no-underline border border-yellow-500/30 text-[#f4d677] hover:bg-yellow-500/10 hover:border-[#d4a747]" style={{ background: 'rgba(212,167,71,0.05)' }}>
+          Cours à Distance
+        </Link>
+      </li>
+    </ul>
 
-          <ul className="hidden md:flex gap-10 list-none items-center m-0 p-0">
-            {[
-              { label: 'À Propos',    href: '#about' },
-              { label: 'Professeurs', href: '#professeurs' },
-              { label: 'Programmes',  href: '#programmes' },
-              { label: 'Événements',  href: '#evenements' },
-              { label: 'Contact',     href: '#contact' },
-            ].map(({ label, href }) => (
-              <li key={label}>
-                <a href={href}
-                  className="text-[#cbd5e1] no-underline font-medium text-[0.95rem] relative hover:text-white transition-colors duration-250"
-                  style={{ '--underline': 'linear-gradient(90deg,#d4a747,#f4d677)' }}>
-                  {label}
-                </a>
-              </li>
-              
-            ))}
-            <li>
-              <Link
-                to="/cours-distance"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold no-underline transition-all duration-250 border border-yellow-500/30 text-[#f4d677] hover:bg-yellow-500/10 hover:border-[#d4a747] hover:-translate-y-0.5"
-                style={{ background: 'rgba(212,167,71,0.05)' }}
-              >
-                <span></span> Cours à Distance
-              </Link>
-            </li>
-          </ul>
+    <div className="flex items-center gap-3">
+      <Link to="/login" className="px-5 py-2.5 bg-gradient-to-br from-[#d4a747] to-[#f4d677] text-[#0a1628] rounded-full font-bold text-[0.85rem] no-underline shadow-[0_4px_12px_rgba(212,167,71,0.3)] hover:-translate-y-0.5 transition-all duration-250">
+        Connexion
+      </Link>
+      {/* Hamburger — mobile only */}
+      <button
+        className="md:hidden flex flex-col justify-center items-center w-10 h-10 rounded-xl border border-yellow-500/20 bg-white/5 gap-[5px] transition-all duration-250 hover:border-yellow-500/40"
+        onClick={() => setMenuOpen(o => !o)}
+        aria-label="Menu"
+      >
+        <span className={`block w-5 h-[2px] bg-[#f4d677] rounded transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-[7px]' : ''}`} />
+        <span className={`block w-5 h-[2px] bg-[#f4d677] rounded transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`} />
+        <span className={`block w-5 h-[2px] bg-[#f4d677] rounded transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-[7px]' : ''}`} />
+      </button>
+    </div>
+  </div>
 
-          <Link to="/login"
-            className="px-5 py-2.5 bg-gradient-to-br from-[#d4a747] to-[#f4d677] text-[#0a1628] rounded-full font-bold text-[0.85rem] no-underline transition-all duration-250 shadow-[0_4px_12px_rgba(212,167,71,0.3)] hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(212,167,71,0.4)]">
-            Connexion
-          </Link>
-        </div>
-      </nav>
+  {/* Mobile dropdown menu */}
+  <div className={`md:hidden overflow-hidden transition-all duration-300 ${menuOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}`}
+    style={{ background: 'rgba(10,22,40,0.98)', borderTop: menuOpen ? '1px solid rgba(212,167,71,0.1)' : 'none' }}>
+    <div className="px-6 py-4 flex flex-col gap-1">
+      {[
+        { label: 'À Propos',    href: '#about' },
+        { label: 'Professeurs', href: '#professeurs' },
+        { label: 'Programmes',  href: '#programmes' },
+        { label: 'Événements',  href: '#evenements' },
+        { label: 'Contact',     href: '#contact' },
+      ].map(({ label, href }) => (
+        <a key={label} href={href}
+          onClick={() => setMenuOpen(false)}
+          className="text-[#cbd5e1] no-underline font-medium text-base py-3 px-4 rounded-xl hover:bg-yellow-500/10 hover:text-white transition-all duration-200 flex items-center gap-3">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#d4a747] opacity-60" />
+          {label}
+        </a>
+      ))}
+      <Link to="/cours-distance" onClick={() => setMenuOpen(false)}
+        className="text-[#f4d677] no-underline font-semibold text-base py-3 px-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 mt-1 flex items-center gap-3">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#d4a747]" />
+        Cours à Distance
+      </Link>
+    </div>
+  </div>
+</nav>
 
       {/* ══ HERO ══ */}
       <section className="relative min-h-screen flex items-center px-[5%] pt-[120px] pb-20 z-[1]">
