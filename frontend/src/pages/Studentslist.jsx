@@ -59,6 +59,24 @@ const SUBJECT_COLORS = {
   'Informatique':     { bg:'rgba(6,182,212,0.1)',   border:'rgba(6,182,212,0.2)',   color:'#22d3ee' },
 };
 
+const DEFAULT_LEVELS = [
+  'Primaire',
+  '1ère Année collège',
+  '2ème Année collège',
+  '3ème Année collège',
+  'Tronc Commun',
+  '1ère Bac',
+  '2ème Bac'
+];
+
+const DEFAULT_FIELDS = [
+  'Sciences Mathématiques',
+  'Physique-Chimie',
+  'SVT',
+  'Lettres',
+  'Économie'
+];
+
 const getSubjectStyle = (s) => SUBJECT_COLORS[s] || { bg:'rgba(148,163,184,0.08)', border:'rgba(148,163,184,0.15)', color:'#94a3b8' };
 
 const getInitials = (student) => {
@@ -95,11 +113,8 @@ const StudentCard = ({ student, onEdit, onDelete, index }) => {
         animationDelay: `${index * 50}ms`,
       }}
     >
-      {/* Gold stripe */}
       <div className="h-0.5 bg-gradient-to-r from-[#c49630] to-[#f0c84a]" />
-
       <div className="p-5 flex flex-col gap-3.5 flex-1">
-        {/* Avatar + Info */}
         <div className="flex items-start gap-3">
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 warriors-title font-black text-sm"
             style={{ background: getAvatarGrad(student.id), color: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.35)' }}>
@@ -107,13 +122,9 @@ const StudentCard = ({ student, onEdit, onDelete, index }) => {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="warriors-title font-bold text-sm leading-snug truncate" style={{ color: '#e8eaf0' }}>{name}</h3>
-            <p className="warriors-font text-[11px] mt-0.5" style={{ color: 'rgba(196,150,48,0.55)' }}>
-              ID #{student.id}
-            </p>
+            <p className="warriors-font text-[11px] mt-0.5" style={{ color: 'rgba(196,150,48,0.55)' }}>ID #{student.id}</p>
           </div>
         </div>
-
-        {/* Level + Field badges */}
         <div className="flex flex-wrap gap-1.5">
           {student.niveau && (
             <span className="warriors-font text-[10px] font-semibold px-2.5 py-1 rounded-full"
@@ -128,11 +139,7 @@ const StudentCard = ({ student, onEdit, onDelete, index }) => {
             </span>
           )}
         </div>
-
-        {/* Divider */}
         <div className="h-px" style={{ background: 'linear-gradient(90deg,transparent,rgba(196,150,48,0.1),transparent)' }} />
-
-        {/* Info rows */}
         <div className="space-y-1.5">
           {[
             { icon: '📞', val: student.phoneNumber || '—' },
@@ -148,8 +155,6 @@ const StudentCard = ({ student, onEdit, onDelete, index }) => {
             </div>
           ))}
         </div>
-
-        {/* Subjects */}
         {matieres.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {matieres.slice(0, 3).map(s => {
@@ -169,8 +174,6 @@ const StudentCard = ({ student, onEdit, onDelete, index }) => {
             )}
           </div>
         )}
-
-        {/* Actions */}
         <div className="flex gap-2 mt-auto pt-3 border-t" style={{ borderColor: 'rgba(196,150,48,0.08)' }}>
           <button onClick={() => onEdit(student)}
             className="flex-1 py-2 rounded-xl text-[12px] font-semibold warriors-font transition-all duration-200"
@@ -191,14 +194,13 @@ const StudentCard = ({ student, onEdit, onDelete, index }) => {
 };
 
 /* ══════════════════════════════════════════════════════════════ */
-/*  TABLE ROW (Table View)                                       */
+/*  TABLE VIEW                                                   */
 /* ══════════════════════════════════════════════════════════════ */
 const TableView = ({ grouped, onEdit, onDelete }) => (
   <div className="space-y-5">
     {Object.entries(grouped).map(([group, students], gi) => (
       <div key={group} className="rounded-2xl overflow-hidden animate-in"
         style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.1)', animationDelay: `${gi * 80}ms` }}>
-        {/* Group header */}
         <div className="flex items-center justify-between px-6 py-4"
           style={{ borderBottom: '1px solid rgba(196,150,48,0.08)', background: 'rgba(196,150,48,0.03)' }}>
           <div className="flex items-center gap-3">
@@ -210,8 +212,6 @@ const TableView = ({ grouped, onEdit, onDelete }) => (
             {students.length} étudiant{students.length > 1 ? 's' : ''}
           </span>
         </div>
-
-        {/* Table */}
         <div className="overflow-x-auto scrollbar-warriors">
           <table className="w-full">
             <thead>
@@ -225,7 +225,7 @@ const TableView = ({ grouped, onEdit, onDelete }) => (
               </tr>
             </thead>
             <tbody>
-              {students.map((student, idx) => {
+              {students.map((student) => {
                 const name = student.fullName || `${student.prenom || ''} ${student.nom || ''}`.trim();
                 const matieres = student.matieres || [];
                 return (
@@ -242,20 +242,10 @@ const TableView = ({ grouped, onEdit, onDelete }) => (
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4">
-                      <span className="warriors-font text-[12px]" style={{ color: 'rgba(180,190,210,0.6)' }}>{student.phoneNumber || '—'}</span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className="warriors-font text-[12px]" style={{ color: 'rgba(180,190,210,0.6)' }}>{student.parentPhone || '—'}</span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className="warriors-font text-[12px] truncate block max-w-[180px]" style={{ color: 'rgba(180,190,210,0.6)' }}>{student.etablissement || '—'}</span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className="warriors-font text-[11px]" style={{ color: 'rgba(148,163,184,0.4)' }}>
-                        {student.dateInscription ? new Date(student.dateInscription).toLocaleDateString('fr-FR') : '—'}
-                      </span>
-                    </td>
+                    <td className="px-5 py-4"><span className="warriors-font text-[12px]" style={{ color: 'rgba(180,190,210,0.6)' }}>{student.phoneNumber || '—'}</span></td>
+                    <td className="px-5 py-4"><span className="warriors-font text-[12px]" style={{ color: 'rgba(180,190,210,0.6)' }}>{student.parentPhone || '—'}</span></td>
+                    <td className="px-5 py-4"><span className="warriors-font text-[12px] truncate block max-w-[180px]" style={{ color: 'rgba(180,190,210,0.6)' }}>{student.etablissement || '—'}</span></td>
+                    <td className="px-5 py-4"><span className="warriors-font text-[11px]" style={{ color: 'rgba(148,163,184,0.4)' }}>{student.dateInscription ? new Date(student.dateInscription).toLocaleDateString('fr-FR') : '—'}</span></td>
                     <td className="px-5 py-4">
                       <div className="flex flex-wrap gap-1">
                         {matieres.slice(0, 2).map(s => {
@@ -276,8 +266,7 @@ const TableView = ({ grouped, onEdit, onDelete }) => (
                       </div>
                     </td>
                     <td className="px-5 py-4">
-                      <div className="flex items-center gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity"
-                        style={{ opacity: 1 }}>
+                      <div className="flex items-center gap-2 justify-end" style={{ opacity: 1 }}>
                         <button onClick={() => onEdit(student)}
                           className="w-8 h-8 rounded-lg flex items-center justify-center text-xs transition-all"
                           style={{ background: 'rgba(196,150,48,0.08)', border: '1px solid rgba(196,150,48,0.15)', color: '#f0c84a' }}
@@ -302,7 +291,7 @@ const TableView = ({ grouped, onEdit, onDelete }) => (
 );
 
 /* ══════════════════════════════════════════════════════════════ */
-/*  STUDENT FORM MODAL                                           */
+/*  FORM MODAL                                                   */
 /* ══════════════════════════════════════════════════════════════ */
 const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
   const isEdit = !!student;
@@ -374,21 +363,15 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
   );
 
   const sectionContent = [
-    /* 0 — Identité */
     <div key="identity" className="space-y-5">
-      {/* Avatar Preview */}
       <div className="flex items-center gap-4 p-4 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.1)' }}>
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center warriors-title font-black text-xl"
           style={{ background: getAvatarGrad(student?.id || 0), color: '#fff', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
           {(form.prenom[0] || '?').toUpperCase()}{(form.nom[0] || '').toUpperCase()}
         </div>
         <div>
-          <p className="warriors-title font-bold text-base" style={{ color: '#e8eaf0' }}>
-            {form.prenom || 'Prénom'} {form.nom || 'Nom'}
-          </p>
-          <p className="warriors-font text-xs mt-0.5" style={{ color: 'rgba(196,150,48,0.5)' }}>
-            {form.level || 'Niveau'} · {form.field || 'Filière'}
-          </p>
+          <p className="warriors-title font-bold text-base" style={{ color: '#e8eaf0' }}>{form.prenom || 'Prénom'} {form.nom || 'Nom'}</p>
+          <p className="warriors-font text-xs mt-0.5" style={{ color: 'rgba(196,150,48,0.5)' }}>{form.level || 'Niveau'} · {form.field || 'Filière'}</p>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
@@ -407,7 +390,6 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
       </div>
     </div>,
 
-    /* 1 — Contact */
     <div key="contact" className="space-y-5">
       <div>
         <LabelRow name="phone" label="TÉLÉPHONE ÉTUDIANT" req />
@@ -418,13 +400,10 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
         <input name="parentPhone" type="tel" value={form.parentPhone} onChange={h} placeholder="06XXXXXXXX" className={inp('parentPhone')} />
       </div>
       <div className="p-4 rounded-2xl" style={{ background: 'rgba(196,150,48,0.04)', border: '1px solid rgba(196,150,48,0.1)' }}>
-        <p className="warriors-font text-xs" style={{ color: 'rgba(148,163,184,0.5)' }}>
-          📞 Format marocain accepté : 06XXXXXXXX ou 07XXXXXXXX
-        </p>
+        <p className="warriors-font text-xs" style={{ color: 'rgba(148,163,184,0.5)' }}>📞 Format marocain accepté : 06XXXXXXXX ou 07XXXXXXXX</p>
       </div>
     </div>,
 
-    /* 2 — Scolarité */
     <div key="scolarite" className="space-y-5">
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -448,12 +427,9 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
       </div>
     </div>,
 
-    /* 3 — Matières */
     <div key="matieres" className="space-y-5">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] font-semibold tracking-[0.12em] warriors-font" style={{ color: 'rgba(196,150,48,0.45)' }}>
-          MATIÈRES DE SOUTIEN *
-        </p>
+        <p className="text-[10px] font-semibold tracking-[0.12em] warriors-font" style={{ color: 'rgba(196,150,48,0.45)' }}>MATIÈRES DE SOUTIEN *</p>
         {errors.subjects && <span className="text-[10px] warriors-font" style={{ color: '#f87171' }}>{errors.subjects}</span>}
       </div>
       <div className="grid grid-cols-1 gap-2">
@@ -463,15 +439,9 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
           return (
             <button key={s} type="button" onClick={() => toggleSubject(s)}
               className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-150 text-left"
-              style={{
-                background: selected ? sc.bg : 'rgba(255,255,255,0.02)',
-                border: `1px solid ${selected ? sc.border : 'rgba(255,255,255,0.06)'}`,
-              }}>
+              style={{ background: selected ? sc.bg : 'rgba(255,255,255,0.02)', border: `1px solid ${selected ? sc.border : 'rgba(255,255,255,0.06)'}` }}>
               <div className="w-4 h-4 rounded-md border flex items-center justify-center flex-shrink-0 transition-all"
-                style={{
-                  background: selected ? 'linear-gradient(135deg,#c49630,#f0c84a)' : 'rgba(255,255,255,0.04)',
-                  border: `1.5px solid ${selected ? '#c49630' : 'rgba(196,150,48,0.2)'}`,
-                }}>
+                style={{ background: selected ? 'linear-gradient(135deg,#c49630,#f0c84a)' : 'rgba(255,255,255,0.04)', border: `1.5px solid ${selected ? '#c49630' : 'rgba(196,150,48,0.2)'}` }}>
                 {selected && <span style={{ color: '#0a1628', fontSize: '9px', fontWeight: 900 }}>✓</span>}
               </div>
               <span className="warriors-font text-sm" style={{ color: selected ? sc.color : 'rgba(180,190,210,0.55)' }}>{s}</span>
@@ -483,12 +453,7 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
         <div className="flex flex-wrap gap-1.5 p-3 rounded-xl" style={{ background: 'rgba(196,150,48,0.04)', border: '1px solid rgba(196,150,48,0.1)' }}>
           {form.subjects.map(s => {
             const sc = getSubjectStyle(s);
-            return (
-              <span key={s} className="warriors-font text-[10px] px-2.5 py-1 rounded-full"
-                style={{ background: sc.bg, border: `1px solid ${sc.border}`, color: sc.color }}>
-                {s}
-              </span>
-            );
+            return <span key={s} className="warriors-font text-[10px] px-2.5 py-1 rounded-full" style={{ background: sc.bg, border: `1px solid ${sc.border}`, color: sc.color }}>{s}</span>;
           })}
         </div>
       )}
@@ -500,8 +465,6 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
       style={{ background: 'rgba(4,9,20,0.9)', backdropFilter: 'blur(16px)' }}>
       <div className="w-full max-w-2xl max-h-[92vh] flex flex-col rounded-3xl overflow-hidden shadow-2xl animate-in"
         style={{ background: 'linear-gradient(145deg,#0d1c30 0%,#080f1e 100%)', border: '1px solid rgba(196,150,48,0.2)', boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }}>
-
-        {/* Header */}
         <div className="flex items-center justify-between px-7 py-5 flex-shrink-0"
           style={{ borderBottom: '1px solid rgba(196,150,48,0.1)', background: 'rgba(196,150,48,0.03)' }}>
           <div className="flex items-center gap-3">
@@ -510,39 +473,27 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
               {isEdit ? getInitials(student) : '👤'}
             </div>
             <div>
-              <h2 className="warriors-title text-lg font-bold" style={{ color: '#f0c84a' }}>
-                {isEdit ? 'Modifier l\'étudiant' : 'Nouvel étudiant'}
-              </h2>
-              <p className="warriors-font text-xs mt-0.5" style={{ color: 'rgba(148,163,184,0.4)' }}>
-                Étape {activeSection + 1} sur {sections.length} — {sections[activeSection]}
-              </p>
+              <h2 className="warriors-title text-lg font-bold" style={{ color: '#f0c84a' }}>{isEdit ? "Modifier l'étudiant" : 'Nouvel étudiant'}</h2>
+              <p className="warriors-font text-xs mt-0.5" style={{ color: 'rgba(148,163,184,0.4)' }}>Étape {activeSection + 1} sur {sections.length} — {sections[activeSection]}</p>
             </div>
           </div>
           <button onClick={onClose}
             className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
             style={{ border: '1px solid rgba(196,150,48,0.15)', color: 'rgba(148,163,184,0.5)', background: 'rgba(255,255,255,0.02)' }}
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(196,150,48,0.1)'; e.currentTarget.style.color = '#f0c84a'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.color = 'rgba(148,163,184,0.5)'; }}>
-            ✕
-          </button>
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.color = 'rgba(148,163,184,0.5)'; }}>✕</button>
         </div>
-
-        {/* Stepper */}
         <div className="flex px-7 pt-5 gap-2 flex-shrink-0">
           {sections.map((s, i) => (
             <button key={s} type="button" onClick={() => setActiveSection(i)} className="flex-1 flex flex-col items-center gap-1.5">
               <div className="w-full h-1 rounded-full transition-all duration-300"
                 style={{ background: i <= activeSection ? 'linear-gradient(90deg,#c49630,#f0c84a)' : 'rgba(196,150,48,0.1)' }} />
-              <span className="warriors-font text-[10px] font-medium"
-                style={{ color: i === activeSection ? '#f0c84a' : 'rgba(148,163,184,0.3)' }}>{s}</span>
+              <span className="warriors-font text-[10px] font-medium" style={{ color: i === activeSection ? '#f0c84a' : 'rgba(148,163,184,0.3)' }}>{s}</span>
             </button>
           ))}
         </div>
-
         <form onSubmit={submit} className="flex flex-col flex-1 overflow-hidden">
-          <div className="flex-1 overflow-y-auto scrollbar-warriors px-7 py-6">
-            {sectionContent[activeSection]}
-          </div>
+          <div className="flex-1 overflow-y-auto scrollbar-warriors px-7 py-6">{sectionContent[activeSection]}</div>
           <div className="px-7 py-5 flex gap-3 flex-shrink-0"
             style={{ borderTop: '1px solid rgba(196,150,48,0.1)', background: 'rgba(196,150,48,0.02)' }}>
             <button type="button"
@@ -561,7 +512,7 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
               <button type="submit" disabled={loading}
                 className="flex-1 py-3 rounded-xl text-sm font-bold warriors-title btn-gold disabled:opacity-50"
                 style={{ color: '#0a1628' }}>
-                {loading ? 'Enregistrement…' : isEdit ? 'Mettre à jour' : 'Créer l\'étudiant'}
+                {loading ? 'Enregistrement…' : isEdit ? 'Mettre à jour' : "Créer l'étudiant"}
               </button>
             )}
           </div>
@@ -632,86 +583,75 @@ const DeleteModal = ({ student, onConfirm, onClose, loading }) => {
 /* ══════════════════════════════════════════════════════════════ */
 const StudentsList = () => {
   const navigate = useNavigate();
-  const [students, setStudents]   = useState([]);
-  const [stats, setStats]         = useState({ totalStudents: 0 });
-  const [levels, setLevels]       = useState([]);
-  const [fields, setFields]       = useState([]);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState('');
+  const [students, setStudents]         = useState([]);
+  const [stats, setStats]               = useState({ totalStudents: 0 });
+  const [levels, setLevels]             = useState([]);
+  const [fields, setFields]             = useState([]);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState('');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [viewMode, setViewMode]   = useState('table');
-
-  const [filterLevel, setFilterLevel] = useState('all');
-  const [filterField, setFilterField] = useState('all');
-  const [search, setSearch]           = useState('');
-
-  const [showForm, setShowForm]     = useState(false);
-  const [showDelete, setShowDelete] = useState(false);
-  const [current, setCurrent]       = useState(null);
-  const DEFAULT_LEVELS = [
-  'Primaire',
-  '1ère Année collège',
-  '2ème Année collège',
-  '3ème Année collège',
-  'Tronc Commun',
-  '1ère Bac',
-  '2ème Bac'
-];
-
-const DEFAULT_FIELDS = [
-  'Sciences Mathématiques',
-  'Physique-Chimie',
-  'SVT',
-  'Lettres',
-  'Économie'
-];
+  const [viewMode, setViewMode]         = useState('table');
+  const [filterLevel, setFilterLevel]   = useState('all');
+  const [filterField, setFilterField]   = useState('all');
+  const [search, setSearch]             = useState('');
+  const [showForm, setShowForm]         = useState(false);
+  const [showDelete, setShowDelete]     = useState(false);
+  const [current, setCurrent]           = useState(null);
+  const [saveError, setSaveError]       = useState('');
 
   useEffect(() => {
     if (!getAuthToken()) { navigate('/login'); return; }
     loadAll();
   }, []);
 
-const loadAll = async () => {
-  try {
-    setLoading(true);
-    setError('');
+  // ─── Helper : unwrap { success, message, data } envelope ───
+  const unwrap = (res) => {
+    // If the API returns { success, data } — return data
+    if (res && typeof res === 'object' && 'data' in res) return res.data;
+    // Otherwise return as-is (local dev might return raw arrays)
+    return res;
+  };
 
-    const [stRes, lvRes, fldRes, evRes] = await Promise.all([
-      studentAPI.getStats(),
-      studentAPI.getNiveaux(),
-      studentAPI.getFilieres(),
-      studentAPI.getAllStudents({ size: 100 }),
-    ]);
+  const loadAll = async () => {
+    try {
+      setLoading(true);
+      setError('');
 
-    console.log('stRes:', stRes);
-    console.log('lvRes:', lvRes);
-    console.log('fldRes:', fldRes);
-    console.log('evRes:', evRes);
+      const [stRes, lvRes, fldRes, evRes] = await Promise.all([
+        studentAPI.getStats(),
+        studentAPI.getNiveaux(),
+        studentAPI.getFilieres(),
+        studentAPI.getAllStudents({ size: 100 }),
+      ]);
 
-    const studentsData = Array.isArray(evRes)
-      ? evRes
-      : Array.isArray(evRes?.content)
-      ? evRes.content
-      : Array.isArray(evRes?.data)
-      ? evRes.data
-      : Array.isArray(evRes?.data?.content)
-      ? evRes.data.content
-      : [];
+      // Unwrap envelope
+      const statsData    = unwrap(stRes);
+      const niveauxData  = unwrap(lvRes);
+      const filieresData = unwrap(fldRes);
+      const studentsRaw  = unwrap(evRes);
 
-    setStudents(studentsData);
-    setStats(stRes || { totalStudents: 0 });
-    setLevels(Array.isArray(lvRes) && lvRes.length > 0 ? lvRes : DEFAULT_LEVELS);
-    setFields(Array.isArray(fldRes) && fldRes.length > 0 ? fldRes : DEFAULT_FIELDS);
-  } catch (err) {
-    console.error(err);
-    setError('Impossible de charger les étudiants.');
-    setStudents([]);
-    setLevels(DEFAULT_LEVELS);
-    setFields(DEFAULT_FIELDS);
-  } finally {
-    setLoading(false);
-  }
-};
+      // Students can be array or paginated { content: [] }
+      const studentsData = Array.isArray(studentsRaw)
+        ? studentsRaw
+        : Array.isArray(studentsRaw?.content)
+        ? studentsRaw.content
+        : [];
+
+      setStudents(studentsData);
+      setStats(statsData || { totalStudents: 0 });
+      setLevels(Array.isArray(niveauxData)  && niveauxData.length  > 0 ? niveauxData  : DEFAULT_LEVELS);
+      setFields(Array.isArray(filieresData) && filieresData.length > 0 ? filieresData : DEFAULT_FIELDS);
+
+    } catch (err) {
+      console.error('loadAll error:', err);
+      setError('Impossible de charger les étudiants.');
+      setStudents([]);
+      setLevels(DEFAULT_LEVELS);
+      setFields(DEFAULT_FIELDS);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filtered = students.filter(s => {
     const okL = filterLevel === 'all' || s.niveau === filterLevel;
@@ -737,43 +677,87 @@ const loadAll = async () => {
   const handleSave = async (data) => {
     try {
       setLoading(true);
+      setSaveError('');
+
       const payload = {
-        nom: data.nom, prenom: data.prenom, email: data.email,
-        phoneNumber: data.phone, parentPhone: data.parentPhone,
-        niveau: data.level, filiere: data.field, etablissement: data.lycee,
-        matieres: data.subjects,
+        nom:          data.nom,
+        prenom:       data.prenom,
+        email:        data.email,
+        phoneNumber:  data.phone,
+        parentPhone:  data.parentPhone,
+        niveau:       data.level,
+        filiere:      data.field,
+        etablissement: data.lycee,
+        matieres:     data.subjects,
       };
-      const res = current
+
+      console.log('➡ Payload envoyé au backend:', JSON.stringify(payload, null, 2));
+
+      const rawRes = current
         ? await studentAPI.updateStudent(current.id, payload)
         : await studentAPI.createStudent(payload);
-      if (res.success) { await loadAll(); setShowForm(false); setCurrent(null); }
-      else alert(res.message || 'Erreur');
-    } catch { alert('Erreur lors de la sauvegarde'); } finally { setLoading(false); }
+
+      // Unwrap response envelope
+      const res = rawRes && typeof rawRes === 'object' && 'success' in rawRes
+        ? rawRes
+        : { success: true, data: rawRes };
+
+      if (res.success) {
+        await loadAll();
+        setShowForm(false);
+        setCurrent(null);
+      } else {
+        setSaveError(res.message || 'Erreur lors de la sauvegarde');
+      }
+    } catch (err) {
+      const backendError = err.response?.data;
+      const msg = backendError?.message
+        || (typeof backendError === 'string' ? backendError : null)
+        || err.message
+        || 'Erreur inconnue';
+      console.error('❌ Backend error:', backendError);
+      setSaveError(`Erreur: ${msg}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async () => {
     try {
       setLoading(true);
-      const res = await studentAPI.deleteStudent(current.id);
-      if (res.success) { await loadAll(); setShowDelete(false); setCurrent(null); }
-    } catch { alert('Erreur lors de la suppression'); } finally { setLoading(false); }
+      const rawRes = await studentAPI.deleteStudent(current.id);
+      const res = rawRes && typeof rawRes === 'object' && 'success' in rawRes
+        ? rawRes
+        : { success: true };
+      if (res.success) {
+        await loadAll();
+        setShowDelete(false);
+        setCurrent(null);
+      } else {
+        alert(res.message || 'Erreur lors de la suppression');
+      }
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Erreur lors de la suppression';
+      alert(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const openEdit   = s => { setCurrent(s); setShowForm(true); };
+  const openEdit   = s => { setCurrent(s); setSaveError(''); setShowForm(true); };
   const openDelete = s => { setCurrent(s); setShowDelete(true); };
 
-  const sidebarW = sidebarCollapsed ? 72 : 240;
+  const sidebarW  = sidebarCollapsed ? 72 : 240;
   const hasFilters = filterLevel !== 'all' || filterField !== 'all' || search;
 
   const statCards = [
-    { label: 'Total',    val: stats.totalStudents || students.length, icon: '◈', color: '#f0c84a', bg: 'rgba(196,150,48,0.08)',  border: 'rgba(196,150,48,0.15)' },
-    { label: 'Niveaux',  val: levels.length,                           icon: '🎓', color: '#c084fc', bg: 'rgba(168,85,247,0.08)',  border: 'rgba(168,85,247,0.15)' },
-    { label: 'Filières', val: fields.length,                           icon: '📚', color: '#2dd4bf', bg: 'rgba(20,184,166,0.08)',  border: 'rgba(20,184,166,0.15)' },
+    { label: 'Total',    val: stats.totalStudents || students.length, icon: '◈', color: '#f0c84a' },
+    { label: 'Niveaux',  val: levels.length,                           icon: '🎓', color: '#c084fc' },
+    { label: 'Filières', val: fields.length,                           icon: '📚', color: '#2dd4bf' },
   ];
 
   return (
     <div className="min-h-screen warriors-font" style={{ background: 'linear-gradient(145deg,#080f1e 0%,#060c18 100%)' }}>
-      {/* Ambient bg */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute rounded-full" style={{ width: '700px', height: '700px', background: 'radial-gradient(circle,rgba(196,150,48,0.04),transparent 70%)', top: '-15%', left: '-10%', filter: 'blur(40px)' }} />
         <div className="absolute rounded-full" style={{ width: '500px', height: '500px', background: 'radial-gradient(circle,rgba(29,78,216,0.05),transparent 70%)', bottom: '-10%', right: '-5%', filter: 'blur(40px)' }} />
@@ -783,8 +767,6 @@ const loadAll = async () => {
       <Sidebar activeItem="students" collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(v => !v)} />
 
       <main className="relative z-10 transition-all duration-300" style={{ marginLeft: `${sidebarW}px` }}>
-
-        {/* Top Bar */}
         <header className="sticky top-0 z-40 flex items-center justify-between px-8 h-[72px]"
           style={{ background: 'rgba(6,12,24,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(196,150,48,0.08)' }}>
           <div className="flex items-center gap-3">
@@ -793,19 +775,16 @@ const loadAll = async () => {
             <span className="warriors-title text-sm font-semibold" style={{ color: '#f0c84a' }}>Étudiants</span>
           </div>
           <div className="flex items-center gap-3">
-            {/* View toggle */}
             <div className="flex p-1 rounded-xl gap-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(196,150,48,0.1)' }}>
               {[['grid', '⊞', 'Cartes'], ['table', '≡', 'Tableau']].map(([mode, icon, label]) => (
                 <button key={mode} onClick={() => setViewMode(mode)}
                   className="px-3 py-1.5 rounded-lg text-xs font-semibold warriors-font transition-all"
-                  style={viewMode === mode
-                    ? { background: 'linear-gradient(135deg,#c49630,#f0c84a)', color: '#0a1628' }
-                    : { color: 'rgba(148,163,184,0.45)' }}>
+                  style={viewMode === mode ? { background: 'linear-gradient(135deg,#c49630,#f0c84a)', color: '#0a1628' } : { color: 'rgba(148,163,184,0.45)' }}>
                   {icon} <span className="hidden sm:inline ml-1">{label}</span>
                 </button>
               ))}
             </div>
-            <button onClick={() => { setCurrent(null); setShowForm(true); }}
+            <button onClick={() => { setCurrent(null); setSaveError(''); setShowForm(true); }}
               className="btn-gold flex items-center gap-2 px-5 py-2.5 rounded-2xl warriors-title text-sm font-bold"
               style={{ color: '#0a1628', boxShadow: '0 4px 20px rgba(196,150,48,0.25)' }}>
               <span className="font-black text-base">+</span> Nouvel étudiant
@@ -814,8 +793,6 @@ const loadAll = async () => {
         </header>
 
         <div className="px-8 py-7 space-y-6">
-
-          {/* Page title */}
           <div>
             <h1 className="warriors-title text-3xl font-black" style={{ color: '#e8eaf0' }}>
               Gestion des <span className="gold-text">Étudiants</span>
@@ -825,7 +802,6 @@ const loadAll = async () => {
             </p>
           </div>
 
-          {/* Error */}
           {error && (
             <div className="flex items-center gap-3 px-5 py-4 rounded-2xl animate-in"
               style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.15)' }}>
@@ -834,11 +810,22 @@ const loadAll = async () => {
             </div>
           )}
 
-          {/* Stat cards */}
+          {/* Save error banner — visible in the page if modal closed */}
+          {saveError && (
+            <div className="flex items-center justify-between gap-3 px-5 py-4 rounded-2xl animate-in"
+              style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.15)' }}>
+              <div className="flex items-center gap-3">
+                <span style={{ color: '#f87171' }}>⚠</span>
+                <span className="warriors-font text-sm" style={{ color: 'rgba(248,113,113,0.75)' }}>{saveError}</span>
+              </div>
+              <button onClick={() => setSaveError('')} className="text-xs" style={{ color: 'rgba(248,113,113,0.5)' }}>✕</button>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {statCards.map(({ label, val, icon, color, bg, border }) => (
+            {statCards.map(({ label, val, icon, color }) => (
               <div key={label} className="p-4 rounded-2xl animate-in"
-                style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid rgba(196,150,48,0.07)` }}>
+                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.07)' }}>
                 <span className="text-xl" style={{ color }}>{icon}</span>
                 <p className="warriors-title text-2xl font-black mt-2" style={{ color: '#e8eaf0' }}>{val}</p>
                 <p className="warriors-font text-[10px] mt-1 tracking-wide" style={{ color: 'rgba(148,163,184,0.4)' }}>{label.toUpperCase()}</p>
@@ -846,7 +833,6 @@ const loadAll = async () => {
             ))}
           </div>
 
-          {/* Filters bar */}
           <div className="flex flex-wrap items-center gap-3 p-5 rounded-2xl"
             style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.1)' }}>
             <div className="relative flex-1 min-w-[180px]">
@@ -874,7 +860,6 @@ const loadAll = async () => {
             )}
           </div>
 
-          {/* ── GRID VIEW ── */}
           {viewMode === 'grid' && (
             loading && students.length === 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
@@ -895,14 +880,11 @@ const loadAll = async () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                {filtered.map((s, i) => (
-                  <StudentCard key={s.id} student={s} index={i} onEdit={openEdit} onDelete={openDelete} />
-                ))}
+                {filtered.map((s, i) => <StudentCard key={s.id} student={s} index={i} onEdit={openEdit} onDelete={openDelete} />)}
               </div>
             )
           )}
 
-          {/* ── TABLE VIEW ── */}
           {viewMode === 'table' && (
             Object.keys(grouped).length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 rounded-2xl"
@@ -917,15 +899,15 @@ const loadAll = async () => {
         </div>
       </main>
 
-      {/* Modals */}
       {showForm && (
         <FormModal
           student={current}
           loading={loading}
           onSave={handleSave}
-          onClose={() => { setShowForm(false); setCurrent(null); }}
+          onClose={() => { setShowForm(false); setCurrent(null); setSaveError(''); }}
           levels={levels}
           fields={fields}
+          saveError={saveError}
         />
       )}
       {showDelete && current && (
