@@ -617,18 +617,14 @@ const StudentsList = () => {
       setLoading(true);
       setError('');
 
-      const [stRes, lvRes, fldRes, evRes] = await Promise.all([
+      const [stRes, evRes] = await Promise.all([
         studentAPI.getStats(),
-        studentAPI.getNiveaux(),
-        studentAPI.getFilieres(),
         studentAPI.getAllStudents({ size: 100 }),
       ]);
 
       // Unwrap envelope
-      const statsData    = unwrap(stRes);
-      const niveauxData  = unwrap(lvRes);
-      const filieresData = unwrap(fldRes);
-      const studentsRaw  = unwrap(evRes);
+      const statsData   = unwrap(stRes);
+      const studentsRaw = unwrap(evRes);
 
       // Students can be array or paginated { content: [] }
       const studentsData = Array.isArray(studentsRaw)
@@ -639,8 +635,9 @@ const StudentsList = () => {
 
       setStudents(studentsData);
       setStats(statsData || { totalStudents: 0 });
-      setLevels(Array.isArray(niveauxData)  && niveauxData.length  > 0 ? niveauxData  : DEFAULT_LEVELS);
-      setFields(Array.isArray(filieresData) && filieresData.length > 0 ? filieresData : DEFAULT_FIELDS);
+      // Toujours utiliser les listes complètes fixes — indépendant du backend
+      setLevels(DEFAULT_LEVELS);
+      setFields(DEFAULT_FIELDS);
 
     } catch (err) {
       console.error('loadAll error:', err);
