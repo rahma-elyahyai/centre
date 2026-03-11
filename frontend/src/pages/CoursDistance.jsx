@@ -384,35 +384,130 @@ export default function CoursDistance() {
 </nav>
 
       {/* ══ HERO ══ */}
-      <section className="cd-fade-up relative" style={{ zIndex: 1, padding: '140px 5% 56px', textAlign: 'center' }}>
-        <div style={{ maxWidth: 720, margin: '0 auto' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 18px', borderRadius: 50, background: 'rgba(212,167,71,0.1)', border: '1px solid rgba(212,167,71,0.2)', marginBottom: 24 }}>
-            <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#d4a747', animation: 'cdPulse 2s ease-in-out infinite', display: 'inline-block' }} />
-            <span className="cd-font" style={{ fontSize: 11, fontWeight: 700, color: '#d4a747', letterSpacing: '.1em', textTransform: 'uppercase' }}>
-              Cours à Distance · Centre Warriors
-            </span>
-          </div>
-          <h1 className="cd-font" style={{ fontSize: 'clamp(2.5rem,5.5vw,4.2rem)', fontWeight: 800, lineHeight: 1.12, marginBottom: 20, letterSpacing: '-.02em' }}>
-            Apprenez à votre <span className="cd-hero-text">rythme</span>
-          </h1>
-          <p style={{ fontSize: '1rem', color: '#64748b', lineHeight: 1.75, maxWidth: 480, margin: '0 auto 40px' }}>
-            Vidéos de cours, exercices corrigés et ressources pédagogiques — accessibles partout, à tout moment.
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 48, flexWrap: 'wrap' }}>
-            {[
-              { n: loading ? '…' : String(niveaux.reduce((a, l) => a + (l.matieres?.reduce((b, m) => b + (m.modules?.reduce((c, mo) => c + (mo.seances?.length || 0), 0) || 0), 0) || 0), 0)) + '+', l: 'Séances' },
-              { n: loading ? '…' : `${niveaux.length}`, l: 'Niveaux' },
-              { n: '∞', l: 'Accès libre' },
-            ].map(({ n, l }) => (
-              <div key={l} style={{ textAlign: 'center' }}>
-                <div className="cd-font cd-stat-num" style={{ fontSize: '2.4rem', fontWeight: 800, lineHeight: 1 }}>{n}</div>
-                <div style={{ fontSize: '.72rem', color: '#475569', marginTop: 6, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.08em' }}>{l}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+<section className="cd-fade-up relative" style={{ 
+  zIndex: 1, 
+  padding: '160px 5% 80px', 
+  textAlign: 'center',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center'
+}}>
+  {/* Glow ambiance derrière le titre */}
+  <div style={{
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -60%)',
+    width: 400,
+    height: 200,
+    background: 'radial-gradient(ellipse at center, rgba(212,167,71,0.08) 0%, transparent 70%)',
+    pointerEvents: 'none',
+    zIndex: 0
+  }} />
 
+  <div style={{ maxWidth: 760, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+    {/* Badge */}
+    <div style={{ 
+      display: 'inline-flex', alignItems: 'center', gap: 8, 
+      padding: '8px 20px', borderRadius: 50, 
+      background: 'rgba(212,167,71,0.1)', 
+      border: '1px solid rgba(212,167,71,0.25)', 
+      marginBottom: 36 
+    }}>
+      <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#d4a747', animation: 'cdPulse 2s ease-in-out infinite', display: 'inline-block' }} />
+      <span className="cd-font" style={{ fontSize: 11, fontWeight: 600, color: '#d4a747', letterSpacing: '.12em', textTransform: 'uppercase' }}>
+        Cours à Distance · Centre Warriors
+      </span>
+    </div>
+
+    {/* Titre principal — beaucoup plus grand */}
+    <h1 style={{ 
+      fontFamily: "'Space Grotesk', sans-serif",
+      fontSize: 'clamp(2.5rem, 8vw, 6rem)',
+      fontWeight: 200,
+      lineHeight: 1.08,
+      letterSpacing: '-0.05em',
+      marginBottom: 18,
+      color: '#fff'
+    }}>
+      <span style={{ display: 'block', marginBottom: 8 }}>غلب راسك تربح </span>
+      <span style={{ display: 'block' }}>
+        <span style={{
+          background: 'linear-gradient(135deg, #d4a747 0%, #f4d677 50%, #fff 100%)',
+          backgroundSize: '500% 500%',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          animation: 'gradientShift 5s ease infinite'
+        }}>
+         كلشي 
+        </span>
+      </span>
+    </h1>
+
+    {/* Ligne décorative */}
+    <div style={{
+      width: 60,
+      height: 2,
+      background: 'linear-gradient(90deg, transparent, #d4a747, transparent)',
+      margin: '0 auto 28px'
+    }} />
+
+    {/* Description — plus grande et lisible */}
+    <p style={{ 
+      fontSize: '1.15rem', 
+      color: '#94a3b8', 
+      lineHeight: 1.8, 
+      maxWidth: 860, 
+      margin: '0 auto 56px',
+      fontWeight: 400
+    }}>
+      Vidéos de cours, exercices corrigés et ressources pédagogiques — accessibles partout, à tout moment.
+    </p>
+
+    {/* Stats — plus grandes avec séparateurs */}
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      gap: 0,
+      flexWrap: 'wrap',
+      background: 'rgba(255,255,255,0.03)',
+      border: '1px solid rgba(255,255,255,0.07)',
+      borderRadius: 20,
+      padding: '14px 0',
+      maxWidth: 720,
+      margin: '0 auto'
+    }}>
+      {[
+        { n: loading ? '…' : String(niveaux.reduce((a, l) => a + (l.matieres?.reduce((b, m) => b + (m.modules?.reduce((c, mo) => c + (mo.seances?.length || 0), 0) || 0), 0) || 0), 0)) + '+', l: 'Séances' },
+        { n: loading ? '…' : `${niveaux.length}`, l: 'Niveaux' },
+        { n: '∞', l: 'Accès libre' },
+      ].map(({ n, l }, i, arr) => (
+        <div key={l} style={{ 
+          flex: 1,
+          textAlign: 'center',
+          padding: '0 22px',
+          borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.08)' : 'none'
+        }}>
+          <div className="cd-font cd-stat-num" style={{ 
+            fontSize: '2.1rem', 
+            fontWeight: 400, 
+            lineHeight: 1,
+            color: '#d4a747'
+          }}>{n}</div>
+          <div style={{ 
+            fontSize: '.72rem', 
+            color: '#475569', 
+            marginTop: 4, 
+            fontWeight: 400, 
+            textTransform: 'uppercase', 
+            letterSpacing: '.1em' 
+          }}>{l}</div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
       {/* ══ MOBILE NIVEAU + MATIERE SELECTOR ══ */}
 {!loading && !error && (
   <div className="md:hidden" style={{ position: 'relative', zIndex: 10, padding: '0 5% 24px' }}>
