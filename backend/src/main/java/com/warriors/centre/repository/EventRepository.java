@@ -46,4 +46,11 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     // Garde pour compatibilité DashboardService
     List<Event> findTop3ByEventDateAfterOrderByEventDateAsc(LocalDate date);
+
+    // Remplacer findTop3WithTagsAfter par cette version qui inclut aujourd'hui
+@Query("SELECT DISTINCT e FROM Event e LEFT JOIN FETCH e.tags WHERE e.eventDate >= :date ORDER BY e.eventDate ASC")
+List<Event> findTop3WithTagsAfterOrEqual(@Param("date") LocalDate date);
+
+// Garder aussi pour compatibilité
+List<Event> findTop3ByEventDateGreaterThanEqualOrderByEventDateAsc(LocalDate date);
 }

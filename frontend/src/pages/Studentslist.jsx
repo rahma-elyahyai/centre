@@ -648,28 +648,70 @@ const StudentsList = () => {
   const [showForm, setShowForm]     = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [current, setCurrent]       = useState(null);
+  const DEFAULT_LEVELS = [
+  'Primaire',
+  '1ère Année collège',
+  '2ème Année collège',
+  '3ème Année collège',
+  'Tronc Commun',
+  '1ère Bac',
+  '2ème Bac'
+];
+
+const DEFAULT_FIELDS = [
+  'Sciences Mathématiques',
+  'Physique-Chimie',
+  'SVT',
+  'Lettres',
+  'Économie'
+];
 
   useEffect(() => {
     if (!getAuthToken()) { navigate('/login'); return; }
     loadAll();
   }, []);
 
-  const loadAll = async () => {
-    try {
-      setLoading(true); setError('');
-      const [stRes, lvRes, fldRes] = await Promise.all([
-        studentAPI.getStats(),
-        studentAPI.getNiveaux(),
-        studentAPI.getFilieres(),
-      ]);
-      const evRes = await studentAPI.getAllStudents({ size: 100 });
-      if (evRes.success) setStudents(evRes.data.content || evRes.data);
-      if (stRes.success) setStats(stRes.data);
-      if (lvRes.success) setLevels(lvRes.data || []);
-      if (fldRes.success) setFields(fldRes.data || []);
-    } catch { setError('Impossible de charger les étudiants.'); }
-    finally { setLoading(false); }
-  };
+const loadAll = async () => {
+  try {
+    setLoading(true);
+    setError('');
+
+    const [stRes, lvRes, fldRes, evRes] = await Promise.all([
+      studentAPI.getStats(),
+      studentAPI.getNiveaux(),
+      studentAPI.getFilieres(),
+      studentAPI.getAllStudents({ size: 100 }),
+    ]);
+
+    console.log('stRes:', stRes);
+    console.log('lvRes:', lvRes);
+    console.log('fldRes:', fldRes);
+    console.log('evRes:', evRes);
+
+    const studentsData = Array.isArray(evRes)
+      ? evRes
+      : Array.isArray(evRes?.content)
+      ? evRes.content
+      : Array.isArray(evRes?.data)
+      ? evRes.data
+      : Array.isArray(evRes?.data?.content)
+      ? evRes.data.content
+      : [];
+
+    setStudents(studentsData);
+    setStats(stRes || { totalStudents: 0 });
+    setLevels(Array.isArray(lvRes) && lvRes.length > 0 ? lvRes : DEFAULT_LEVELS);
+    setFields(Array.isArray(fldRes) && fldRes.length > 0 ? fldRes : DEFAULT_FIELDS);
+  } catch (err) {
+    console.error(err);
+    setError('Impossible de charger les étudiants.');
+    setStudents([]);
+    setLevels(DEFAULT_LEVELS);
+    setFields(DEFAULT_FIELDS);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const filtered = students.filter(s => {
     const okL = filterLevel === 'all' || s.niveau === filterLevel;
@@ -725,8 +767,6 @@ const StudentsList = () => {
 
   const statCards = [
     { label: 'Total',    val: stats.totalStudents || students.length, icon: '◈', color: '#f0c84a', bg: 'rgba(196,150,48,0.08)',  border: 'rgba(196,150,48,0.15)' },
-    { label: 'Affichés', val: filtered.length,                         icon: '⊞', color: '#60a5fa', bg: 'rgba(59,130,246,0.08)',  border: 'rgba(59,130,246,0.15)' },
-    { label: 'Groupes',  val: Object.keys(grouped).length,             icon: '◫', color: '#4ade80', bg: 'rgba(34,197,94,0.08)',   border: 'rgba(34,197,94,0.15)'  },
     { label: 'Niveaux',  val: levels.length,                           icon: '🎓', color: '#c084fc', bg: 'rgba(168,85,247,0.08)',  border: 'rgba(168,85,247,0.15)' },
     { label: 'Filières', val: fields.length,                           icon: '📚', color: '#2dd4bf', bg: 'rgba(20,184,166,0.08)',  border: 'rgba(20,184,166,0.15)' },
   ];

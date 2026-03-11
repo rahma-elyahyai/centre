@@ -128,19 +128,21 @@ public class DashboardService {
         response.setRecentActivities(recentActivities);
 
         // ── Evenements a venir (3 prochains) ─────────────────────
-        List<UpcomingEvent> upcomingEvents = eventRepository
-                .findTop3ByEventDateAfterOrderByEventDateAsc(LocalDate.now())
-                .stream()
-                .map(e -> {
-                    UpcomingEvent ue = new UpcomingEvent();
-                    ue.setId(e.getId());
-                    ue.setTitle(e.getTitle());
-                    ue.setEventDate(e.getEventDate());
-                    ue.setLieu(e.getLieu());
-                    ue.setNbParticipants(e.getNbParticipants() != null ? e.getNbParticipants() : 0);
-                    return ue;
-                })
-                .collect(Collectors.toList());
+        // Après
+    List<UpcomingEvent> upcomingEvents = eventRepository
+        .findTop3ByEventDateGreaterThanEqualOrderByEventDateAsc(LocalDate.now())
+        .stream()
+        .limit(3)
+        .map(e -> {
+            UpcomingEvent ue = new UpcomingEvent();
+            ue.setId(e.getId());
+            ue.setTitle(e.getTitle());
+            ue.setEventDate(e.getEventDate());
+            ue.setLieu(e.getLocation());                // ← corrigé
+            ue.setRegisteredCount(e.getRegisteredCount() != null ? e.getRegisteredCount() : 0); // ← corrigé
+            return ue;
+        })
+        .collect(Collectors.toList());
         response.setUpcomingEvents(upcomingEvents);
 
         return response;

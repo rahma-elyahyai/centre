@@ -118,21 +118,21 @@ public class DashboardResponse {
 
     // ── UPCOMING EVENT ───────────────────────────────────────
     public static class UpcomingEvent {
-        private Long      id;
-        private String    title;
-        private LocalDate eventDate;
-        private String    lieu;
-        private int       nbParticipants;
+    private Long      id;
+    private String    title;
+    private LocalDate eventDate;
+    private String    lieu;           // garde le nom "lieu" pour le frontend AdminDashboard
+    private int       registeredCount; // ← renommé depuis nbParticipants
 
-        public Long      getId()             { return id; }
-        public void      setId(Long v)             { this.id = v; }
-        public String    getTitle()          { return title; }
-        public void      setTitle(String v)        { this.title = v; }
-        public LocalDate getEventDate()      { return eventDate; }
-        public void      setEventDate(LocalDate v) { this.eventDate = v; }
-        public String    getLieu()           { return lieu; }
-        public void      setLieu(String v)         { this.lieu = v; }
-        public int       getNbParticipants() { return nbParticipants; }
-        public void      setNbParticipants(int v)  { this.nbParticipants = v; }
-    }
+    public Long      getId()                        { return id; }
+    public void      setId(Long v)                  { this.id = v; }
+    public String    getTitle()                     { return title; }
+    public void      setTitle(String v)             { this.title = v; }
+    public LocalDate getEventDate()                 { return eventDate; }
+    public void      setEventDate(LocalDate v)      { this.eventDate = v; }
+    public String    getLieu()                      { return lieu; }
+    public void      setLieu(String v)              { this.lieu = v; }
+    public int       getRegisteredCount()           { return registeredCount; }
+    public void      setRegisteredCount(int v)      { this.registeredCount = v; }
+}
 }

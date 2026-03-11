@@ -76,18 +76,20 @@ const AdminDashboard = () => {
   }, []);
 
   const loadDashboard = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const res = await dashboardAPI.getDashboardData();
-      if (res.success) setData(res.data);
-      else setError(res.message || 'Erreur de chargement');
-    } catch {
-      setError('Impossible de charger le tableau de bord');
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
+    setError('');
+    const res = await dashboardAPI.getDashboardData();
+    console.log('Dashboard response:', res); // ← ajouter ici
+    if (res.success) setData(res.data);
+    else setError(res.message || 'Erreur de chargement');
+  } catch (e) {
+    console.error(e);
+    setError('Impossible de charger le tableau de bord');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const stats = data ? [
     { icon:'👥', label:'Étudiants Actifs', value: data.stats.totalStudents,   change: data.stats.studentsChange,   trend: data.stats.studentsTrend   },
@@ -320,7 +322,7 @@ const AdminDashboard = () => {
                       <span className="text-2xl">📅</span>
                       <span className="dash-font text-[10px] font-bold px-2 py-1 rounded-full"
                         style={{ background:'rgba(196,150,48,0.1)', border:'1px solid rgba(196,150,48,0.2)', color:'#f0c84a' }}>
-                        {ev.nbParticipants ?? 0} participants
+                        {ev.registeredCount  ?? 0} participants
                       </span>
                     </div>
                     <h3 className="dash-font text-sm font-semibold mb-1.5 line-clamp-2" style={{ color:'#e8eaf0' }}>{ev.title}</h3>

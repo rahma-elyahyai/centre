@@ -723,8 +723,24 @@ const CoursesList = () => {
   const [selectedSubject, setSelectedSubject] = useState('all');
   const [selectedProfessor, setSelectedProfessor] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [levels, setLevels] = useState([]);
-  const [subjects, setSubjects] = useState([]);
+const [levels, setLevels] = useState([
+  'Primaire',
+  '1ère année Collège',
+  '2ème année Collège',
+  '3ème année Collège',
+  'Tronc Commun',
+  '1ère année Bac',
+  '2ème année Bac'
+]);
+
+const [fields, setFields] = useState([
+  'Sciences Mathématiques',
+  'Physique-Chimie',
+  'SVT',
+  'Lettres',
+  'economie',
+  'Autres'
+]);
   const [professors, setProfessors] = useState([]);
   const [stats, setStats] = useState({ totalCourses: 0 });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
