@@ -1,6 +1,5 @@
 package com.warriors.centre.service;
 
-import com.warriors.centre.entity.User;
 import com.warriors.centre.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

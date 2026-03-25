@@ -4,7 +4,6 @@ import com.warriors.centre.dto.PaymentRequest;
 import com.warriors.centre.dto.PaymentResponse;
 import com.warriors.centre.entity.Payment;
 import com.warriors.centre.entity.Student;
-import com.warriors.centre.entity.Course;
 import com.warriors.centre.exception.PaymentNotFoundException;
 import com.warriors.centre.repository.PaymentRepository;
 import com.warriors.centre.repository.StudentRepository;

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +16,6 @@ public class DashboardService {
     // Constantes pour les statuts - evite l'encodage hardcode dans les queries
     private static final String STATUS_PAYE    = "Pay\u00e9";    // "Payé"
     private static final String STATUS_NONPAYE = "Non pay\u00e9"; // "Non payé"
-    private static final String STATUS_PARTIEL = "Partiel";
 
     private final StudentRepository       studentRepository;
     private final ProfessorRepository     professorRepository;

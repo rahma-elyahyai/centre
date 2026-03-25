@@ -1,12 +1,6 @@
 package com.warriors.centre.controller;
 
-
-import com.warriors.centre.dto.CoursDto.ApiResponse;
-import com.warriors.centre.dto.CoursDto.MatiereDto;
-import com.warriors.centre.dto.CoursDto.ModuleDto;
-import com.warriors.centre.dto.CoursDto.NiveauDto;
-import com.warriors.centre.dto.CoursDto.NiveauSummaryDto;
-import com.warriors.centre.dto.CoursDto.SeanceDto;
+import com.warriors.centre.dto.CoursDto.*;
 import com.warriors.centre.service.CoursService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,80 +14,94 @@ public class CoursController {
 
     private final CoursService coursService;
 
-    // Constructor injection
     public CoursController(CoursService coursService) {
         this.coursService = coursService;
     }
 
     // ────────────────────────────────────────────────────────
     //  GET /api/cours/niveaux
-    //
-    //  Retourne TOUTE l'arborescence en une seule requête.
-    //  C'est l'endpoint principal appelé par le frontend.
-    //
-    //  Réponse :
-    //  {
-    //    "success": true,
-    //    "data": [
-    //      {
-    //        "id": 1,
-    //        "code": "bac2",
-    //        "label": "2ème Bac",
-    //        "fullLabel": "2ème Année Baccalauréat",
-    //        "emoji": "🎓",
-    //        "colorHex": "#d4a747",
-    //        "matieres": [
-    //          {
-    //            "id": 1,
-    //            "nom": "Physique-Chimie",
-    //            "icon": "⚛️",
-    //            "modules": [
-    //              {
-    //                "id": 1,
-    //                "nom": "Électricité",
-    //                "icon": "⚡",
-    //                "seances": [
-    //                  {
-    //                    "id": 1,
-    //                    "titre": "RC — Séance 1",
-    //                    "sousTitre": "Circuit RC : charge & décharge",
-    //                    "description": "...",
-    //                    "videoUrl": "https://...",
-    //                    "imageUrl": null,
-    //                    "duree": "~45 min",
-    //                    "typeSeance": "cours",
-    //                    "disponible": true,
-    //                    "ordre": 1
-    //                  }
-    //                ]
-    //              }
-    //            ]
-    //          }
-    //        ]
-    //      }
-    //    ]
-    //  }
+    //  Retourne toute l'arborescence (niveaux + matières +
+    //  modules + séances) en une seule requête.
+    //  Appelé par CoursDistance.js ET CoursesList.js au chargement.
     // ────────────────────────────────────────────────────────
     @GetMapping("/niveaux")
-public ResponseEntity<ApiResponse<List<NiveauDto>>> getAllNiveaux() {
-    try {
-        List<NiveauDto> data = coursService.getAllNiveauxWithTree();
-        return ResponseEntity.ok(ApiResponse.ok(data));
-    } catch (Exception e) {
-        e.printStackTrace();
-        return ResponseEntity.internalServerError()
-                .body(ApiResponse.error(
-                        "Erreur lors du chargement des niveaux : "
-                                + e.getClass().getName()
-                                + " - "
-                                + e.getMessage()
-                ));
+    public ResponseEntity<ApiResponse<List<NiveauDto>>> getAllNiveaux() {
+        try {
+            List<NiveauDto> data = coursService.getAllNiveauxWithTree();
+            return ResponseEntity.ok(ApiResponse.ok(data));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error(
+                            "Erreur lors du chargement des niveaux : "
+                            + e.getClass().getSimpleName() + " — " + e.getMessage()));
+        }
     }
-}
+
+    // ────────────────────────────────────────────────────────
+    //  POST /api/cours/niveaux/save
+    //
+    //  Reçoit la liste complète des niveaux depuis l'admin
+    //  (DistanceCourseManager.js → saveNiveaux()).
+    //
+    //  Body JSON attendu :
+    //  [
+    //    {
+    //      "id": 1,                     ← null si nouveau niveau
+    //      "label": "1ère Bac",
+    //      "fullLabel": "Première Baccalauréat",
+    //      "emoji": "📘",
+    //      "colorHex": "#d4a747",
+    //      "matieres": [
+    //        {
+    //          "id": null,              ← null si nouvelle matière
+    //          "nom": "Physique-Chimie",
+    //          "icon": "⚗️",
+    //          "color": "#3b82f6",      ← couleur accent
+    //          "description": "...",
+    //          "modules": [
+    //            {
+    //              "id": null,
+    //              "nom": "Électricité",
+    //              "icon": "⚡",
+    //              "seances": [
+    //                {
+    //                  "id": null,
+    //                  "titre": "RC — Séance 1",
+    //                  "typeSeance": "cours",
+    //                  "disponible": true,
+    //                  "videoUrl": "https://...",
+    //                  "duree": "45 min"
+    //                }
+    //              ]
+    //            }
+    //          ]
+    //        }
+    //      ]
+    //    }
+    //  ]
+    //
+    //  Réponse : { "success": true, "data": [ ...NiveauDto ] }
+    //  (même structure que GET /niveaux → rechargement automatique)
+    // ────────────────────────────────────────────────────────
+    @PostMapping("/niveaux/save")
+    public ResponseEntity<ApiResponse<List<NiveauDto>>> saveNiveaux(
+            @RequestBody List<SaveNiveauRequest> requests) {
+        try {
+            List<NiveauDto> saved = coursService.saveAllNiveaux(requests);
+            return ResponseEntity.ok(ApiResponse.ok(saved));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error(
+                            "Erreur lors de la sauvegarde : "
+                            + e.getClass().getSimpleName() + " — " + e.getMessage()));
+        }
+    }
 
     // ────────────────────────────────────────────────────────
     //  GET /api/cours/niveaux/summary
-    //  Liste légère sans enfants (pour la navbar)
+    //  Liste légère (sans enfants) pour la navbar
     // ────────────────────────────────────────────────────────
     @GetMapping("/niveaux/summary")
     public ResponseEntity<ApiResponse<List<NiveauSummaryDto>>> getNiveauxSummary() {
@@ -119,7 +127,7 @@ public ResponseEntity<ApiResponse<List<NiveauDto>>> getAllNiveaux() {
 
     // ────────────────────────────────────────────────────────
     //  GET /api/cours/niveaux/code/{code}
-    //  ex: /api/cours/niveaux/code/bac2
+    //  ex : /api/cours/niveaux/code/bac2
     // ────────────────────────────────────────────────────────
     @GetMapping("/niveaux/code/{code}")
     public ResponseEntity<ApiResponse<NiveauDto>> getNiveauByCode(@PathVariable String code) {
