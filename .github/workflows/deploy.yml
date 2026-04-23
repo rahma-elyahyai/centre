@@ -74,13 +74,12 @@ jobs:
     needs: [docker-build-push]
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Trigger Railway Deploy
-        run: |
-          curl -X POST \
-          -H "Authorization: Bearer ${{ secrets.RAILWAY_TOKEN }}" \
-          -H "Content-Type: application/json" \
-          -d '{"query":"mutation { deploymentRedeploy(id: \"${{ secrets.RAILWAY_DEPLOYMENT_ID }}\") { id } }"}' \
-          https://backboard.railway.app/graphql/v2
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+      - name: Deploy to Railway
+        run: railway redeploy --service warriors-centre-backend --yes
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
 
   deploy-vercel:
     runs-on: ubuntu-latest
