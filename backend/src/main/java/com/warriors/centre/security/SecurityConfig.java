@@ -61,8 +61,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of(
             "http://localhost:3000",
             "http://localhost:5173",
-            "https://warriors-centre-frontend.onrender.com",
-            "https://warriors-centre-frontend.vercel.app"
+            "https://centre-self.vercel.app"
         ));
         config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
