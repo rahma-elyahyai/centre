@@ -417,10 +417,10 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-4 -mx-[5%] px-[5%] md:mx-0 md:px-0 md:grid md:grid-cols-2 md:overflow-visible md:pb-0 lg:grid-cols-4 md:gap-8">
             {TESTIMONIALS.map((t, i) => (
               <div key={i}
-                className="relative bg-white/[0.03] backdrop-blur-xl border border-yellow-500/10 rounded-3xl overflow-hidden transition-all duration-300"
+                className="flex-shrink-0 w-[240px] snap-center md:w-auto relative bg-white/[0.03] backdrop-blur-xl border border-yellow-500/10 rounded-3xl overflow-hidden transition-all duration-300"
                 onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.borderColor = 'rgba(212,167,71,0.3)'; }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(212,167,71,0.1)'; }}>
                 <div className="aspect-[9/16] w-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#12203a,#0a1628)' }}>
@@ -453,9 +453,9 @@ const Home = () => {
           </div>
 
           {loading.professors ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-4 -mx-[5%] px-[5%] md:mx-0 md:px-0 md:grid md:grid-cols-2 md:overflow-visible md:pb-0 lg:grid-cols-3 md:gap-10">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white/[0.02] border border-yellow-500/07 rounded-3xl p-10 space-y-4">
+                <div key={i} className="flex-shrink-0 w-[280px] snap-center md:w-auto bg-white/[0.02] border border-yellow-500/07 rounded-3xl p-10 space-y-4">
                   <Skeleton h="7rem" rounded="rounded-full" w="7rem" className="mx-auto" />
                   <Skeleton h="1.2rem" w="70%" className="mx-auto" />
                   <Skeleton h="0.8rem" w="50%" className="mx-auto" />
@@ -469,8 +469,12 @@ const Home = () => {
               <p className="text-[#94a3b8]">Aucun professeur enregistré pour le moment.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-              {professors.map((prof, i) => <ProfessorCard key={prof.id || i} prof={prof} />)}
+            <div className="flex overflow-x-auto snap-x snap-mandatory gap-6 pb-4 -mx-[5%] px-[5%] md:mx-0 md:px-0 md:grid md:grid-cols-2 md:overflow-visible md:pb-0 lg:grid-cols-3 md:gap-10">
+              {professors.map((prof, i) => (
+                <div key={prof.id || i} className="flex-shrink-0 w-[280px] snap-center md:w-auto">
+                  <ProfessorCard prof={prof} />
+                </div>
+              ))}
             </div>
           )}
         </div>

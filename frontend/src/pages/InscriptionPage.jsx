@@ -19,7 +19,7 @@ const getYoutubeEmbedUrl = (url) => {
 
 const SUBJECTS = [
   'Mathématiques', 'Physique-Chimie', 'SVT', 'Français', 'Anglais',
-  'Arabe', 'Histoire-Géographie', 'Philosophie', 'Économie', 'Comptabilité', 'Informatique',
+  'Arabe', 'Histoire-Géographie', 'Philosophie',
 ];
 // À distance, seule la Physique-Chimie est proposée pour le moment
 const DISTANCE_SUBJECTS = ['Physique-Chimie'];
@@ -159,7 +159,7 @@ const InscriptionPage = () => {
             Formulaire <span className="bg-gradient-to-br from-[#d4a747] to-[#f4d677] bg-clip-text text-transparent">d'inscription</span>
           </h1>
           <p className="text-[#cbd5e1] max-w-xl mx-auto">
-            Regarde la vidéo pour savoir comment bien remplir le formulaire, puis complète tes informations ci-dessous.
+💪 Travaille mieux, progresse plus vite, réussis davantage ! Complète le formulaire et rejoins Warriors Center pour bénéficier d'un accompagnement qui t'aide à viser l'excellence.
           </p>
         </div>
 
