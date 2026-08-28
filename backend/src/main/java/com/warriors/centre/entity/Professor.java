@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -56,8 +57,11 @@ public class Professor {
     @Column(nullable = false)
     private String disponibilite = "Disponible";
 
-    @Column(nullable = false)
-    private Double salaire;
+    @Column(nullable = true)
+    private Double salaire; // conservé pour compatibilité — le revenu réel vient désormais de `tarifs`
+
+    @OneToMany(mappedBy = "professor", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<ProfessorRate> tarifs = new ArrayList<>();
 
     @Column(name = "date_recrutement")
     private LocalDate dateRecrutement;
@@ -120,6 +124,8 @@ public class Professor {
     public void setDisponibilite(String disponibilite) { this.disponibilite = disponibilite; }
     public Double getSalaire() { return salaire; }
     public void setSalaire(Double salaire) { this.salaire = salaire; }
+    public List<ProfessorRate> getTarifs() { return tarifs; }
+    public void setTarifs(List<ProfessorRate> tarifs) { this.tarifs = tarifs; }
     public LocalDate getDateRecrutement() { return dateRecrutement; }
     public void setDateRecrutement(LocalDate dateRecrutement) { this.dateRecrutement = dateRecrutement; }
     public String getAvatarType() { return avatarType; }

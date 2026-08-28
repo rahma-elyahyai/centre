@@ -38,8 +38,9 @@ public class ProfessorRequest {
     
     private String disponibilite;
     
-    @NotBlank(message = "Le salaire est requis")
-    private String salaire;
+    private String salaire; // optionnel désormais — conservé pour compatibilité
+    
+    private List<ProfessorRateDto.TarifRequest> tarifs;
     
     private LocalDate dateRecrutement;
     
@@ -83,6 +84,9 @@ public class ProfessorRequest {
     
     public String getSalaire() { return salaire; }
     public void setSalaire(String salaire) { this.salaire = salaire; }
+    
+    public List<ProfessorRateDto.TarifRequest> getTarifs() { return tarifs; }
+    public void setTarifs(List<ProfessorRateDto.TarifRequest> tarifs) { this.tarifs = tarifs; }
     
     public LocalDate getDateRecrutement() { return dateRecrutement; }
     public void setDateRecrutement(LocalDate dateRecrutement) { this.dateRecrutement = dateRecrutement; }

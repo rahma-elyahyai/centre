@@ -13,7 +13,8 @@ import ProtectedRoute from './routes/ProtectedRoute';
 import { isAuthenticated } from './services/api';
 import Unauthorized from './pages/Unauthorized';
 import CoursDistance from './pages/CoursDistance'; 
-
+import InscriptionRequestsList from './pages/InscriptionRequestsList';
+import InscriptionPage from './pages/InscriptionPage';
 // Redirige vers le dashboard si déjà connecté
 const PublicRoute = ({ children }) => {
   if (isAuthenticated()) {          // ← utilise la vraie fonction avec vérif expiration
@@ -57,6 +58,13 @@ function App() {
           }
         />
 
+        <Route path="/admin/inscriptions" 
+        element={
+          <ProtectedRoute requiredRole="ADMIN">
+              <InscriptionRequestsList />
+            </ProtectedRoute>
+          } />
+
         <Route
           path="/admin/professors"
           element={
@@ -74,6 +82,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/inscription" element={<InscriptionPage />} />
 
         <Route
           path="/admin/finance"

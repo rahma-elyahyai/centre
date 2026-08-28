@@ -19,6 +19,8 @@ public class ProfessorResponse {
     private String bio;
     private String disponibilite;
     private Double salaire;
+    private List<ProfessorRateDto.TarifResponse> tarifs;
+    private Double revenuMensuelEstime; // somme des (nb étudiants concernés * tarif) pour chaque ligne
     private LocalDate dateRecrutement;
     private String avatarType;
     private String avatarEmoji;
@@ -69,6 +71,8 @@ public class ProfessorResponse {
     public String getBio() { return bio; }
     public String getDisponibilite() { return disponibilite; }
     public Double getSalaire() { return salaire; }
+    public List<ProfessorRateDto.TarifResponse> getTarifs() { return tarifs; }
+    public Double getRevenuMensuelEstime() { return revenuMensuelEstime; }
     public LocalDate getDateRecrutement() { return dateRecrutement; }
     public String getAvatarType() { return avatarType; }
     public String getAvatarEmoji() { return avatarEmoji; }  
@@ -90,6 +94,8 @@ public class ProfessorResponse {
     public void setBio(String bio) { this.bio = bio; }
     public void setDisponibilite(String disponibilite) { this.disponibilite = disponibilite; }
     public void setSalaire(Double salaire) { this.salaire = salaire; }
+    public void setTarifs(List<ProfessorRateDto.TarifResponse> tarifs) { this.tarifs = tarifs; }
+    public void setRevenuMensuelEstime(Double revenuMensuelEstime) { this.revenuMensuelEstime = revenuMensuelEstime; }
     public void setDateRecrutement(LocalDate dateRecrutement) { this.dateRecrutement = dateRecrutement; }
     public void setAvatarType(String avatarType) { this.avatarType = avatarType; }
     public void setAvatarEmoji(String avatarEmoji) { this.avatarEmoji = avatarEmoji; }      

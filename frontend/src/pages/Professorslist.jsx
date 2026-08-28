@@ -1,20 +1,202 @@
-// src/components/ProfessorsList.js
+// src/components/ProfessorsList.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { professorAPI } from '../services/professorService';
 import { getAuthToken } from '../services/api';
 import Sidebar from './Sidebar';
+import {
+  Mail, Phone, GraduationCap, Wallet, Calendar, BookOpen, Users,
+  Pencil, Trash2, X, AlertTriangle, LayoutGrid, List, Plus, Check,
+  ChevronLeft, ChevronRight, Search, RotateCcw, Camera, Smile,
+  Sparkles, Eye, Circle,
+} from 'lucide-react';
 
-/* ─── Font injection ─── */
-if (!document.getElementById('warriors-fonts')) {
-  const link = document.createElement('link');
-  link.id = 'warriors-fonts';
-  link.rel = 'stylesheet';
-  link.href = 'https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap';
-  document.head.appendChild(link);
+/* ══════════════════════════════════════════════════════════════ */
+/*  DESIGN TOKENS — shared with StudentsList, injected once      */
+/* ══════════════════════════════════════════════════════════════ */
+{
+  let s = document.getElementById('sv-design-tokens');
+  if (!s) {
+    s = document.createElement('style');
+    s.id = 'sv-design-tokens';
+    document.head.appendChild(s);
+  }
+  s.innerHTML = `
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+      --sv-bg:            #0A0F1C;
+      --sv-surface:       #10172A;
+      --sv-surface-2:     #141C32;
+      --sv-border:        rgba(255,255,255,0.07);
+      --sv-border-strong: rgba(255,255,255,0.14);
+      --sv-text:          #E7EAF0;
+      --sv-text-dim:      #8B93A6;
+      --sv-text-faint:    #5C6478;
+      --sv-accent:        #C9A24D;
+      --sv-accent-hover:  #D8B563;
+      --sv-accent-ink:    #17130A;
+      --sv-accent-soft:   rgba(201,162,77,0.12);
+      --sv-accent-border: rgba(201,162,77,0.30);
+      --sv-success:       #5FAE83;
+      --sv-success-soft:  rgba(95,174,131,0.12);
+      --sv-success-border:rgba(95,174,131,0.30);
+      --sv-warning:       #C99A55;
+      --sv-warning-soft:  rgba(201,154,85,0.12);
+      --sv-warning-border:rgba(201,154,85,0.30);
+      --sv-danger:        #E2574C;
+      --sv-danger-soft:   rgba(226,87,76,0.10);
+      --sv-danger-border: rgba(226,87,76,0.28);
+      --sv-info:          #6AA3D9;
+      --sv-info-soft:     rgba(106,163,217,0.12);
+      --sv-info-border:   rgba(106,163,217,0.30);
+      --sv-radius-sm:     8px;
+      --sv-radius:        10px;
+      --sv-radius-lg:     14px;
+      --sv-shadow:        0 1px 2px rgba(0,0,0,0.4);
+      --sv-shadow-md:     0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .sv-root { font-family: 'Inter', sans-serif; }
+    .sv-heading { font-family: 'Manrope', sans-serif; letter-spacing: -0.01em; }
+    .sv-accent-text { color: var(--sv-accent); }
+
+    .sv-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13px;
+      border-radius: var(--sv-radius-sm); border: 1px solid transparent;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      cursor: pointer; white-space: nowrap;
+    }
+    .sv-btn-primary { background: var(--sv-accent); color: var(--sv-accent-ink); }
+    .sv-btn-primary:hover { background: var(--sv-accent-hover); }
+    .sv-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .sv-btn-ghost { background: transparent; border-color: var(--sv-border-strong); color: var(--sv-text-dim); }
+    .sv-btn-ghost:hover { border-color: var(--sv-text-faint); color: var(--sv-text); background: rgba(255,255,255,0.02); }
+    .sv-btn-info { background: var(--sv-info-soft); border-color: var(--sv-info-border); color: var(--sv-info); }
+    .sv-btn-info:hover { background: rgba(106,163,217,0.2); }
+    .sv-btn-danger { background: var(--sv-danger); color: #fff; }
+    .sv-btn-danger:hover { background: #EB6B60; }
+    .sv-icon-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: var(--sv-radius-sm);
+      border: 1px solid var(--sv-border); background: transparent; color: var(--sv-text-dim);
+      transition: background 0.15s, color 0.15s, border-color 0.15s; cursor: pointer;
+    }
+    .sv-icon-btn:hover { background: rgba(255,255,255,0.04); color: var(--sv-text); border-color: var(--sv-border-strong); }
+    .sv-icon-btn.danger:hover { background: var(--sv-danger-soft); color: var(--sv-danger); border-color: var(--sv-danger-border); }
+
+    input.sv-input, select.sv-input, textarea.sv-input {
+      background-color: var(--sv-surface-2) !important;
+      border: 1px solid var(--sv-border) !important;
+      color: var(--sv-text) !important;
+      font-family: 'Inter', sans-serif; font-size: 13.5px;
+      border-radius: var(--sv-radius-sm); transition: border-color 0.15s;
+      appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    }
+    select.sv-input {
+      background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%238B93A6' stroke-width='1.75'%3E%3Cpath d='M6 8l4 4 4-4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px;
+      padding-right: 34px !important;
+    }
+    input.sv-input::placeholder, textarea.sv-input::placeholder { color: var(--sv-text-faint) !important; }
+    input.sv-input:focus, select.sv-input:focus, textarea.sv-input:focus { outline: none; border-color: var(--sv-accent-border) !important; }
+    input.sv-input.error, textarea.sv-input.error { border-color: var(--sv-danger-border) !important; }
+    select.sv-input option { background: var(--sv-surface); color: var(--sv-text); }
+    :root[data-theme="light"] select.sv-input {
+      background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%235B6475' stroke-width='1.75'%3E%3Cpath d='M6 8l4 4 4-4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+
+    .sv-card {
+      background: var(--sv-surface); border: 1px solid var(--sv-border);
+      border-radius: var(--sv-radius-lg); transition: border-color 0.15s;
+    }
+    .sv-card:hover { border-color: var(--sv-border-strong); }
+
+    .sv-tag {
+      display: inline-flex; align-items: center; font-size: 11px; font-weight: 600;
+      padding: 3px 9px; border-radius: 6px; line-height: 1.4;
+    }
+
+    .sv-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .sv-scroll::-webkit-scrollbar-track { background: transparent; }
+    .sv-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10); border-radius: 4px; }
+
+    @keyframes sv-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .sv-in { animation: sv-in 0.22s ease forwards; }
+    @keyframes sv-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.9; } }
+    .sv-shimmer { animation: sv-pulse 1.4s ease-in-out infinite; }
+
+    .sv-row:hover { background: rgba(255,255,255,0.02); }
+
+    .sv-checkbox {
+      appearance: none; width: 16px; height: 16px; border-radius: 4px;
+      border: 1.5px solid var(--sv-border-strong); background: transparent;
+      cursor: pointer; flex-shrink: 0; transition: all 0.15s; position: relative;
+    }
+    .sv-checkbox:checked { background: var(--sv-accent); border-color: var(--sv-accent); }
+  `;
 }
 
-/* ─── Static data ─── */
+/* ══════════════════════════════════════════════════════════════ */
+/*  LIGHT THEME OVERRIDE — shared across the app                 */
+/* ══════════════════════════════════════════════════════════════ */
+{
+  let sl = document.getElementById('sv-theme-light');
+  if (!sl) {
+    sl = document.createElement('style');
+    sl.id = 'sv-theme-light';
+    document.head.appendChild(sl);
+  }
+  sl.innerHTML = `
+    :root[data-theme="light"] {
+      --sv-bg:            #F1F2F6;
+      --sv-surface:       #FFFFFF;
+      --sv-surface-2:     #F6F7FA;
+      --sv-border:        rgba(15,23,42,0.08);
+      --sv-border-strong: rgba(15,23,42,0.16);
+      --sv-text:          #171B26;
+      --sv-text-dim:      #5B6475;
+      --sv-text-faint:    #8A93A3;
+      --sv-accent:        #B8873A;
+      --sv-accent-hover:  #A67830;
+      --sv-accent-ink:    #FFFFFF;
+      --sv-accent-soft:   rgba(184,135,58,0.12);
+      --sv-accent-border: rgba(184,135,58,0.35);
+      --sv-success:       #3F8F68;
+      --sv-success-soft:  rgba(63,143,104,0.12);
+      --sv-success-border:rgba(63,143,104,0.32);
+      --sv-warning:       #B07F2E;
+      --sv-warning-soft:  rgba(176,127,46,0.12);
+      --sv-warning-border:rgba(176,127,46,0.32);
+      --sv-danger:        #C43D33;
+      --sv-danger-soft:   rgba(196,61,51,0.10);
+      --sv-danger-border: rgba(196,61,51,0.30);
+      --sv-info:          #3E7FB8;
+      --sv-info-soft:     rgba(62,127,184,0.12);
+      --sv-info-border:   rgba(62,127,184,0.32);
+      --sv-violet:        #7A6BC4;
+      --sv-violet-soft:   rgba(122,107,196,0.12);
+      --sv-violet-border: rgba(122,107,196,0.32);
+      --sv-shadow:        0 1px 2px rgba(15,23,42,0.07);
+      --sv-shadow-md:     0 8px 24px rgba(15,23,42,0.10);
+    }
+    :root[data-theme="light"] select.sv-input option { background: #FFFFFF; color: var(--sv-text); }
+    :root[data-theme="light"] .sv-scroll::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.14); }
+  `;
+}
+
+/* Apply any previously saved theme immediately, on whichever page loads first */
+if (typeof window !== 'undefined') {
+  const savedTheme = localStorage.getItem('sv-theme');
+  if (savedTheme === 'light' || savedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }
+}
+
+/* ─── Static data (unchanged) ─── */
 const SUBJECTS = ['Mathématiques','Physique-Chimie','SVT','Français','Anglais','Arabe','Histoire-Géographie','Philosophie','Économie','Comptabilité','Informatique','Leadership','Management','Marketing Digital','Design Graphique','UX/UI','Data Science','Machine Learning','Cybersécurité','Développement Web'];
 const EXPERIENCE_LEVELS = ['Débutant (0-2 ans)','Intermédiaire (3-5 ans)','Confirmé (6-10 ans)','Senior (11-15 ans)','Expert (15+ ans)'];
 const AVATARS = ['👨‍🏫','👩‍🏫','👨‍🔬','👩‍🔬','👨‍💻','👩‍💻','👨‍🎨','👩‍🎨','👨‍💼','👩‍💼'];
@@ -27,155 +209,183 @@ const SAMPLE = [
   { id:4, nom:'Mansouri', prenom:'Leila', fullName:'Dr. Leila Mansouri', email:'leila.mansouri@centrewarriors.fr', phoneNumber:'0645678901', specialite:'Design & Créativité', experienceLevel:'Senior (11-15 ans)', matieres:['Design Graphique','UX/UI','Branding'], diplome:'Master Design - ESAD', bio:'Directrice artistique primée.', disponibilite:'Disponible', salaire:7000, dateRecrutement:'2016-06-10', avatar:'👩‍🎨' },
 ];
 
-/* ─── Shared CSS vars injected once ─── */
-const style = document.createElement('style');
-style.innerHTML = `
-  :root {
-    --gold: #c49630;
-    --gold-light: #f0c84a;
-    --gold-fade: rgba(196,150,48,0.1);
-    --navy: #080f1e;
-    --navy-card: rgba(10,18,35,0.8);
-  }
-  .warriors-font { font-family: 'Outfit', sans-serif; }
-  .warriors-title { font-family: 'Sora', sans-serif; }
-  .gold-gradient { background: linear-gradient(135deg, #c49630 0%, #f0c84a 60%, #c89a2e 100%); }
-  .gold-text { background: linear-gradient(135deg, #c49630, #f0c84a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .card-hover { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
-  .card-hover:hover { transform: translateY(-4px); border-color: rgba(196,150,48,0.4) !important; box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(196,150,48,0.15); }
-  .btn-gold { background: linear-gradient(135deg, #c49630 0%, #f0c84a 100%); transition: all 0.2s; }
-  .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(196,150,48,0.35); }
-  .input-warriors { background: rgba(255,255,255,0.04); border: 1px solid rgba(196,150,48,0.15); color: #e8eaf0; font-family: 'Outfit', sans-serif; transition: border-color 0.2s; }
-  .input-warriors:focus { outline: none; border-color: rgba(196,150,48,0.55); box-shadow: 0 0 0 3px rgba(196,150,48,0.08); }
-  .input-warriors::placeholder { color: rgba(148,163,184,0.4); }
-  select.input-warriors option { background: #0d1c30; color: #e8eaf0; }
-  .specialty-tag { background: rgba(196,150,48,0.1); border: 1px solid rgba(196,150,48,0.2); color: #f0c84a; font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 500; padding: 2px 9px; border-radius: 20px; }
-  .scrollbar-warriors::-webkit-scrollbar { width: 4px; }
-  .scrollbar-warriors::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
-  .scrollbar-warriors::-webkit-scrollbar-thumb { background: rgba(196,150,48,0.2); border-radius: 4px; }
-  @keyframes fadeInUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-  .animate-in { animation: fadeInUp 0.35s ease forwards; }
-  @keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .shimmer { animation: shimmer 1.5s ease-in-out infinite; }
-`;
-if (!document.getElementById('warriors-style')) {
-  style.id = 'warriors-style';
-  document.head.appendChild(style);
-}
+// Flat, muted avatar palette shared with StudentsList
+const AVATAR_COLORS = ['#8B93E8', '#C9A24D', '#5CADC2', '#D18BA0', '#5FAE83', '#C97A6B'];
+const getAvatarColor = (id) => AVATAR_COLORS[(id || 0) % AVATAR_COLORS.length];
 
-/* ──────────────────────────────────────────────────────────── */
-/*  SUB-COMPONENTS                                              */
-/* ──────────────────────────────────────────────────────────── */
+const STATUS_STYLE = {
+  'Disponible':               { color: 'var(--sv-success)', soft: 'var(--sv-success-soft)', border: 'var(--sv-success-border)' },
+  'Partiellement disponible': { color: 'var(--sv-warning)', soft: 'var(--sv-warning-soft)', border: 'var(--sv-warning-border)' },
+  'Non disponible':           { color: 'var(--sv-danger)',  soft: 'var(--sv-danger-soft)',  border: 'var(--sv-danger-border)' },
+};
 
 const AvailDot = ({ status }) => {
-  const color = status === 'Disponible' ? '#22c55e' : status === 'Partiellement disponible' ? '#f59e0b' : '#ef4444';
+  const st = STATUS_STYLE[status] || STATUS_STYLE['Non disponible'];
   return (
     <span className="inline-flex items-center gap-1.5">
-      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: color, boxShadow: `0 0 6px ${color}` }} />
-      <span className="text-[11px] warriors-font" style={{ color: 'rgba(180,190,210,0.65)' }}>{status}</span>
+      <Circle size={7} fill={st.color} strokeWidth={0} />
+      <span className="text-[11.5px]" style={{ color: 'var(--sv-text-dim)' }}>{status}</span>
     </span>
   );
 };
 
-const ProfessorCard = ({ professor, onDetails, onEdit, onDelete, index }) => {
-  const name = professor.fullName || `${professor.prenom} ${professor.nom}`;
+/* Person avatar — photo or emoji, flat consistent frame (feature preserved, visuals redesigned) */
+const PersonAvatar = ({ professor, size = 56, textSize = 24 }) => {
+  const c = getAvatarColor(professor?.id || 0);
   return (
     <div
-      className="card-hover animate-in rounded-2xl p-5 flex flex-col gap-4 cursor-default"
-      style={{
-        background: 'linear-gradient(145deg, rgba(13,24,44,0.95) 0%, rgba(8,15,30,0.9) 100%)',
-        border: '1px solid rgba(196,150,48,0.12)',
-        animationDelay: `${index * 60}ms`,
-      }}
+      className="rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0"
+      style={{ width: size, height: size, background: `${c}1E`, border: `1px solid ${c}40` }}
     >
-      {/* Top: avatar + name + status */}
+      {professor?.avatarType === 'photo' && professor?.photoUrl ? (
+        <img src={professor.photoUrl} alt="" className="w-full h-full object-cover" />
+      ) : (
+        <span style={{ fontSize: textSize }}>{professor?.avatarEmoji || professor?.avatar || '👨‍🏫'}</span>
+      )}
+    </div>
+  );
+};
+
+/* ══════════════════════════════════════════════════════════════ */
+/*  PROFESSOR CARD (Grid view)                                   */
+/* ══════════════════════════════════════════════════════════════ */
+const ProfessorCard = ({ professor, onDetails, onEdit, onDelete, index }) => {
+  const name = professor.fullName || `${professor.prenom} ${professor.nom}`;
+  const matieres = professor.matieres || [];
+  return (
+    <div className="sv-card sv-in flex flex-col gap-3.5 p-4" style={{ animationDelay: `${index * 30}ms` }}>
       <div className="flex items-start gap-3">
-        <div className="relative flex-shrink-0">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl overflow-hidden"
-            style={{
-              background: 'linear-gradient(135deg, rgba(196,150,48,0.25) 0%, rgba(240,200,74,0.15) 100%)',
-              border: '1.5px solid rgba(196,150,48,0.3)',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-            }}>
-            {professor.avatarType === 'photo' && professor.photoUrl
-              ? <img src={professor.photoUrl} alt={name} className="w-full h-full object-cover" />
-              : <span>{professor.avatarEmoji || professor.avatar || '👨‍🏫'}</span>
-            }
-          </div>
-          {/* glow ring */}
-          <div className="absolute inset-0 rounded-2xl" style={{ boxShadow: '0 0 0 3px rgba(196,150,48,0.08)' }} />
-        </div>
-
+        <PersonAvatar professor={professor} size={52} textSize={22} />
         <div className="flex-1 min-w-0">
-          <h3 className="warriors-title font-bold text-sm leading-tight truncate" style={{ color: '#e8eaf0' }}>{name}</h3>
-          <p className="warriors-font text-[11px] mt-0.5 truncate" style={{ color: 'rgba(196,150,48,0.6)' }}>{professor.experienceLevel}</p>
-          <div className="mt-2">
-            <AvailDot status={professor.disponibilite} />
-          </div>
+          <h3 className="sv-heading font-semibold text-[13.5px] leading-snug truncate" style={{ color: 'var(--sv-text)' }}>{name}</h3>
+          <p className="text-[11px] mt-0.5 truncate" style={{ color: 'var(--sv-accent)' }}>{professor.experienceLevel}</p>
+          <div className="mt-1.5"><AvailDot status={professor.disponibilite} /></div>
         </div>
-      </div>
-
-      {/* Divider */}
-      <div className="h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(196,150,48,0.12), transparent)' }} />
-
-      {/* Contact */}
-      <div className="space-y-1.5">
-        {[
-          { icon: '✉', value: professor.email },
-          { icon: '◌', value: professor.phoneNumber },
-        ].map(({ icon, value }) => (
-          <div key={icon} className="flex items-center gap-2">
-            <span className="text-xs flex-shrink-0" style={{ color: 'rgba(196,150,48,0.5)' }}>{icon}</span>
-            <span className="warriors-font text-[12px] truncate" style={{ color: 'rgba(180,190,210,0.55)' }}>{value}</span>
+        {professor.revenuMensuelEstime != null && (
+          <div className="text-right flex-shrink-0">
+            <p className="sv-heading text-[13.5px] font-bold" style={{ color: 'var(--sv-accent)' }}>{professor.revenuMensuelEstime.toLocaleString('fr-FR')}</p>
+            <p className="text-[9.5px]" style={{ color: 'var(--sv-text-faint)' }}>MAD/mois</p>
           </div>
-        ))}
-      </div>
-
-      {/* Subjects */}
-      <div className="flex flex-wrap gap-1.5">
-        {(professor.matieres || []).slice(0, 3).map((m, i) => (
-          <span key={i} className="specialty-tag">{m}</span>
-        ))}
-        {(professor.matieres || []).length > 3 && (
-          <span className="specialty-tag">+{(professor.matieres || []).length - 3}</span>
         )}
       </div>
 
-      {/* Action buttons */}
-      <div className="flex gap-2 mt-auto">
-        <button
-          onClick={() => onDetails(professor)}
-          className="flex-1 py-2 rounded-xl text-[12px] font-semibold warriors-font transition-all duration-200"
-          style={{
-            background: 'rgba(59,130,246,0.1)',
-            border: '1px solid rgba(59,130,246,0.2)',
-            color: '#60a5fa',
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,130,246,0.18)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'rgba(59,130,246,0.1)'}
-        >Détails</button>
+      <div className="h-px" style={{ background: 'var(--sv-border)' }} />
 
-        <button
-          onClick={() => onEdit(professor)}
-          className="w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all duration-200 flex-shrink-0"
-          style={{ background: 'rgba(196,150,48,0.1)', border: '1px solid rgba(196,150,48,0.2)', color: '#f0c84a' }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(196,150,48,0.2)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'rgba(196,150,48,0.1)'}
-        >✏</button>
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-2">
+          <Mail size={13} strokeWidth={1.75} style={{ color: 'var(--sv-text-faint)', flexShrink: 0 }} />
+          <span className="text-[12px] truncate" style={{ color: 'var(--sv-text-dim)' }}>{professor.email}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Phone size={13} strokeWidth={1.75} style={{ color: 'var(--sv-text-faint)', flexShrink: 0 }} />
+          <span className="text-[12px] truncate" style={{ color: 'var(--sv-text-dim)' }}>{professor.phoneNumber}</span>
+        </div>
+      </div>
 
-        <button
-          onClick={() => onDelete(professor)}
-          className="w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all duration-200 flex-shrink-0"
-          style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.2)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.1)'}
-        >✕</button>
+      <div className="flex flex-wrap gap-1.5">
+        {matieres.slice(0, 3).map((m, i) => (
+          <span key={i} className="sv-tag" style={{ background: 'var(--sv-accent-soft)', border: '1px solid var(--sv-accent-border)', color: 'var(--sv-accent)' }}>{m}</span>
+        ))}
+        {matieres.length > 3 && (
+          <span className="sv-tag" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--sv-border)', color: 'var(--sv-text-faint)' }}>+{matieres.length - 3}</span>
+        )}
+      </div>
+
+      <div className="flex gap-2 mt-auto pt-3" style={{ borderTop: '1px solid var(--sv-border)' }}>
+        <button onClick={() => onDetails(professor)} className="sv-btn sv-btn-info flex-1 py-2">
+          <Eye size={13} strokeWidth={1.75} /> Détails
+        </button>
+        <button onClick={() => onEdit(professor)} className="sv-icon-btn"><Pencil size={13} strokeWidth={1.75} /></button>
+        <button onClick={() => onDelete(professor)} className="sv-icon-btn danger"><Trash2 size={13} strokeWidth={1.75} /></button>
       </div>
     </div>
   );
 };
 
-/* ─── FORM MODAL ─── */
+/* ══════════════════════════════════════════════════════════════ */
+/*  TABLE VIEW                                                   */
+/* ══════════════════════════════════════════════════════════════ */
+const TableView = ({ grouped, onDetails, onEdit, onDelete }) => (
+  <div className="space-y-4">
+    {Object.entries(grouped).map(([specialty, group], gi) => (
+      <div key={specialty} className="sv-card sv-in overflow-hidden" style={{ animationDelay: `${gi * 40}ms` }}>
+        <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: '1px solid var(--sv-border)' }}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-1 h-4 rounded-full" style={{ background: 'var(--sv-accent)' }} />
+            <h2 className="sv-heading text-[13.5px] font-semibold" style={{ color: 'var(--sv-text)' }}>{specialty}</h2>
+          </div>
+          <span className="text-[11px] font-medium px-2 py-0.5 rounded-md" style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--sv-text-faint)' }}>
+            {group.length} professeur{group.length > 1 ? 's' : ''}
+          </span>
+        </div>
+        <div className="overflow-x-auto sv-scroll">
+          <table className="w-full">
+            <thead>
+              <tr style={{ borderBottom: '1px solid var(--sv-border)' }}>
+                {['Professeur', 'Contact', 'Expérience', 'Disponibilité', 'Matières', 'Revenu/mois', ''].map(h => (
+                  <th key={h} className="px-5 py-2.5 text-left text-[10.5px] font-semibold tracking-wide" style={{ color: 'var(--sv-text-faint)' }}>
+                    {h.toUpperCase()}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {group.map((professor) => {
+                const name = professor.fullName || `${professor.prenom} ${professor.nom}`;
+                const matieres = professor.matieres || [];
+                return (
+                  <tr key={professor.id} className="sv-row" style={{ borderBottom: '1px solid var(--sv-border)' }}>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <PersonAvatar professor={professor} size={34} textSize={16} />
+                        <p className="text-[13px] font-medium" style={{ color: 'var(--sv-text)' }}>{name}</p>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">
+                      <p className="text-[12px]" style={{ color: 'var(--sv-text-dim)' }}>{professor.email}</p>
+                      <p className="text-[11.5px]" style={{ color: 'var(--sv-text-faint)' }}>{professor.phoneNumber}</p>
+                    </td>
+                    <td className="px-5 py-3"><span className="text-[12.5px]" style={{ color: 'var(--sv-text-dim)' }}>{professor.experienceLevel}</span></td>
+                    <td className="px-5 py-3"><AvailDot status={professor.disponibilite} /></td>
+                    <td className="px-5 py-3">
+                      <div className="flex flex-wrap gap-1">
+                        {matieres.slice(0, 2).map((m, i) => (
+                          <span key={i} className="sv-tag" style={{ background: 'var(--sv-accent-soft)', border: '1px solid var(--sv-accent-border)', color: 'var(--sv-accent)' }}>{m}</span>
+                        ))}
+                        {matieres.length > 2 && (
+                          <span className="sv-tag" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--sv-border)', color: 'var(--sv-text-faint)' }}>+{matieres.length - 2}</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">
+                      <span className="text-[13px] font-semibold" style={{ color: 'var(--sv-accent)' }}>
+                        {professor.revenuMensuelEstime != null ? `${professor.revenuMensuelEstime.toLocaleString('fr-FR')} MAD` : '—'}
+                      </span>
+                      <p className="text-[10.5px] mt-0.5" style={{ color: 'var(--sv-text-faint)' }}>{professor.tarifs?.length || 0} tarif{(professor.tarifs?.length || 0) > 1 ? 's' : ''}</p>
+                    </td>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <button onClick={() => onDetails(professor)} className="sv-icon-btn"><Eye size={13} strokeWidth={1.75} /></button>
+                        <button onClick={() => onEdit(professor)} className="sv-icon-btn"><Pencil size={13} strokeWidth={1.75} /></button>
+                        <button onClick={() => onDelete(professor)} className="sv-icon-btn danger"><Trash2 size={13} strokeWidth={1.75} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+/* ══════════════════════════════════════════════════════════════ */
+/*  FORM MODAL                                                   */
+/* ══════════════════════════════════════════════════════════════ */
+const NIVEAUX_PROF = ['Primaire','1ère Année collège','2ème Année collège','3ème Année collège','Tronc Commun','1ère Bac','2ème Bac'];
+
 const FormModal = ({ professor, onSave, onClose, specialties, loading }) => {
   const isEdit = !!professor;
   const [formData, setFormData] = useState(() => professor ? {
@@ -183,20 +393,23 @@ const FormModal = ({ professor, onSave, onClose, specialties, loading }) => {
     phone: professor.phoneNumber, specialty: professor.specialite,
     experience: professor.experienceLevel, subjects: professor.matieres || [],
     diploma: professor.diplome, bio: professor.bio || '',
-    availability: professor.disponibilite, salary: professor.salaire?.toString() || '',
+    availability: professor.disponibilite,
+    tarifs: (professor.tarifs || []).map(t => ({ matiere: t.matiere, niveau: t.niveau, montant: String(t.montantParEtudiant) })),
     avatarType: professor.avatarType || 'emoji', avatarEmoji: professor.avatarEmoji || '👨‍🏫',
     photoUrl: professor.photoUrl || null,
   } : {
     nom:'', prenom:'', email:'', phone:'', specialty:'', experience:'',
-    subjects:[], diploma:'', bio:'', availability:'Disponible', salary:'',
+    subjects:[], diploma:'', bio:'', availability:'Disponible',
+    tarifs: [],
     avatarType:'emoji', avatarEmoji:'👨‍🏫', photoUrl:null,
   });
   const [errors, setErrors] = useState({});
   const [photoFile, setPhotoFile] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(professor?.photoUrl || null);
   const [activeSection, setActiveSection] = useState(0);
+  const [newTarif, setNewTarif] = useState({ matiere: '', niveau: '', montant: '' });
 
-  const sections = ['Avatar', 'Identité', 'Compétences', 'Biographie'];
+  const sections = ['Avatar', 'Identité', 'Compétences', 'Tarifs', 'Biographie'];
 
   const ch = e => {
     const { name, value } = e.target;
@@ -208,6 +421,15 @@ const FormModal = ({ professor, onSave, onClose, specialties, loading }) => {
     ...p,
     subjects: p.subjects.includes(s) ? p.subjects.filter(x => x !== s) : [...p.subjects, s],
   }));
+
+  const addTarif = () => {
+    if (!newTarif.matiere || !newTarif.niveau || !newTarif.montant) return;
+    setFormData(p => ({ ...p, tarifs: [...p.tarifs, { ...newTarif }] }));
+    setNewTarif({ matiere: '', niveau: '', montant: '' });
+    if (errors.tarifs) setErrors(p => ({ ...p, tarifs: '' }));
+  };
+
+  const removeTarif = (idx) => setFormData(p => ({ ...p, tarifs: p.tarifs.filter((_, i) => i !== idx) }));
 
   const handlePhoto = e => {
     const f = e.target.files[0];
@@ -229,8 +451,8 @@ const FormModal = ({ professor, onSave, onClose, specialties, loading }) => {
     if (!formData.specialty) e.specialty = 'Requis';
     if (!formData.experience) e.experience = 'Requis';
     if (!formData.diploma.trim()) e.diploma = 'Requis';
-    if (!formData.salary.trim()) e.salary = 'Requis';
     if (formData.subjects.length === 0) e.subjects = 'Au moins une matière';
+    if (formData.tarifs.length === 0) e.tarifs = 'Ajoutez au moins un tarif (matière + niveau + montant)';
     if (formData.avatarType === 'photo' && !photoFile && !formData.photoUrl) e.photo = 'Photo requise';
     return e;
   };
@@ -239,43 +461,50 @@ const FormModal = ({ professor, onSave, onClose, specialties, loading }) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length) { setErrors(errs); return; }
-    onSave({ ...formData, nom: formData.nom.trim(), prenom: formData.prenom.trim(), avatarEmoji: formData.avatarType === 'emoji' ? formData.avatarEmoji : null, photoUrl: formData.avatarType === 'photo' ? formData.photoUrl : null }, photoFile);
+    onSave({
+      ...formData, nom: formData.nom.trim(), prenom: formData.prenom.trim(),
+      avatarEmoji: formData.avatarType === 'emoji' ? formData.avatarEmoji : null,
+      photoUrl: formData.avatarType === 'photo' ? formData.photoUrl : null,
+      tarifs: formData.tarifs.map(t => ({ matiere: t.matiere, niveau: t.niveau, montantParEtudiant: parseFloat(t.montant) })),
+    }, photoFile);
   };
 
-  const inputClass = (name) =>
-    `input-warriors w-full px-4 py-3 rounded-xl text-sm warriors-font ${errors[name] ? 'border-red-500/50' : ''}`;
+  const inputClass = (name) => `sv-input w-full px-3.5 py-2.5 text-[13.5px] ${errors[name] ? 'error' : ''}`;
+  const FieldLabel = ({ name, label }) => (
+    <div className="flex items-center justify-between mb-1.5">
+      <label className="text-[11px] font-semibold tracking-wide" style={{ color: 'var(--sv-text-faint)' }}>{label}</label>
+      {errors[name] && <span className="text-[11px]" style={{ color: 'var(--sv-danger)' }}>{errors[name]}</span>}
+    </div>
+  );
 
   const sectionContent = [
     /* 0 - Avatar */
-    <div key="avatar" className="space-y-5">
+    <div key="avatar" className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
-        {[['emoji','😊','Emoji Avatar'],['photo','📸','Photo Perso']].map(([type, icon, label]) => (
+        {[['emoji', Smile, 'Emoji'], ['photo', Camera, 'Photo perso']].map(([type, Icon, label]) => (
           <button key={type} type="button"
             onClick={() => setFormData(p => ({ ...p, avatarType: type }))}
-            className="p-5 rounded-2xl text-center transition-all duration-200 space-y-2"
+            className="p-4 rounded-lg text-center transition-all flex flex-col items-center gap-2"
             style={{
-              background: formData.avatarType === type ? 'rgba(196,150,48,0.12)' : 'rgba(255,255,255,0.02)',
-              border: `2px solid ${formData.avatarType === type ? 'rgba(196,150,48,0.5)' : 'rgba(196,150,48,0.1)'}`,
-              boxShadow: formData.avatarType === type ? '0 0 20px rgba(196,150,48,0.1)' : 'none',
+              background: formData.avatarType === type ? 'var(--sv-accent-soft)' : 'var(--sv-surface-2)',
+              border: `1px solid ${formData.avatarType === type ? 'var(--sv-accent-border)' : 'var(--sv-border)'}`,
             }}>
-            <div className="text-4xl">{icon}</div>
-            <div className="warriors-title text-sm font-semibold" style={{ color: formData.avatarType === type ? '#f0c84a' : 'rgba(180,190,210,0.55)' }}>{label}</div>
+            <Icon size={20} strokeWidth={1.75} style={{ color: formData.avatarType === type ? 'var(--sv-accent)' : 'var(--sv-text-faint)' }} />
+            <span className="text-[12.5px] font-medium" style={{ color: formData.avatarType === type ? 'var(--sv-accent)' : 'var(--sv-text-dim)' }}>{label}</span>
           </button>
         ))}
       </div>
 
       {formData.avatarType === 'emoji' && (
-        <div className="rounded-2xl p-4 space-y-3" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.1)' }}>
-          <p className="text-[11px] font-semibold tracking-widest warriors-font" style={{ color: 'rgba(196,150,48,0.45)' }}>CHOISIR UN EMOJI</p>
+        <div className="rounded-lg p-3.5 space-y-3" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+          <p className="text-[11px] font-semibold tracking-wide" style={{ color: 'var(--sv-text-faint)' }}>CHOISIR UN AVATAR</p>
           <div className="flex flex-wrap gap-2">
             {AVATARS.map(av => (
               <button key={av} type="button" onClick={() => setFormData(p => ({ ...p, avatarEmoji: av }))}
-                className="w-12 h-12 rounded-2xl text-2xl flex items-center justify-center transition-all duration-200"
+                className="w-10 h-10 rounded-lg text-lg flex items-center justify-center transition-all"
                 style={{
-                  background: formData.avatarEmoji === av ? 'linear-gradient(135deg, #c49630, #f0c84a)' : 'rgba(255,255,255,0.05)',
-                  border: `1.5px solid ${formData.avatarEmoji === av ? '#c49630' : 'transparent'}`,
-                  transform: formData.avatarEmoji === av ? 'scale(1.12)' : 'scale(1)',
-                  boxShadow: formData.avatarEmoji === av ? '0 4px 12px rgba(196,150,48,0.3)' : 'none',
+                  background: formData.avatarEmoji === av ? 'var(--sv-accent-soft)' : 'rgba(255,255,255,0.03)',
+                  border: `1.5px solid ${formData.avatarEmoji === av ? 'var(--sv-accent-border)' : 'var(--sv-border)'}`,
                 }}>{av}</button>
             ))}
           </div>
@@ -284,27 +513,22 @@ const FormModal = ({ professor, onSave, onClose, specialties, loading }) => {
 
       {formData.avatarType === 'photo' && (
         <div>
-          {errors.photo && <p className="text-red-400 text-xs warriors-font mb-2">{errors.photo}</p>}
+          {errors.photo && <p className="text-[11px] mb-2" style={{ color: 'var(--sv-danger)' }}>{errors.photo}</p>}
           {!photoPreview ? (
             <label htmlFor="photo-upload"
-              className="flex flex-col items-center justify-center gap-3 p-10 rounded-2xl cursor-pointer transition-all duration-200"
-              style={{ border: `2px dashed ${errors.photo ? 'rgba(239,68,68,0.5)' : 'rgba(196,150,48,0.2)'}`, background: 'rgba(255,255,255,0.02)' }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(196,150,48,0.04)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}>
-              <span className="text-5xl">📸</span>
-              <span className="warriors-font text-sm font-medium" style={{ color: 'rgba(180,190,210,0.5)' }}>Cliquer pour télécharger</span>
-              <span className="warriors-font text-xs" style={{ color: 'rgba(130,145,170,0.4)' }}>JPG · PNG · WebP — max 5MB</span>
+              className="flex flex-col items-center justify-center gap-2.5 p-8 rounded-lg cursor-pointer transition-all"
+              style={{ border: `1.5px dashed ${errors.photo ? 'var(--sv-danger-border)' : 'var(--sv-border-strong)'}`, background: 'var(--sv-surface-2)' }}>
+              <Camera size={28} strokeWidth={1.5} style={{ color: 'var(--sv-text-faint)' }} />
+              <span className="text-[13px] font-medium" style={{ color: 'var(--sv-text-dim)' }}>Cliquer pour télécharger</span>
+              <span className="text-[11px]" style={{ color: 'var(--sv-text-faint)' }}>JPG · PNG · WebP — max 5MB</span>
               <input type="file" id="photo-upload" accept="image/*" onChange={handlePhoto} className="hidden" />
             </label>
           ) : (
-            <div className="flex items-center gap-5 p-4 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.15)' }}>
-              <img src={photoPreview} alt="Aperçu" className="w-20 h-20 object-cover rounded-2xl" style={{ border: '2px solid rgba(196,150,48,0.4)' }} />
+            <div className="flex items-center gap-4 p-3.5 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+              <img src={photoPreview} alt="Aperçu" className="w-16 h-16 object-cover rounded-lg" style={{ border: '1px solid var(--sv-border-strong)' }} />
               <div className="flex gap-2">
-                <label htmlFor="photo-upload" className="px-3 py-2 rounded-xl text-xs font-medium warriors-font cursor-pointer transition-all"
-                  style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', color: '#60a5fa' }}>Changer</label>
-                <button type="button" onClick={() => { setPhotoFile(null); setPhotoPreview(null); }}
-                  className="px-3 py-2 rounded-xl text-xs font-medium warriors-font transition-all"
-                  style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}>Supprimer</button>
+                <label htmlFor="photo-upload" className="sv-btn sv-btn-info px-3 py-2 cursor-pointer">Changer</label>
+                <button type="button" onClick={() => { setPhotoFile(null); setPhotoPreview(null); }} className="sv-btn px-3 py-2" style={{ background: 'var(--sv-danger-soft)', border: '1px solid var(--sv-danger-border)', color: 'var(--sv-danger)' }}>Supprimer</button>
               </div>
               <input type="file" id="photo-upload" accept="image/*" onChange={handlePhoto} className="hidden" />
             </div>
@@ -314,17 +538,16 @@ const FormModal = ({ professor, onSave, onClose, specialties, loading }) => {
     </div>,
 
     /* 1 - Identité */
-    <div key="identity" className="grid grid-cols-2 gap-4">
+    <div key="identity" className="grid grid-cols-2 gap-3.5">
       {[
         { name:'nom', label:'NOM', col:1 },
         { name:'prenom', label:'PRÉNOM', col:1 },
         { name:'email', label:'EMAIL', col:2, type:'email' },
         { name:'phone', label:'TÉLÉPHONE', col:1, ph:'06XXXXXXXX' },
-        { name:'salary', label:'SALAIRE (MAD)', col:1, type:'number', ph:'7500' },
-        { name:'availability', label:'DISPONIBILITÉ', col:2, isSelect:true },
+        { name:'availability', label:'DISPONIBILITÉ', col:1, isSelect:true },
       ].map(({ name, label, col, type='text', ph, isSelect }) => (
         <div key={name} className={col === 2 ? 'col-span-2' : ''}>
-          <label className="block text-[10px] font-semibold tracking-[0.12em] warriors-font mb-2" style={{ color: 'rgba(196,150,48,0.45)' }}>{label}</label>
+          <FieldLabel name={name} label={label} />
           {isSelect ? (
             <select name={name} value={formData[name]} onChange={ch} className={inputClass(name)} style={{ cursor:'pointer' }}>
               <option value="Disponible">Disponible</option>
@@ -332,86 +555,127 @@ const FormModal = ({ professor, onSave, onClose, specialties, loading }) => {
               <option value="Non disponible">Non disponible</option>
             </select>
           ) : (
-            <input type={type} name={name} value={formData[name]} onChange={ch} placeholder={ph}
-              className={inputClass(name)} />
+            <input type={type} name={name} value={formData[name]} onChange={ch} placeholder={ph} className={inputClass(name)} />
           )}
-          {errors[name] && <p className="mt-1 text-red-400 text-[11px] warriors-font">{errors[name]}</p>}
         </div>
       ))}
     </div>,
 
     /* 2 - Compétences */
-    <div key="skills" className="space-y-5">
-      <div className="grid grid-cols-2 gap-4">
+    <div key="skills" className="space-y-4">
+      <div className="grid grid-cols-2 gap-3.5">
         {[
           { name:'specialty', label:'SPÉCIALITÉ', options: specialties },
           { name:'experience', label:'EXPÉRIENCE', options: EXPERIENCE_LEVELS },
         ].map(({ name, label, options }) => (
           <div key={name}>
-            <label className="block text-[10px] font-semibold tracking-[0.12em] warriors-font mb-2" style={{ color: 'rgba(196,150,48,0.45)' }}>{label}</label>
+            <FieldLabel name={name} label={label} />
             <select name={name} value={formData[name]} onChange={ch} className={inputClass(name)} style={{ cursor:'pointer' }}>
-              <option value="">Sélectionner...</option>
+              <option value="">Sélectionner…</option>
               {options.map(o => <option key={o} value={o}>{o}</option>)}
             </select>
-            {errors[name] && <p className="mt-1 text-red-400 text-[11px] warriors-font">{errors[name]}</p>}
           </div>
         ))}
         <div className="col-span-2">
-          <label className="block text-[10px] font-semibold tracking-[0.12em] warriors-font mb-2" style={{ color: 'rgba(196,150,48,0.45)' }}>DIPLÔME</label>
+          <FieldLabel name="diploma" label="DIPLÔME" />
           <input type="text" name="diploma" value={formData.diploma} onChange={ch} placeholder="ex: Master en IA — ENSIAS" className={inputClass('diploma')} />
-          {errors.diploma && <p className="mt-1 text-red-400 text-[11px] warriors-font">{errors.diploma}</p>}
         </div>
       </div>
 
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-[10px] font-semibold tracking-[0.12em] warriors-font" style={{ color: 'rgba(196,150,48,0.45)' }}>MATIÈRES ENSEIGNÉES</label>
-          <span className="text-[10px] warriors-font" style={{ color: 'rgba(196,150,48,0.4)' }}>{formData.subjects.length} sélectionnées</span>
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="text-[11px] font-semibold tracking-wide" style={{ color: 'var(--sv-text-faint)' }}>MATIÈRES ENSEIGNÉES</label>
+          <span className="text-[11px]" style={{ color: errors.subjects ? 'var(--sv-danger)' : 'var(--sv-text-faint)' }}>
+            {errors.subjects || `${formData.subjects.length} sélectionnées`}
+          </span>
         </div>
-        {errors.subjects && <p className="mb-2 text-red-400 text-[11px] warriors-font">{errors.subjects}</p>}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-4 rounded-2xl scrollbar-warriors overflow-y-auto max-h-48"
-          style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${errors.subjects ? 'rgba(239,68,68,0.3)' : 'rgba(196,150,48,0.1)'}` }}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3.5 rounded-lg sv-scroll overflow-y-auto max-h-48"
+          style={{ background: 'var(--sv-surface-2)', border: `1px solid ${errors.subjects ? 'var(--sv-danger-border)' : 'var(--sv-border)'}` }}>
           {SUBJECTS.map(s => {
             const sel = formData.subjects.includes(s);
             return (
               <button key={s} type="button" onClick={() => toggleSubject(s)}
-                className="py-2 px-3 rounded-xl text-[11.5px] warriors-font font-medium transition-all duration-150 text-left"
+                className="flex items-center gap-2 py-2 px-2.5 rounded-md text-[12px] font-medium transition-all text-left"
                 style={{
-                  background: sel ? 'linear-gradient(135deg, #c49630, #f0c84a)' : 'rgba(255,255,255,0.04)',
-                  color: sel ? '#0a1628' : 'rgba(180,190,210,0.55)',
-                  border: sel ? 'none' : '1px solid rgba(196,150,48,0.1)',
-                  fontWeight: sel ? 700 : 400,
-                }}>{s}</button>
+                  background: sel ? 'var(--sv-accent-soft)' : 'rgba(255,255,255,0.02)',
+                  color: sel ? 'var(--sv-accent)' : 'var(--sv-text-dim)',
+                  border: `1px solid ${sel ? 'var(--sv-accent-border)' : 'var(--sv-border)'}`,
+                }}>
+                {sel && <Check size={12} strokeWidth={2.5} className="flex-shrink-0" />}
+                <span className="truncate">{s}</span>
+              </button>
             );
           })}
         </div>
       </div>
     </div>,
 
-    /* 3 - Biographie */
-    <div key="bio" className="space-y-4">
+    /* 3 - Tarifs */
+    <div key="tarifs" className="space-y-4">
       <div>
-        <label className="block text-[10px] font-semibold tracking-[0.12em] warriors-font mb-2" style={{ color: 'rgba(196,150,48,0.45)' }}>BIOGRAPHIE</label>
+        <div className="flex items-center justify-between mb-1">
+          <p className="text-[11px] font-semibold tracking-wide" style={{ color: 'var(--sv-text-faint)' }}>TARIF PAR ÉLÈVE, PAR MATIÈRE ET NIVEAU</p>
+          {errors.tarifs && <span className="text-[11px]" style={{ color: 'var(--sv-danger)' }}>{errors.tarifs}</span>}
+        </div>
+        <p className="text-[12px] mb-3" style={{ color: 'var(--sv-text-faint)' }}>
+          Ex : Mathématiques · 2ème Bac · 150 MAD/élève. Le revenu mensuel du professeur est calculé automatiquement à partir du nombre d'élèves inscrits dans chaque matière/niveau.
+        </p>
+
+        <div className="grid grid-cols-[1fr_1fr_110px_40px] gap-2 mb-3 p-3 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+          <select value={newTarif.matiere} onChange={e => setNewTarif(p => ({ ...p, matiere: e.target.value }))} className={inputClass('newTarifMatiere')} style={{ cursor:'pointer' }}>
+            <option value="">Matière…</option>
+            {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+          <select value={newTarif.niveau} onChange={e => setNewTarif(p => ({ ...p, niveau: e.target.value }))} className={inputClass('newTarifNiveau')} style={{ cursor:'pointer' }}>
+            <option value="">Niveau…</option>
+            {NIVEAUX_PROF.map(n => <option key={n} value={n}>{n}</option>)}
+          </select>
+          <input type="number" min="0" step="0.01" value={newTarif.montant} onChange={e => setNewTarif(p => ({ ...p, montant: e.target.value }))} placeholder="MAD" className={inputClass('newTarifMontant')} />
+          <button type="button" onClick={addTarif} className="sv-btn sv-btn-primary" style={{ padding: 0 }}>
+            <Plus size={16} strokeWidth={2} />
+          </button>
+        </div>
+
+        {formData.tarifs.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px dashed var(--sv-border-strong)' }}>
+            <Wallet size={22} strokeWidth={1.5} style={{ color: 'var(--sv-text-faint)', marginBottom: 6 }} />
+            <p className="text-[12.5px]" style={{ color: 'var(--sv-text-faint)' }}>Aucun tarif ajouté</p>
+          </div>
+        ) : (
+          <div className="space-y-1.5">
+            {formData.tarifs.map((t, i) => (
+              <div key={i} className="flex items-center justify-between px-3.5 py-2.5 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-[12.5px] font-medium truncate" style={{ color: 'var(--sv-text)' }}>{t.matiere}</span>
+                  <span className="text-[11px]" style={{ color: 'var(--sv-text-faint)' }}>·</span>
+                  <span className="text-[12px] truncate" style={{ color: 'var(--sv-text-dim)' }}>{t.niveau}</span>
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <span className="text-[13px] font-semibold" style={{ color: 'var(--sv-accent)' }}>{Number(t.montant).toLocaleString('fr-FR')} MAD</span>
+                  <button type="button" onClick={() => removeTarif(i)} className="sv-icon-btn danger" style={{ width: 26, height: 26 }}><X size={12} strokeWidth={2} /></button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>,
+
+    /* 4 - Biographie */
+    <div key="bio" className="space-y-3.5">
+      <div>
+        <FieldLabel name="bio" label="BIOGRAPHIE" />
         <textarea name="bio" value={formData.bio} onChange={ch} rows={6}
           placeholder="Présentez le parcours et l'expertise du professeur..."
-          className="input-warriors w-full px-4 py-3 rounded-xl text-sm warriors-font resize-none" />
+          className="sv-input w-full px-3.5 py-2.5 text-[13.5px] resize-none" />
       </div>
-      {/* Preview */}
-      <div className="p-4 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.1)' }}>
-        <p className="text-[10px] tracking-widest warriors-font mb-3" style={{ color: 'rgba(196,150,48,0.4)' }}>APERÇU</p>
+      <div className="p-3.5 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+        <p className="text-[10.5px] tracking-wide mb-2.5" style={{ color: 'var(--sv-text-faint)' }}>APERÇU</p>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, rgba(196,150,48,0.2), rgba(240,200,74,0.1))', border: '1px solid rgba(196,150,48,0.25)' }}>
-            {formData.avatarType === 'photo' && photoPreview
-              ? <img src={photoPreview} alt="" className="w-full h-full object-cover rounded-xl" />
-              : <span>{formData.avatarEmoji}</span>
-            }
-          </div>
+          <PersonAvatar professor={{ id: professor?.id || 0, avatarType: formData.avatarType, avatarEmoji: formData.avatarEmoji, photoUrl: photoPreview }} size={40} textSize={18} />
           <div>
-            <p className="warriors-title text-sm font-bold" style={{ color: '#e8eaf0' }}>
-              {formData.prenom || 'Prénom'} {formData.nom || 'Nom'}
-            </p>
-            <p className="warriors-font text-xs" style={{ color: 'rgba(196,150,48,0.55)' }}>{formData.specialty || 'Spécialité'}</p>
+            <p className="sv-heading text-[13.5px] font-semibold" style={{ color: 'var(--sv-text)' }}>{formData.prenom || 'Prénom'} {formData.nom || 'Nom'}</p>
+            <p className="text-[12px]" style={{ color: 'var(--sv-accent)' }}>{formData.specialty || 'Spécialité'}</p>
           </div>
         </div>
       </div>
@@ -419,71 +683,38 @@ const FormModal = ({ professor, onSave, onClose, specialties, loading }) => {
   ];
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: 'rgba(4,9,20,0.9)', backdropFilter: 'blur(16px)' }}>
-      <div className="w-full max-w-2xl max-h-[92vh] flex flex-col rounded-3xl overflow-hidden shadow-2xl animate-in"
-        style={{ background: 'linear-gradient(145deg, #0d1c30 0%, #080f1e 100%)', border: '1px solid rgba(196,150,48,0.2)', boxShadow: '0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(196,150,48,0.1)' }}>
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-7 py-5 flex-shrink-0"
-          style={{ borderBottom: '1px solid rgba(196,150,48,0.1)', background: 'rgba(196,150,48,0.03)' }}>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: 'rgba(4,8,16,0.75)', backdropFilter: 'blur(6px)' }}>
+      <div className="sv-in w-full max-w-xl max-h-[90vh] flex flex-col rounded-2xl overflow-hidden" style={{ background: 'var(--sv-surface)', border: '1px solid var(--sv-border-strong)', boxShadow: 'var(--sv-shadow-md)' }}>
+        <div className="flex items-center justify-between px-6 py-4 flex-shrink-0" style={{ borderBottom: '1px solid var(--sv-border)' }}>
           <div>
-            <h2 className="warriors-title text-lg font-bold" style={{ color: '#f0c84a' }}>
-              {isEdit ? 'Modifier le profil' : 'Nouveau professeur'}
-            </h2>
-            <p className="warriors-font text-xs mt-0.5" style={{ color: 'rgba(148,163,184,0.45)' }}>
-              Étape {activeSection + 1} sur {sections.length} — {sections[activeSection]}
-            </p>
+            <h2 className="sv-heading text-[15px] font-semibold" style={{ color: 'var(--sv-text)' }}>{isEdit ? 'Modifier le profil' : 'Nouveau professeur'}</h2>
+            <p className="text-[11.5px] mt-0.5" style={{ color: 'var(--sv-text-faint)' }}>Étape {activeSection + 1}/{sections.length} — {sections[activeSection]}</p>
           </div>
-          <button onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 warriors-font"
-            style={{ border: '1px solid rgba(196,150,48,0.15)', color: 'rgba(148,163,184,0.5)', background: 'rgba(255,255,255,0.02)' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(196,150,48,0.1)'; e.currentTarget.style.color = '#f0c84a'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.color = 'rgba(148,163,184,0.5)'; }}>
-            ✕
-          </button>
+          <button onClick={onClose} className="sv-icon-btn"><X size={15} strokeWidth={1.75} /></button>
         </div>
 
-        {/* Stepper */}
-        <div className="flex px-7 pt-5 gap-2 flex-shrink-0">
+        <div className="flex px-6 pt-4 gap-2 flex-shrink-0">
           {sections.map((s, i) => (
-            <button key={s} type="button" onClick={() => setActiveSection(i)}
-              className="flex-1 flex flex-col items-center gap-1.5 group">
-              <div className="w-full h-1 rounded-full transition-all duration-300"
-                style={{ background: i <= activeSection ? 'linear-gradient(90deg, #c49630, #f0c84a)' : 'rgba(196,150,48,0.1)' }} />
-              <span className="warriors-font text-[10px] font-medium transition-colors duration-200"
-                style={{ color: i === activeSection ? '#f0c84a' : 'rgba(148,163,184,0.35)' }}>{s}</span>
+            <button key={s} type="button" onClick={() => setActiveSection(i)} className="flex-1 flex flex-col items-center gap-1.5">
+              <div className="w-full h-[3px] rounded-full transition-all" style={{ background: i <= activeSection ? 'var(--sv-accent)' : 'var(--sv-border)' }} />
+              <span className="text-[10.5px] font-medium" style={{ color: i === activeSection ? 'var(--sv-accent)' : 'var(--sv-text-faint)' }}>{s}</span>
             </button>
           ))}
         </div>
 
-        {/* Content */}
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
-          <div className="flex-1 overflow-y-auto scrollbar-warriors px-7 py-6">
-            {sectionContent[activeSection]}
-          </div>
-
-          {/* Footer */}
-          <div className="px-7 py-5 flex gap-3 flex-shrink-0" style={{ borderTop: '1px solid rgba(196,150,48,0.1)', background: 'rgba(196,150,48,0.02)' }}>
-            <button type="button"
-              onClick={activeSection === 0 ? onClose : () => setActiveSection(p => p - 1)}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold warriors-font transition-all duration-200"
-              style={{ border: '1px solid rgba(196,150,48,0.15)', color: 'rgba(180,190,210,0.55)', background: 'rgba(255,255,255,0.02)' }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(196,150,48,0.06)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}>
-              {activeSection === 0 ? 'Annuler' : '← Retour'}
+          <div className="flex-1 overflow-y-auto sv-scroll px-6 py-5">{sectionContent[activeSection]}</div>
+          <div className="px-6 py-4 flex gap-3 flex-shrink-0" style={{ borderTop: '1px solid var(--sv-border)' }}>
+            <button type="button" onClick={activeSection === 0 ? onClose : () => setActiveSection(p => p - 1)} className="sv-btn sv-btn-ghost flex-1 py-2.5">
+              {activeSection === 0 ? 'Annuler' : (<><ChevronLeft size={14} strokeWidth={2} /> Retour</>)}
             </button>
-
             {activeSection < sections.length - 1 ? (
-              <button type="button" onClick={() => setActiveSection(p => p + 1)}
-                className="flex-1 py-3 rounded-xl text-sm font-bold warriors-title btn-gold"
-                style={{ color: '#0a1628' }}>
-                Suivant →
+              <button type="button" onClick={() => setActiveSection(p => p + 1)} className="sv-btn sv-btn-primary flex-1 py-2.5">
+                Suivant <ChevronRight size={14} strokeWidth={2} />
               </button>
             ) : (
-              <button type="submit" disabled={loading}
-                className="flex-1 py-3 rounded-xl text-sm font-bold warriors-title btn-gold disabled:opacity-50"
-                style={{ color: '#0a1628' }}>
-                {loading ? 'Enregistrement...' : isEdit ? 'Mettre à jour' : 'Ajouter le professeur'}
+              <button type="submit" disabled={loading} className="sv-btn sv-btn-primary flex-1 py-2.5">
+                {loading ? 'Enregistrement…' : isEdit ? 'Mettre à jour' : 'Ajouter le professeur'}
               </button>
             )}
           </div>
@@ -493,45 +724,36 @@ const FormModal = ({ professor, onSave, onClose, specialties, loading }) => {
   );
 };
 
-/* ─── DELETE MODAL ─── */
+/* ══════════════════════════════════════════════════════════════ */
+/*  DELETE MODAL                                                 */
+/* ══════════════════════════════════════════════════════════════ */
 const DeleteModal = ({ professor, onConfirm, onClose, loading }) => {
   if (!professor) return null;
   const name = professor.fullName || `${professor.prenom} ${professor.nom}`;
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: 'rgba(4,9,20,0.9)', backdropFilter: 'blur(16px)' }}>
-      <div className="w-full max-w-md rounded-3xl overflow-hidden animate-in"
-        style={{ background: 'linear-gradient(145deg, #0d1c30, #080f1e)', border: '1px solid rgba(239,68,68,0.2)', boxShadow: '0 40px 80px rgba(0,0,0,0.6)' }}>
-        <div className="px-7 py-5" style={{ background: 'rgba(239,68,68,0.06)', borderBottom: '1px solid rgba(239,68,68,0.12)' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl flex-shrink-0" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.2)' }}>⚠</div>
-            <div>
-              <h3 className="warriors-title font-bold text-base" style={{ color: '#f87171' }}>Supprimer ce professeur ?</h3>
-              <p className="warriors-font text-[11px] mt-0.5" style={{ color: 'rgba(148,163,184,0.45)' }}>Action irréversible</p>
-            </div>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: 'rgba(4,8,16,0.75)', backdropFilter: 'blur(6px)' }}>
+      <div className="sv-in w-full max-w-sm rounded-2xl overflow-hidden" style={{ background: 'var(--sv-surface)', border: '1px solid var(--sv-danger-border)', boxShadow: 'var(--sv-shadow-md)' }}>
+        <div className="px-6 py-4 flex items-center gap-3" style={{ borderBottom: '1px solid var(--sv-border)' }}>
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'var(--sv-danger-soft)', border: '1px solid var(--sv-danger-border)' }}>
+            <AlertTriangle size={16} strokeWidth={1.75} style={{ color: 'var(--sv-danger)' }} />
+          </div>
+          <div>
+            <h3 className="sv-heading font-semibold text-[14px]" style={{ color: 'var(--sv-text)' }}>Supprimer ce professeur ?</h3>
+            <p className="text-[11px] mt-0.5" style={{ color: 'var(--sv-text-faint)' }}>Action irréversible</p>
           </div>
         </div>
-        <div className="p-7 space-y-5">
-          <div className="flex items-center gap-4 p-4 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.1)' }}>
-            <span className="text-3xl">{professor.avatarEmoji || professor.avatar || '👨‍🏫'}</span>
+        <div className="p-6 space-y-4">
+          <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+            <PersonAvatar professor={professor} size={40} textSize={18} />
             <div>
-              <p className="warriors-title font-bold text-sm" style={{ color: '#e8eaf0' }}>{name}</p>
-              <p className="warriors-font text-xs mt-0.5" style={{ color: 'rgba(196,150,48,0.5)' }}>{professor.specialite}</p>
+              <p className="sv-heading font-semibold text-[13px]" style={{ color: 'var(--sv-text)' }}>{name}</p>
+              <p className="text-[11.5px] mt-0.5" style={{ color: 'var(--sv-text-faint)' }}>{professor.specialite}</p>
             </div>
           </div>
-          <p className="warriors-font text-xs" style={{ color: 'rgba(248,113,113,0.65)' }}>
-            Toutes les données de ce professeur seront définitivement supprimées de la base.
-          </p>
+          <p className="text-[12px]" style={{ color: 'var(--sv-text-dim)' }}>Toutes les données de ce professeur seront définitivement supprimées de la base.</p>
           <div className="flex gap-3">
-            <button onClick={onClose} disabled={loading}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold warriors-font transition-all duration-200"
-              style={{ border: '1px solid rgba(196,150,48,0.15)', color: 'rgba(180,190,210,0.55)', background: 'rgba(255,255,255,0.02)' }}>
-              Annuler
-            </button>
-            <button onClick={onConfirm} disabled={loading}
-              className="flex-1 py-3 rounded-xl text-sm font-bold warriors-title transition-all duration-200"
-              style={{ background: 'linear-gradient(135deg, #b91c1c, #ef4444)', color: '#fff' }}>
-              {loading ? 'Suppression...' : 'Supprimer'}
-            </button>
+            <button onClick={onClose} disabled={loading} className="sv-btn sv-btn-ghost flex-1 py-2.5">Annuler</button>
+            <button onClick={onConfirm} disabled={loading} className="sv-btn sv-btn-danger flex-1 py-2.5">{loading ? 'Suppression…' : 'Supprimer'}</button>
           </div>
         </div>
       </div>
@@ -539,101 +761,95 @@ const DeleteModal = ({ professor, onConfirm, onClose, loading }) => {
   );
 };
 
-/* ─── DETAILS MODAL ─── */
+/* ══════════════════════════════════════════════════════════════ */
+/*  DETAILS MODAL                                                */
+/* ══════════════════════════════════════════════════════════════ */
 const DetailsModal = ({ professor, onClose, onEdit }) => {
   if (!professor) return null;
   const name = professor.fullName || `${professor.prenom} ${professor.nom}`;
+  const infoRows = [
+    { icon: Mail, label: 'EMAIL', value: professor.email },
+    { icon: Phone, label: 'TÉLÉPHONE', value: professor.phoneNumber },
+    { icon: GraduationCap, label: 'DIPLÔME', value: professor.diplome },
+    { icon: Calendar, label: 'RECRUTEMENT', value: new Date(professor.dateRecrutement).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' }) },
+  ];
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: 'rgba(4,9,20,0.9)', backdropFilter: 'blur(16px)' }}>
-      <div className="w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl overflow-hidden animate-in"
-        style={{ background: 'linear-gradient(145deg, #0d1c30, #080f1e)', border: '1px solid rgba(196,150,48,0.15)', boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }}>
-
-        {/* Header */}
-        <div className="px-7 py-5 flex-shrink-0 flex items-center justify-between"
-          style={{ borderBottom: '1px solid rgba(196,150,48,0.1)', background: 'rgba(196,150,48,0.03)' }}>
-          <h2 className="warriors-title text-lg font-bold" style={{ color: '#f0c84a' }}>Profil du professeur</h2>
-          <button onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200"
-            style={{ border: '1px solid rgba(196,150,48,0.15)', color: 'rgba(148,163,184,0.5)', background: 'rgba(255,255,255,0.02)' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(196,150,48,0.1)'; e.currentTarget.style.color = '#f0c84a'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.color = 'rgba(148,163,184,0.5)'; }}>
-            ✕
-          </button>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: 'rgba(4,8,16,0.75)', backdropFilter: 'blur(6px)' }}>
+      <div className="sv-in w-full max-w-xl max-h-[90vh] flex flex-col rounded-2xl overflow-hidden" style={{ background: 'var(--sv-surface)', border: '1px solid var(--sv-border-strong)', boxShadow: 'var(--sv-shadow-md)' }}>
+        <div className="px-6 py-4 flex-shrink-0 flex items-center justify-between" style={{ borderBottom: '1px solid var(--sv-border)' }}>
+          <h2 className="sv-heading text-[15px] font-semibold" style={{ color: 'var(--sv-text)' }}>Profil du professeur</h2>
+          <button onClick={onClose} className="sv-icon-btn"><X size={15} strokeWidth={1.75} /></button>
         </div>
 
-        <div className="flex-1 overflow-y-auto scrollbar-warriors p-7 space-y-5">
-          {/* Hero */}
-          <div className="relative p-6 rounded-2xl overflow-hidden"
-            style={{ background: 'linear-gradient(135deg, rgba(196,150,48,0.12) 0%, rgba(240,200,74,0.04) 100%)', border: '1px solid rgba(196,150,48,0.2)' }}>
-            <div className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-5"
-              style={{ background: 'radial-gradient(circle, #f0c84a, transparent)', transform: 'translate(30%, -30%)' }} />
-            <div className="flex items-center gap-5">
-              <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-4xl overflow-hidden flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, rgba(196,150,48,0.3), rgba(240,200,74,0.15))', border: '2px solid rgba(196,150,48,0.4)', boxShadow: '0 8px 24px rgba(0,0,0,0.4)' }}>
-                {professor.avatarType === 'photo' && professor.photoUrl
-                  ? <img src={professor.photoUrl} alt={name} className="w-full h-full object-cover" />
-                  : <span>{professor.avatarEmoji || professor.avatar || '👨‍🏫'}</span>
-                }
-              </div>
-              <div className="flex-1">
-                <h3 className="warriors-title text-xl font-black" style={{ color: '#e8eaf0' }}>{name}</h3>
-                <p className="warriors-font text-sm mt-1" style={{ color: 'rgba(196,150,48,0.65)' }}>{professor.specialite}</p>
-                <div className="flex flex-wrap gap-2 mt-3">
-                  <AvailDot status={professor.disponibilite} />
-                  <span className="text-[11px] warriors-font px-2.5 py-0.5 rounded-full" style={{ background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.2)', color: '#60a5fa' }}>{professor.experienceLevel}</span>
-                </div>
+        <div className="flex-1 overflow-y-auto sv-scroll p-6 space-y-4">
+          <div className="flex items-center gap-4 p-4 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+            <PersonAvatar professor={professor} size={64} textSize={30} />
+            <div className="flex-1">
+              <h3 className="sv-heading text-[16px] font-bold" style={{ color: 'var(--sv-text)' }}>{name}</h3>
+              <p className="text-[12.5px] mt-0.5" style={{ color: 'var(--sv-accent)' }}>{professor.specialite}</p>
+              <div className="flex flex-wrap items-center gap-2.5 mt-2.5">
+                <AvailDot status={professor.disponibilite} />
+                <span className="sv-tag" style={{ background: 'var(--sv-info-soft)', border: '1px solid var(--sv-info-border)', color: 'var(--sv-info)' }}>{professor.experienceLevel}</span>
               </div>
             </div>
           </div>
 
-          {/* Info grid */}
           <div className="grid grid-cols-2 gap-3">
-            {[
-              { icon:'✉', label:'EMAIL', value: professor.email },
-              { icon:'◌', label:'TÉLÉPHONE', value: professor.phoneNumber },
-              { icon:'🎓', label:'DIPLÔME', value: professor.diplome },
-              { icon:'◆', label:'SALAIRE', value: `${professor.salaire?.toLocaleString('fr-FR')} MAD` },
-              { icon:'📅', label:'RECRUTEMENT', value: new Date(professor.dateRecrutement).toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' }) },
-            ].map(({ icon, label, value }) => (
-              <div key={label} className="p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.1)' }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs" style={{ color: 'rgba(196,150,48,0.45)' }}>{icon}</span>
-                  <span className="warriors-font text-[9px] font-semibold tracking-[0.15em]" style={{ color: 'rgba(196,150,48,0.35)' }}>{label}</span>
+            {infoRows.map(({ icon: Icon, label, value }) => (
+              <div key={label} className="p-3.5 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Icon size={13} strokeWidth={1.75} style={{ color: 'var(--sv-text-faint)' }} />
+                  <span className="text-[10px] font-semibold tracking-wide" style={{ color: 'var(--sv-text-faint)' }}>{label}</span>
                 </div>
-                <p className="warriors-font text-xs font-medium" style={{ color: '#c8d0e0' }}>{value}</p>
+                <p className="text-[12.5px] font-medium" style={{ color: 'var(--sv-text)' }}>{value}</p>
               </div>
             ))}
           </div>
 
-          {/* Subjects */}
-          <div className="p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.1)' }}>
-            <p className="warriors-font text-[9px] font-semibold tracking-[0.15em] mb-3" style={{ color: 'rgba(196,150,48,0.35)' }}>MATIÈRES ENSEIGNÉES</p>
+          <div className="p-3.5 rounded-lg" style={{ background: 'var(--sv-accent-soft)', border: '1px solid var(--sv-accent-border)' }}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[10px] font-semibold tracking-wide" style={{ color: 'var(--sv-accent)' }}>TARIFS & REVENU MENSUEL ESTIMÉ</p>
+              <p className="sv-heading text-[17px] font-bold" style={{ color: 'var(--sv-accent)' }}>
+                {(professor.revenuMensuelEstime ?? 0).toLocaleString('fr-FR')} MAD
+              </p>
+            </div>
+            {(professor.tarifs || []).length === 0 ? (
+              <p className="text-[12px]" style={{ color: 'var(--sv-text-faint)' }}>Aucun tarif configuré.</p>
+            ) : (
+              <div className="space-y-1.5">
+                {professor.tarifs.map((t, i) => (
+                  <div key={t.id || i} className="flex items-center justify-between px-3 py-2 rounded-md" style={{ background: 'var(--sv-surface)', border: '1px solid var(--sv-border)' }}>
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-medium truncate" style={{ color: 'var(--sv-text)' }}>{t.matiere} · {t.niveau}</p>
+                      <p className="text-[10.5px]" style={{ color: 'var(--sv-text-faint)' }}>{t.montantParEtudiant} MAD × {t.nombreEtudiants} élève{t.nombreEtudiants > 1 ? 's' : ''}</p>
+                    </div>
+                    <span className="text-[13px] font-semibold flex-shrink-0" style={{ color: 'var(--sv-accent)' }}>{(t.revenuCalcule ?? 0).toLocaleString('fr-FR')} MAD</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="p-3.5 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+            <p className="text-[10px] font-semibold tracking-wide mb-2.5" style={{ color: 'var(--sv-text-faint)' }}>MATIÈRES ENSEIGNÉES</p>
             <div className="flex flex-wrap gap-1.5">
-              {(professor.matieres || []).map((m, i) => <span key={i} className="specialty-tag">{m}</span>)}
+              {(professor.matieres || []).map((m, i) => (
+                <span key={i} className="sv-tag" style={{ background: 'var(--sv-accent-soft)', border: '1px solid var(--sv-accent-border)', color: 'var(--sv-accent)' }}>{m}</span>
+              ))}
             </div>
           </div>
 
-          {/* Bio */}
           {professor.bio && (
-            <div className="p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.1)' }}>
-              <p className="warriors-font text-[9px] font-semibold tracking-[0.15em] mb-3" style={{ color: 'rgba(196,150,48,0.35)' }}>BIOGRAPHIE</p>
-              <p className="warriors-font text-sm leading-relaxed" style={{ color: 'rgba(180,190,210,0.6)' }}>{professor.bio}</p>
+            <div className="p-3.5 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+              <p className="text-[10px] font-semibold tracking-wide mb-2.5" style={{ color: 'var(--sv-text-faint)' }}>BIOGRAPHIE</p>
+              <p className="text-[13px] leading-relaxed" style={{ color: 'var(--sv-text-dim)' }}>{professor.bio}</p>
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="px-7 py-5 flex gap-3 flex-shrink-0" style={{ borderTop: '1px solid rgba(196,150,48,0.1)', background: 'rgba(196,150,48,0.02)' }}>
-          <button onClick={onClose}
-            className="flex-1 py-3 rounded-xl text-sm font-semibold warriors-font transition-all duration-200"
-            style={{ border: '1px solid rgba(196,150,48,0.15)', color: 'rgba(180,190,210,0.55)', background: 'rgba(255,255,255,0.02)' }}>
-            Fermer
-          </button>
-          <button onClick={onEdit}
-            className="flex-1 py-3 rounded-xl text-sm font-bold warriors-title btn-gold"
-            style={{ color: '#0a1628' }}>
-            Modifier le profil
-          </button>
+        <div className="px-6 py-4 flex gap-3 flex-shrink-0" style={{ borderTop: '1px solid var(--sv-border)' }}>
+          <button onClick={onClose} className="sv-btn sv-btn-ghost flex-1 py-2.5">Fermer</button>
+          <button onClick={onEdit} className="sv-btn sv-btn-primary flex-1 py-2.5">Modifier le profil</button>
         </div>
       </div>
     </div>
@@ -652,6 +868,7 @@ const ProfessorsList = () => {
   const [specialties, setSpecialties] = useState([]);
   const [stats, setStats] = useState({ totalProfessors: 0 });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [viewMode, setViewMode] = useState('grid');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -704,7 +921,7 @@ const ProfessorsList = () => {
   const handleAdd = async (data, photoFile) => {
     try {
       setLoading(true);
-      const res = await professorAPI.createProfessor({ nom:data.nom, prenom:data.prenom, email:data.email, phoneNumber:data.phone, specialite:data.specialty, experienceLevel:data.experience, matieres:data.subjects, diplome:data.diploma, bio:data.bio, disponibilite:data.availability, salaire:data.salary, avatarType:data.avatarType, avatarEmoji:data.avatarEmoji, photoUrl:data.photoUrl }, photoFile);
+      const res = await professorAPI.createProfessor({ nom:data.nom, prenom:data.prenom, email:data.email, phoneNumber:data.phone, specialite:data.specialty, experienceLevel:data.experience, matieres:data.subjects, diplome:data.diploma, bio:data.bio, disponibilite:data.availability, tarifs:data.tarifs, avatarType:data.avatarType, avatarEmoji:data.avatarEmoji, photoUrl:data.photoUrl }, photoFile);
       if (res.success) { setProfessors(p => [...p, res.data]); setShowAddModal(false); await loadOptions(); }
       else alert(res.message || 'Erreur');
     } catch { alert('Erreur lors de l\'ajout'); } finally { setLoading(false); }
@@ -713,7 +930,7 @@ const ProfessorsList = () => {
   const handleEdit = async (data, photoFile) => {
     try {
       setLoading(true);
-      const res = await professorAPI.updateProfessor(currentProfessor.id, { nom:data.nom, prenom:data.prenom, email:data.email, phoneNumber:data.phone, specialite:data.specialty, experienceLevel:data.experience, matieres:data.subjects, diplome:data.diploma, bio:data.bio, disponibilite:data.availability, salaire:data.salary, avatarType:data.avatarType, avatarEmoji:data.avatarEmoji, photoUrl:data.photoUrl }, photoFile);
+      const res = await professorAPI.updateProfessor(currentProfessor.id, { nom:data.nom, prenom:data.prenom, email:data.email, phoneNumber:data.phone, specialite:data.specialty, experienceLevel:data.experience, matieres:data.subjects, diplome:data.diploma, bio:data.bio, disponibilite:data.availability, tarifs:data.tarifs, avatarType:data.avatarType, avatarEmoji:data.avatarEmoji, photoUrl:data.photoUrl }, photoFile);
       if (res.success) { setProfessors(p => p.map(x => x.id === currentProfessor.id ? res.data : x)); setShowEditModal(false); setCurrentProfessor(null); }
       else alert(res.message || 'Erreur');
     } catch { alert('Erreur de modification'); } finally { setLoading(false); }
@@ -735,160 +952,133 @@ const ProfessorsList = () => {
   }, {});
 
   const sidebarW = sidebarCollapsed ? 72 : 240;
+  const hasFilters = searchQuery || selectedSpecialty !== 'all';
 
   const statCards = [
-    { label: 'Professeurs', value: stats.totalProfessors || professors.length, color: '#f0c84a', bg: 'rgba(196,150,48,0.08)', border: 'rgba(196,150,48,0.15)', icon: '✦' },
-    { label: 'Disponibles', value: professors.filter(p => p.disponibilite === 'Disponible').length, color: '#4ade80', bg: 'rgba(34,197,94,0.08)', border: 'rgba(34,197,94,0.15)', icon: '◎' },
-    { label: 'Spécialités', value: Object.keys(grouped).length, color: '#60a5fa', bg: 'rgba(59,130,246,0.08)', border: 'rgba(59,130,246,0.15)', icon: '◆' },
+    { label: 'Professeurs', value: stats.totalProfessors || professors.length, icon: Users },
+    { label: 'Disponibles', value: professors.filter(p => p.disponibilite === 'Disponible').length, icon: Sparkles },
+    { label: 'Spécialités', value: Object.keys(grouped).length, icon: BookOpen },
   ];
 
   return (
-    <div className="min-h-screen warriors-font" style={{ background: 'linear-gradient(145deg, #080f1e 0%, #060c18 100%)' }}>
-      {/* Ambient bg orbs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute rounded-full" style={{ width:'700px', height:'700px', background:'radial-gradient(circle, rgba(196,150,48,0.04) 0%, transparent 70%)', top:'-15%', left:'-10%', filter:'blur(40px)' }} />
-        <div className="absolute rounded-full" style={{ width:'500px', height:'500px', background:'radial-gradient(circle, rgba(29,78,216,0.05) 0%, transparent 70%)', bottom:'-10%', right:'-5%', filter:'blur(40px)' }} />
-        {/* Subtle grid */}
-        <div className="absolute inset-0" style={{ backgroundImage:'linear-gradient(rgba(196,150,48,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(196,150,48,0.03) 1px, transparent 1px)', backgroundSize:'60px 60px' }} />
-      </div>
-
+    <div className="sv-root min-h-screen" style={{ background: 'var(--sv-bg)' }}>
       <Sidebar activeItem="professors" collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(v => !v)} />
 
       <main className="relative z-10 transition-all duration-300" style={{ marginLeft: `${sidebarW}px` }}>
-
-        {/* Top Bar */}
-        <header className="sticky top-0 z-40 flex items-center justify-between px-8 h-[72px]"
-          style={{ background: 'rgba(6,12,24,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(196,150,48,0.08)', boxShadow: '0 1px 0 rgba(196,150,48,0.05)' }}>
-          <div className="flex items-center gap-5">
-            {/* Breadcrumb */}
-            <div className="flex items-center gap-2">
-              <span className="warriors-font text-xs" style={{ color: 'rgba(148,163,184,0.35)' }}>Admin</span>
-              <span style={{ color: 'rgba(196,150,48,0.25)' }}>›</span>
-              <span className="warriors-title text-sm font-semibold" style={{ color: '#f0c84a' }}>Professeurs</span>
-            </div>
+        <header
+          className="sticky top-0 z-40 flex items-center justify-between px-8 h-16"
+          style={{ background: 'rgba(10,15,28,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--sv-border)' }}
+        >
+          <div className="flex items-center gap-2 text-[12.5px]">
+            <span style={{ color: 'var(--sv-text-faint)' }}>Admin</span>
+            <span style={{ color: 'var(--sv-text-faint)' }}>/</span>
+            <span className="sv-heading font-semibold" style={{ color: 'var(--sv-text)' }}>Professeurs</span>
           </div>
-
-          {/* Stat pills */}
-          <div className="flex items-center gap-2">
-            {statCards.map(({ label, value, color, bg, border, icon }) => (
-              <div key={label} className="flex items-center gap-2 px-4 py-2 rounded-xl"
-                style={{ background: bg, border: `1px solid ${border}` }}>
-                <span className="text-[11px]" style={{ color }}>{icon}</span>
-                <span className="warriors-title text-sm font-bold" style={{ color }}>{value}</span>
-                <span className="warriors-font text-[10px] font-medium tracking-wide" style={{ color: 'rgba(148,163,184,0.4)' }}>{label.toUpperCase()}</span>
-              </div>
-            ))}
+          <div className="flex items-center gap-2.5">
+            <div className="flex p-0.5 rounded-lg gap-0.5" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+              {[['grid', LayoutGrid, 'Cartes'], ['table', List, 'Tableau']].map(([mode, Icon, label]) => (
+                <button
+                  key={mode} onClick={() => setViewMode(mode)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-all"
+                  style={viewMode === mode ? { background: 'var(--sv-accent)', color: 'var(--sv-accent-ink)' } : { color: 'var(--sv-text-faint)' }}
+                >
+                  <Icon size={13} strokeWidth={1.75} /><span className="hidden sm:inline">{label}</span>
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setShowAddModal(true)} disabled={loading} className="sv-btn sv-btn-primary px-4 py-2">
+              <Plus size={15} strokeWidth={2} /> Ajouter un professeur
+            </button>
           </div>
         </header>
 
-        {/* Page content */}
-        <div className="px-8 py-7 space-y-6">
-
-          {/* Page title */}
-          <div className="flex items-end justify-between">
-            <div>
-              <h1 className="warriors-title text-3xl font-black" style={{ color: '#e8eaf0' }}>
-                Gestion des <span className="gold-text">Professeurs</span>
-              </h1>
-              <p className="warriors-font text-sm mt-1" style={{ color: 'rgba(148,163,184,0.4)' }}>
-                {filteredProfessors.length} résultat{filteredProfessors.length !== 1 ? 's' : ''} · {Object.keys(grouped).length} spécialité{Object.keys(grouped).length !== 1 ? 's' : ''}
-              </p>
-            </div>
-            <button onClick={() => setShowAddModal(true)} disabled={loading}
-              className="btn-gold flex items-center gap-2.5 px-5 py-3 rounded-2xl warriors-title text-sm font-bold disabled:opacity-50"
-              style={{ color: '#0a1628', boxShadow: '0 4px 20px rgba(196,150,48,0.25)' }}>
-              <span className="text-base font-black">+</span>
-              Ajouter un professeur
-            </button>
+        <div className="px-8 py-6 space-y-5">
+          <div>
+            <h1 className="sv-heading text-[22px] font-bold" style={{ color: 'var(--sv-text)' }}>Gestion des professeurs</h1>
+            <p className="text-[13px] mt-1" style={{ color: 'var(--sv-text-faint)' }}>
+              {filteredProfessors.length} résultat{filteredProfessors.length !== 1 ? 's' : ''} · {Object.keys(grouped).length} spécialité{Object.keys(grouped).length !== 1 ? 's' : ''}
+            </p>
           </div>
 
-          {/* Error */}
           {error && (
-            <div className="flex items-center gap-3 px-5 py-4 rounded-2xl animate-in"
-              style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.15)' }}>
-              <span style={{ color: '#f87171' }}>⚠</span>
-              <span className="warriors-font text-sm" style={{ color: 'rgba(248,113,113,0.75)' }}>{error}</span>
+            <div className="flex items-center gap-2.5 px-4 py-3 rounded-lg sv-in" style={{ background: 'var(--sv-danger-soft)', border: '1px solid var(--sv-danger-border)' }}>
+              <AlertTriangle size={15} strokeWidth={1.75} style={{ color: 'var(--sv-danger)' }} />
+              <span className="text-[13px]" style={{ color: '#F0A8A2' }}>{error}</span>
             </div>
           )}
 
-          {/* Filters */}
-          <div className="flex items-center gap-4 p-5 rounded-2xl"
-            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.1)' }}>
-            {/* Search */}
-            <div className="relative flex-1 max-w-xs">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'rgba(196,150,48,0.4)' }}>⊕</span>
-              <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Rechercher un professeur..."
-                className="input-warriors w-full pl-10 pr-4 py-2.5 rounded-xl text-sm"
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {statCards.map(({ label, value, icon: Icon }) => (
+              <div key={label} className="sv-card sv-in flex items-center gap-3.5 p-4">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'var(--sv-accent-soft)', border: '1px solid var(--sv-accent-border)' }}>
+                  <Icon size={16} strokeWidth={1.75} style={{ color: 'var(--sv-accent)' }} />
+                </div>
+                <div>
+                  <p className="sv-heading text-lg font-bold" style={{ color: 'var(--sv-text)' }}>{value}</p>
+                  <p className="text-[11.5px]" style={{ color: 'var(--sv-text-faint)' }}>{label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 p-3.5 rounded-xl sv-card">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search size={14} strokeWidth={1.75} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--sv-text-faint)' }} />
+              <input
+                type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Rechercher un professeur…"
+                className="sv-input w-full pl-9 pr-3 py-2.5 text-[13px]"
               />
             </div>
-
-            {/* Specialty select */}
-            <select value={selectedSpecialty} onChange={e => setSelectedSpecialty(e.target.value)}
-              className="input-warriors px-4 py-2.5 rounded-xl text-sm" style={{ cursor:'pointer', minWidth: '200px' }}>
+            <select value={selectedSpecialty} onChange={e => setSelectedSpecialty(e.target.value)} className="sv-input px-3.5 py-2.5 text-[13px] min-w-[180px]" style={{ cursor:'pointer' }}>
               <option value="all">Toutes les spécialités</option>
               {specialties.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
-
-            {(searchQuery || selectedSpecialty !== 'all') && (
-              <button onClick={() => { setSearchQuery(''); setSelectedSpecialty('all'); }}
-                className="px-4 py-2.5 rounded-xl text-xs warriors-font font-medium transition-all"
-                style={{ color: 'rgba(196,150,48,0.6)', border: '1px solid rgba(196,150,48,0.15)', background: 'rgba(196,150,48,0.05)' }}>
-                Réinitialiser
+            {hasFilters && (
+              <button onClick={() => { setSearchQuery(''); setSelectedSpecialty('all'); }} className="sv-btn sv-btn-ghost px-3 py-2.5">
+                <RotateCcw size={13} strokeWidth={1.75} /> Réinitialiser
               </button>
             )}
           </div>
 
-          {/* Content */}
           {loading && professors.length === 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="rounded-2xl p-5 space-y-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.08)' }}>
+                <div key={i} className="sv-card p-4 space-y-3.5">
                   <div className="flex gap-3">
-                    <div className="w-14 h-14 rounded-2xl shimmer" style={{ background: 'rgba(196,150,48,0.07)' }} />
+                    <div className="w-13 h-13 rounded-xl sv-shimmer" style={{ background: 'var(--sv-surface-2)', width: 52, height: 52 }} />
                     <div className="flex-1 space-y-2 pt-1">
-                      <div className="h-3 rounded-full shimmer" style={{ background: 'rgba(196,150,48,0.07)', width:'70%' }} />
-                      <div className="h-2.5 rounded-full shimmer" style={{ background: 'rgba(196,150,48,0.05)', width:'50%' }} />
+                      <div className="h-3 rounded-full sv-shimmer" style={{ background: 'var(--sv-surface-2)', width:'70%' }} />
+                      <div className="h-2.5 rounded-full sv-shimmer" style={{ background: 'var(--sv-surface-2)', width:'50%' }} />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <div className="h-2.5 rounded-full shimmer" style={{ background: 'rgba(255,255,255,0.04)' }} />
-                    <div className="h-2.5 rounded-full shimmer" style={{ background: 'rgba(255,255,255,0.03)', width:'80%' }} />
+                    <div className="h-2.5 rounded-full sv-shimmer" style={{ background: 'var(--sv-surface-2)' }} />
+                    <div className="h-2.5 rounded-full sv-shimmer" style={{ background: 'var(--sv-surface-2)', width:'80%' }} />
                   </div>
                 </div>
               ))}
             </div>
           ) : filteredProfessors.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 rounded-2xl animate-in"
-              style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(196,150,48,0.08)' }}>
-              <span className="text-6xl mb-4 opacity-30">🔍</span>
-              <p className="warriors-title font-bold text-lg" style={{ color: 'rgba(232,234,240,0.3)' }}>Aucun résultat</p>
-              <p className="warriors-font text-sm mt-2" style={{ color: 'rgba(148,163,184,0.3)' }}>Essayez de modifier vos filtres</p>
+            <div className="flex flex-col items-center justify-center py-16 rounded-xl sv-card">
+              <Search size={32} strokeWidth={1.5} style={{ color: 'var(--sv-text-faint)', marginBottom: 12 }} />
+              <p className="sv-heading font-semibold text-[14px]" style={{ color: 'var(--sv-text-dim)' }}>Aucun résultat</p>
+              <p className="text-[12.5px] mt-1" style={{ color: 'var(--sv-text-faint)' }}>Essayez de modifier vos filtres</p>
             </div>
-          ) : (
-            <div className="space-y-8">
+          ) : viewMode === 'grid' ? (
+            <div className="space-y-7">
               {Object.entries(grouped).map(([specialty, group], gi) => (
-                <div key={specialty} className="animate-in" style={{ animationDelay: `${gi * 80}ms` }}>
-                  {/* Group header */}
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-1 h-6 rounded-full" style={{ background: 'linear-gradient(180deg, #c49630, #f0c84a)' }} />
-                      <h2 className="warriors-title text-base font-bold" style={{ color: '#c8a84a' }}>{specialty}</h2>
-                      <span className="warriors-font text-[11px] px-2.5 py-0.5 rounded-full font-medium"
-                        style={{ background: 'rgba(196,150,48,0.1)', border: '1px solid rgba(196,150,48,0.18)', color: 'rgba(196,150,48,0.6)' }}>
-                        {group.length}
-                      </span>
-                    </div>
-                    <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, rgba(196,150,48,0.1), transparent)' }} />
+                <div key={specialty} className="sv-in" style={{ animationDelay: `${gi * 60}ms` }}>
+                  <div className="flex items-center gap-3 mb-3.5">
+                    <div className="w-1 h-4 rounded-full" style={{ background: 'var(--sv-accent)' }} />
+                    <h2 className="sv-heading text-[13.5px] font-semibold" style={{ color: 'var(--sv-text)' }}>{specialty}</h2>
+                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-md" style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--sv-text-faint)' }}>{group.length}</span>
+                    <div className="flex-1 h-px" style={{ background: 'var(--sv-border)' }} />
                   </div>
-
-                  {/* Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {group.map((prof, idx) => (
                       <ProfessorCard
-                        key={prof.id}
-                        professor={prof}
-                        index={idx}
+                        key={prof.id} professor={prof} index={idx}
                         onDetails={p => { setCurrentProfessor(p); setShowDetailsModal(true); }}
                         onEdit={p => { setCurrentProfessor(p); setShowEditModal(true); }}
                         onDelete={p => { setCurrentProfessor(p); setShowDeleteModal(true); }}
@@ -898,11 +1088,17 @@ const ProfessorsList = () => {
                 </div>
               ))}
             </div>
+          ) : (
+            <TableView
+              grouped={grouped}
+              onDetails={p => { setCurrentProfessor(p); setShowDetailsModal(true); }}
+              onEdit={p => { setCurrentProfessor(p); setShowEditModal(true); }}
+              onDelete={p => { setCurrentProfessor(p); setShowDeleteModal(true); }}
+            />
           )}
         </div>
       </main>
 
-      {/* Modals */}
       {(showAddModal || showEditModal) && (
         <FormModal
           professor={showEditModal ? currentProfessor : null}

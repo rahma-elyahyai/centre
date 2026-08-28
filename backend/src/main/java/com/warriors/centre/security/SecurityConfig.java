@@ -23,9 +23,9 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthFilter;  // ← AJOUTER
+    private final JwtAuthenticationFilter jwtAuthFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {  // ← AJOUTER
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
@@ -49,9 +49,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/cours/**").permitAll()
                 .requestMatchers("/api/niveaux/**").permitAll()
                 .requestMatchers("/api/cours/niveaux/save").permitAll()
+                // Formulaire public de pré-inscription (site vitrine) — soumission libre, tout le reste reste protégé
+                .requestMatchers(HttpMethod.POST, "/api/inscription-requests").permitAll()
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);  // ← AJOUTER
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

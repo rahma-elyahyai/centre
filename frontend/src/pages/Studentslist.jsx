@@ -4,39 +4,187 @@ import { useNavigate } from 'react-router-dom';
 import { studentAPI } from '../services/studentService';
 import { getAuthToken } from '../services/api';
 import Sidebar from './Sidebar';
+import {
+  GraduationCap, Phone, Users, Building2, Calendar, BookOpen,
+  Pencil, Trash2, X, AlertTriangle, LayoutGrid, List, Plus,
+  Check, ChevronLeft, ChevronRight, Search, RotateCcw, Hash, Wallet,
+} from 'lucide-react';
 
-/* ─── Warriors CSS injection ─── */
-if (!document.getElementById('warriors-students-style')) {
-  const s = document.createElement('style');
-  s.id = 'warriors-students-style';
+/* ══════════════════════════════════════════════════════════════ */
+/*  DESIGN TOKENS — injected once                                */
+/* ══════════════════════════════════════════════════════════════ */
+{
+  let s = document.getElementById('sv-design-tokens');
+  if (!s) {
+    s = document.createElement('style');
+    s.id = 'sv-design-tokens';
+    document.head.appendChild(s);
+  }
   s.innerHTML = `
-    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap');
-    .warriors-font  { font-family: 'Outfit', sans-serif; }
-    .warriors-title { font-family: 'Sora', sans-serif; }
-    .gold-text { background: linear-gradient(135deg,#c49630,#f0c84a); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-    .card-hover { transition: all 0.25s cubic-bezier(0.4,0,0.2,1); }
-    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.45), 0 0 0 1px rgba(196,150,48,0.18); }
-    .btn-gold { background: linear-gradient(135deg,#c49630 0%,#f0c84a 100%); transition: all 0.2s; }
-    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(196,150,48,0.35); }
-    .input-warriors { background: rgba(255,255,255,0.04); border: 1px solid rgba(196,150,48,0.15); color: #e8eaf0; font-family:'Outfit',sans-serif; transition: border-color 0.2s, box-shadow 0.2s; }
-    .input-warriors:focus { outline:none; border-color:rgba(196,150,48,0.55); box-shadow:0 0 0 3px rgba(196,150,48,0.08); }
-    .input-warriors::placeholder { color:rgba(148,163,184,0.35); }
-    select.input-warriors option { background:#0d1c30; color:#e8eaf0; }
-    .scrollbar-warriors::-webkit-scrollbar { width:4px; }
-    .scrollbar-warriors::-webkit-scrollbar-track { background:transparent; }
-    .scrollbar-warriors::-webkit-scrollbar-thumb { background:rgba(196,150,48,0.2); border-radius:4px; }
-    @keyframes fadeInUp { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:translateY(0);} }
-    .animate-in { animation: fadeInUp 0.35s ease forwards; }
-    @keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:0.4} }
-    .shimmer { animation: shimmer 1.6s ease-in-out infinite; }
-    @keyframes pulse-dot { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.4);opacity:0.7;} }
-    .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
-    .checkbox-warriors { appearance:none; width:16px; height:16px; border-radius:4px; border:1.5px solid rgba(196,150,48,0.3); background:rgba(255,255,255,0.04); cursor:pointer; transition:all 0.15s; flex-shrink:0; }
-    .checkbox-warriors:checked { background:linear-gradient(135deg,#c49630,#f0c84a); border-color:#c49630; background-image:url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%230a1628' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e"); }
-    .row-hover { transition: background 0.15s; }
-    .row-hover:hover { background: rgba(196,150,48,0.04); }
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+      --sv-bg:            #0A0F1C;
+      --sv-surface:       #10172A;
+      --sv-surface-2:     #141C32;
+      --sv-border:        rgba(255,255,255,0.07);
+      --sv-border-strong: rgba(255,255,255,0.14);
+      --sv-text:          #E7EAF0;
+      --sv-text-dim:      #8B93A6;
+      --sv-text-faint:    #5C6478;
+      --sv-accent:        #C9A24D;
+      --sv-accent-hover:  #D8B563;
+      --sv-accent-ink:    #17130A;
+      --sv-accent-soft:   rgba(201,162,77,0.12);
+      --sv-accent-border: rgba(201,162,77,0.30);
+      --sv-danger:        #E2574C;
+      --sv-danger-soft:   rgba(226,87,76,0.10);
+      --sv-danger-border: rgba(226,87,76,0.28);
+      --sv-radius-sm:     8px;
+      --sv-radius:        10px;
+      --sv-radius-lg:     14px;
+      --sv-shadow:        0 1px 2px rgba(0,0,0,0.4);
+      --sv-shadow-md:     0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    .sv-root { font-family: 'Inter', sans-serif; }
+    .sv-heading { font-family: 'Manrope', sans-serif; letter-spacing: -0.01em; }
+
+    .sv-accent-text { color: var(--sv-accent); }
+
+    /* Buttons */
+    .sv-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13px;
+      border-radius: var(--sv-radius-sm); border: 1px solid transparent;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      cursor: pointer; white-space: nowrap;
+    }
+    .sv-btn-primary { background: var(--sv-accent); color: var(--sv-accent-ink); }
+    .sv-btn-primary:hover { background: var(--sv-accent-hover); }
+    .sv-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .sv-btn-ghost { background: transparent; border-color: var(--sv-border-strong); color: var(--sv-text-dim); }
+    .sv-btn-ghost:hover { border-color: var(--sv-text-faint); color: var(--sv-text); background: rgba(255,255,255,0.02); }
+    .sv-btn-danger { background: var(--sv-danger); color: #fff; }
+    .sv-btn-danger:hover { background: #EB6B60; }
+    .sv-icon-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: var(--sv-radius-sm);
+      border: 1px solid var(--sv-border); background: transparent; color: var(--sv-text-dim);
+      transition: background 0.15s, color 0.15s, border-color 0.15s; cursor: pointer;
+    }
+    .sv-icon-btn:hover { background: rgba(255,255,255,0.04); color: var(--sv-text); border-color: var(--sv-border-strong); }
+    .sv-icon-btn.danger:hover { background: var(--sv-danger-soft); color: var(--sv-danger); border-color: var(--sv-danger-border); }
+
+    /* Inputs */
+    input.sv-input, select.sv-input, textarea.sv-input {
+      background-color: var(--sv-surface-2) !important;
+      border: 1px solid var(--sv-border) !important;
+      color: var(--sv-text) !important;
+      font-family: 'Inter', sans-serif; font-size: 13.5px;
+      border-radius: var(--sv-radius-sm); transition: border-color 0.15s;
+      appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    }
+    select.sv-input {
+      background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%238B93A6' stroke-width='1.75'%3E%3Cpath d='M6 8l4 4 4-4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px;
+      padding-right: 34px !important;
+    }
+    input.sv-input::placeholder, textarea.sv-input::placeholder { color: var(--sv-text-faint) !important; }
+    input.sv-input:focus, select.sv-input:focus, textarea.sv-input:focus { outline: none; border-color: var(--sv-accent-border) !important; }
+    input.sv-input.error, textarea.sv-input.error { border-color: var(--sv-danger-border) !important; }
+    select.sv-input option { background: var(--sv-surface); color: var(--sv-text); }
+    :root[data-theme="light"] select.sv-input {
+      background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%235B6475' stroke-width='1.75'%3E%3Cpath d='M6 8l4 4 4-4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+
+    .sv-card {
+      background: var(--sv-surface); border: 1px solid var(--sv-border);
+      border-radius: var(--sv-radius-lg); transition: border-color 0.15s;
+    }
+    .sv-card:hover { border-color: var(--sv-border-strong); }
+
+    .sv-tag {
+      display: inline-flex; align-items: center; font-size: 11px; font-weight: 600;
+      padding: 3px 9px; border-radius: 6px; line-height: 1.4;
+    }
+
+    .sv-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .sv-scroll::-webkit-scrollbar-track { background: transparent; }
+    .sv-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10); border-radius: 4px; }
+
+    @keyframes sv-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .sv-in { animation: sv-in 0.22s ease forwards; }
+    @keyframes sv-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.9; } }
+    .sv-shimmer { animation: sv-pulse 1.4s ease-in-out infinite; }
+
+    .sv-row:hover { background: rgba(255,255,255,0.02); }
+
+    .sv-checkbox {
+      appearance: none; width: 16px; height: 16px; border-radius: 4px;
+      border: 1.5px solid var(--sv-border-strong); background: transparent;
+      cursor: pointer; flex-shrink: 0; transition: all 0.15s; position: relative;
+    }
+    .sv-checkbox:checked { background: var(--sv-accent); border-color: var(--sv-accent); }
   `;
-  document.head.appendChild(s);
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/*  LIGHT THEME OVERRIDE — shared across the app                 */
+/* ══════════════════════════════════════════════════════════════ */
+{
+  let sl = document.getElementById('sv-theme-light');
+  if (!sl) {
+    sl = document.createElement('style');
+    sl.id = 'sv-theme-light';
+    document.head.appendChild(sl);
+  }
+  sl.innerHTML = `
+    :root[data-theme="light"] {
+      --sv-bg:            #F1F2F6;
+      --sv-surface:       #FFFFFF;
+      --sv-surface-2:     #F6F7FA;
+      --sv-border:        rgba(15,23,42,0.08);
+      --sv-border-strong: rgba(15,23,42,0.16);
+      --sv-text:          #171B26;
+      --sv-text-dim:      #5B6475;
+      --sv-text-faint:    #8A93A3;
+      --sv-accent:        #B8873A;
+      --sv-accent-hover:  #A67830;
+      --sv-accent-ink:    #FFFFFF;
+      --sv-accent-soft:   rgba(184,135,58,0.12);
+      --sv-accent-border: rgba(184,135,58,0.35);
+      --sv-success:       #3F8F68;
+      --sv-success-soft:  rgba(63,143,104,0.12);
+      --sv-success-border:rgba(63,143,104,0.32);
+      --sv-warning:       #B07F2E;
+      --sv-warning-soft:  rgba(176,127,46,0.12);
+      --sv-warning-border:rgba(176,127,46,0.32);
+      --sv-danger:        #C43D33;
+      --sv-danger-soft:   rgba(196,61,51,0.10);
+      --sv-danger-border: rgba(196,61,51,0.30);
+      --sv-info:          #3E7FB8;
+      --sv-info-soft:     rgba(62,127,184,0.12);
+      --sv-info-border:   rgba(62,127,184,0.32);
+      --sv-violet:        #7A6BC4;
+      --sv-violet-soft:   rgba(122,107,196,0.12);
+      --sv-violet-border: rgba(122,107,196,0.32);
+      --sv-shadow:        0 1px 2px rgba(15,23,42,0.07);
+      --sv-shadow-md:     0 8px 24px rgba(15,23,42,0.10);
+    }
+    :root[data-theme="light"] select.sv-input option { background: #FFFFFF; color: var(--sv-text); }
+    :root[data-theme="light"] .sv-scroll::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.14); }
+  `;
+}
+
+/* Apply any previously saved theme immediately, on whichever page loads first */
+if (typeof window !== 'undefined') {
+  const savedTheme = localStorage.getItem('sv-theme');
+  if (savedTheme === 'light' || savedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }
 }
 
 /* ─── Constants ─── */
@@ -45,18 +193,19 @@ const SUBJECTS = [
   'Arabe','Histoire-Géographie','Philosophie','Économie','Comptabilité','Informatique'
 ];
 
+// Muted, consistent-saturation palette — no neon, no per-subject gradients.
 const SUBJECT_COLORS = {
-  'Mathématiques':    { bg:'rgba(99,102,241,0.1)',  border:'rgba(99,102,241,0.2)',  color:'#818cf8' },
-  'Physique-Chimie':  { bg:'rgba(59,130,246,0.1)',  border:'rgba(59,130,246,0.2)',  color:'#60a5fa' },
-  'SVT':              { bg:'rgba(34,197,94,0.1)',   border:'rgba(34,197,94,0.2)',   color:'#4ade80' },
-  'Français':         { bg:'rgba(236,72,153,0.1)',  border:'rgba(236,72,153,0.2)',  color:'#f472b6' },
-  'Anglais':          { bg:'rgba(20,184,166,0.1)',  border:'rgba(20,184,166,0.2)',  color:'#2dd4bf' },
-  'Arabe':            { bg:'rgba(245,158,11,0.1)',  border:'rgba(245,158,11,0.2)',  color:'#fbbf24' },
-  'Histoire-Géographie':{ bg:'rgba(239,68,68,0.1)', border:'rgba(239,68,68,0.2)',  color:'#f87171' },
-  'Philosophie':      { bg:'rgba(168,85,247,0.1)',  border:'rgba(168,85,247,0.2)',  color:'#c084fc' },
-  'Économie':         { bg:'rgba(196,150,48,0.1)',  border:'rgba(196,150,48,0.2)',  color:'#f0c84a' },
-  'Comptabilité':     { bg:'rgba(234,179,8,0.1)',   border:'rgba(234,179,8,0.2)',   color:'#facc15' },
-  'Informatique':     { bg:'rgba(6,182,212,0.1)',   border:'rgba(6,182,212,0.2)',   color:'#22d3ee' },
+  'Mathématiques':       '#8B93E8',
+  'Physique-Chimie':     '#6AA3D9',
+  'SVT':                 '#5FAE83',
+  'Français':            '#D18BA0',
+  'Anglais':             '#4FB0A6',
+  'Arabe':               '#C99A55',
+  'Histoire-Géographie': '#C97A6B',
+  'Philosophie':         '#A088CC',
+  'Économie':            '#B99548',
+  'Comptabilité':        '#B7A25A',
+  'Informatique':        '#5CADC2',
 };
 
 const DEFAULT_LEVELS = [
@@ -77,7 +226,10 @@ const DEFAULT_FIELDS = [
   'Économie'
 ];
 
-const getSubjectStyle = (s) => SUBJECT_COLORS[s] || { bg:'rgba(148,163,184,0.08)', border:'rgba(148,163,184,0.15)', color:'#94a3b8' };
+// Flat, muted avatar palette (no gradients) — one solid color per hash bucket.
+const AVATAR_COLORS = ['#8B93E8', '#C9A24D', '#5CADC2', '#D18BA0', '#5FAE83', '#C97A6B'];
+
+const getSubjectColor = (s) => SUBJECT_COLORS[s] || '#8B93A6';
 
 const getInitials = (student) => {
   const p = student.prenom || '';
@@ -85,16 +237,24 @@ const getInitials = (student) => {
   return `${p[0] || ''}${n[0] || ''}`.toUpperCase() || '?';
 };
 
-const getAvatarGrad = (id) => {
-  const grads = [
-    'linear-gradient(135deg,#6366f1,#8b5cf6)',
-    'linear-gradient(135deg,#c49630,#f0c84a)',
-    'linear-gradient(135deg,#3b82f6,#06b6d4)',
-    'linear-gradient(135deg,#ec4899,#f43f5e)',
-    'linear-gradient(135deg,#10b981,#14b8a6)',
-    'linear-gradient(135deg,#f59e0b,#ef4444)',
-  ];
-  return grads[(id || 0) % grads.length];
+const getAvatarColor = (id) => AVATAR_COLORS[(id || 0) % AVATAR_COLORS.length];
+
+/* Small helper: colored dot + label chip used for subjects */
+const SubjectChip = ({ subject, size = 'sm' }) => {
+  const c = getSubjectColor(subject);
+  return (
+    <span
+      className="sv-tag"
+      style={{
+        background: `${c}1A`,
+        border: `1px solid ${c}40`,
+        color: c,
+        fontSize: size === 'sm' ? 11 : 12,
+      }}
+    >
+      {subject}
+    </span>
+  );
 };
 
 /* ══════════════════════════════════════════════════════════════ */
@@ -103,90 +263,82 @@ const getAvatarGrad = (id) => {
 const StudentCard = ({ student, onEdit, onDelete, index }) => {
   const name = student.fullName || `${student.prenom || ''} ${student.nom || ''}`.trim();
   const matieres = student.matieres || [];
+  const avatarColor = getAvatarColor(student.id);
+
+  const details = [
+    { icon: Phone, val: student.phoneNumber || '—' },
+    { icon: Users, val: student.parentPhone || '—', label: 'Parent' },
+    { icon: Building2, val: student.etablissement || '—' },
+    { icon: Calendar, val: student.dateInscription ? new Date(student.dateInscription).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '—' },
+  ];
 
   return (
-    <div
-      className="card-hover animate-in rounded-2xl flex flex-col overflow-hidden"
-      style={{
-        background: 'linear-gradient(145deg, rgba(13,24,44,0.95) 0%, rgba(8,15,30,0.9) 100%)',
-        border: '1px solid rgba(196,150,48,0.1)',
-        animationDelay: `${index * 50}ms`,
-      }}
-    >
-      <div className="h-0.5 bg-gradient-to-r from-[#c49630] to-[#f0c84a]" />
-      <div className="p-5 flex flex-col gap-3.5 flex-1">
+    <div className="sv-card sv-in flex flex-col overflow-hidden" style={{ animationDelay: `${index * 30}ms` }}>
+      <div className="p-4 flex flex-col gap-3 flex-1">
         <div className="flex items-start gap-3">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 warriors-title font-black text-sm"
-            style={{ background: getAvatarGrad(student.id), color: '#fff', boxShadow: '0 4px 14px rgba(0,0,0,0.35)' }}>
+          <div
+            className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 sv-heading font-bold text-xs"
+            style={{ background: `${avatarColor}22`, color: avatarColor, border: `1px solid ${avatarColor}40` }}
+          >
             {getInitials(student)}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="warriors-title font-bold text-sm leading-snug truncate" style={{ color: '#e8eaf0' }}>{name}</h3>
-            <p className="warriors-font text-[11px] mt-0.5" style={{ color: 'rgba(196,150,48,0.55)' }}>ID #{student.id}</p>
+            <h3 className="sv-heading font-semibold text-[13.5px] leading-snug truncate" style={{ color: 'var(--sv-text)' }}>{name}</h3>
+            <p className="text-[11px] mt-0.5 flex items-center gap-1" style={{ color: 'var(--sv-text-faint)' }}>
+              <Hash size={10} strokeWidth={2} />{student.id}
+            </p>
           </div>
+          {student.abonnementMensuel != null && (
+            <span className="sv-tag flex-shrink-0" style={{ background: 'var(--sv-accent-soft)', border: '1px solid var(--sv-accent-border)', color: 'var(--sv-accent)' }}>
+              <Wallet size={10} strokeWidth={2} /> {Number(student.abonnementMensuel).toLocaleString('fr-FR')} MAD/mois
+            </span>
+          )}
         </div>
+
         <div className="flex flex-wrap gap-1.5">
           {student.niveau && (
-            <span className="warriors-font text-[10px] font-semibold px-2.5 py-1 rounded-full"
-              style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', color: '#818cf8' }}>
-              🎓 {student.niveau}
+            <span className="sv-tag" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid var(--sv-border-strong)', color: 'var(--sv-text-dim)' }}>
+              <GraduationCap size={11} strokeWidth={2} className="mr-1" />{student.niveau}
             </span>
           )}
           {student.filiere && (
-            <span className="warriors-font text-[10px] font-semibold px-2.5 py-1 rounded-full"
-              style={{ background: 'rgba(196,150,48,0.08)', border: '1px solid rgba(196,150,48,0.18)', color: '#f0c84a' }}>
+            <span className="sv-tag" style={{ background: 'var(--sv-accent-soft)', border: '1px solid var(--sv-accent-border)', color: 'var(--sv-accent)' }}>
               {student.filiere}
             </span>
           )}
         </div>
-        <div className="h-px" style={{ background: 'linear-gradient(90deg,transparent,rgba(196,150,48,0.1),transparent)' }} />
+
+        <div className="h-px" style={{ background: 'var(--sv-border)' }} />
+
         <div className="space-y-1.5">
-          {[
-            { icon: '📞', val: student.phoneNumber || '—' },
-            { icon: '👪', val: student.parentPhone || '—', label: 'Parent' },
-            { icon: '🏫', val: student.etablissement || '—' },
-            { icon: '◷', val: student.dateInscription ? new Date(student.dateInscription).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '—' },
-          ].map(({ icon, val, label }) => (
-            <div key={icon} className="flex items-center gap-2">
-              <span className="text-[11px] flex-shrink-0 w-4 text-center" style={{ color: 'rgba(196,150,48,0.4)' }}>{icon}</span>
-              <span className="warriors-font text-[12px] truncate" style={{ color: 'rgba(180,190,210,0.5)' }}>
-                {label ? <span style={{ color: 'rgba(148,163,184,0.35)' }}>{label}: </span> : null}{val}
+          {details.map(({ icon: Icon, val, label }, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <Icon size={13} strokeWidth={1.75} style={{ color: 'var(--sv-text-faint)', flexShrink: 0 }} />
+              <span className="text-[12px] truncate" style={{ color: 'var(--sv-text-dim)' }}>
+                {label ? <span style={{ color: 'var(--sv-text-faint)' }}>{label}: </span> : null}{val}
               </span>
             </div>
           ))}
         </div>
+
         {matieres.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {matieres.slice(0, 3).map(s => {
-              const sc = getSubjectStyle(s);
-              return (
-                <span key={s} className="warriors-font text-[10px] px-2 py-0.5 rounded-full"
-                  style={{ background: sc.bg, border: `1px solid ${sc.border}`, color: sc.color }}>
-                  {s}
-                </span>
-              );
-            })}
+          <div className="flex flex-wrap gap-1.5">
+            {matieres.slice(0, 3).map(s => <SubjectChip key={s} subject={s} />)}
             {matieres.length > 3 && (
-              <span className="warriors-font text-[10px] px-2 py-0.5 rounded-full"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(148,163,184,0.5)' }}>
+              <span className="sv-tag" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--sv-border)', color: 'var(--sv-text-faint)' }}>
                 +{matieres.length - 3}
               </span>
             )}
           </div>
         )}
-        <div className="flex gap-2 mt-auto pt-3 border-t" style={{ borderColor: 'rgba(196,150,48,0.08)' }}>
-          <button onClick={() => onEdit(student)}
-            className="flex-1 py-2 rounded-xl text-[12px] font-semibold warriors-font transition-all duration-200"
-            style={{ background: 'rgba(196,150,48,0.08)', border: '1px solid rgba(196,150,48,0.18)', color: '#f0c84a' }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(196,150,48,0.18)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'rgba(196,150,48,0.08)'}>
-            ✏ Modifier
+
+        <div className="flex gap-2 mt-auto pt-3" style={{ borderTop: '1px solid var(--sv-border)' }}>
+          <button onClick={() => onEdit(student)} className="sv-btn sv-btn-ghost flex-1 py-2">
+            <Pencil size={13} strokeWidth={1.75} /> Modifier
           </button>
-          <button onClick={() => onDelete(student)}
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-sm transition-all flex-shrink-0"
-            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.18)', color: '#f87171' }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.18)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}>✕</button>
+          <button onClick={() => onDelete(student)} className="sv-icon-btn danger">
+            <Trash2 size={14} strokeWidth={1.75} />
+          </button>
         </div>
       </div>
     </div>
@@ -197,28 +349,24 @@ const StudentCard = ({ student, onEdit, onDelete, index }) => {
 /*  TABLE VIEW                                                   */
 /* ══════════════════════════════════════════════════════════════ */
 const TableView = ({ grouped, onEdit, onDelete }) => (
-  <div className="space-y-5">
+  <div className="space-y-4">
     {Object.entries(grouped).map(([group, students], gi) => (
-      <div key={group} className="rounded-2xl overflow-hidden animate-in"
-        style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.1)', animationDelay: `${gi * 80}ms` }}>
-        <div className="flex items-center justify-between px-6 py-4"
-          style={{ borderBottom: '1px solid rgba(196,150,48,0.08)', background: 'rgba(196,150,48,0.03)' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-6 rounded-full" style={{ background: 'linear-gradient(180deg,#c49630,#f0c84a)' }} />
-            <h2 className="warriors-title text-base font-bold" style={{ color: '#c8a84a' }}>📚 {group}</h2>
+      <div key={group} className="sv-card sv-in overflow-hidden" style={{ animationDelay: `${gi * 40}ms` }}>
+        <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: '1px solid var(--sv-border)' }}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-1 h-4 rounded-full" style={{ background: 'var(--sv-accent)' }} />
+            <h2 className="sv-heading text-[13.5px] font-semibold" style={{ color: 'var(--sv-text)' }}>{group}</h2>
           </div>
-          <span className="warriors-font text-[11px] px-2.5 py-0.5 rounded-full"
-            style={{ background: 'rgba(196,150,48,0.1)', border: '1px solid rgba(196,150,48,0.18)', color: 'rgba(196,150,48,0.6)' }}>
+          <span className="text-[11px] font-medium px-2 py-0.5 rounded-md" style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--sv-text-faint)' }}>
             {students.length} étudiant{students.length > 1 ? 's' : ''}
           </span>
         </div>
-        <div className="overflow-x-auto scrollbar-warriors">
+        <div className="overflow-x-auto sv-scroll">
           <table className="w-full">
             <thead>
-              <tr style={{ borderBottom: '1px solid rgba(196,150,48,0.07)' }}>
-                {['Étudiant', 'Téléphone', 'Tél. Parent', 'Lycée / Collège', 'Inscription', 'Matières', ''].map(h => (
-                  <th key={h} className="px-5 py-3.5 text-left warriors-font text-[10px] font-semibold tracking-[0.1em]"
-                    style={{ color: 'rgba(196,150,48,0.4)' }}>
+              <tr style={{ borderBottom: '1px solid var(--sv-border)' }}>
+                {['Étudiant', 'Téléphone', 'Tél. Parent', 'Établissement', 'Abonnement', 'Matières', ''].map(h => (
+                  <th key={h} className="px-5 py-2.5 text-left text-[10.5px] font-semibold tracking-wide" style={{ color: 'var(--sv-text-faint)' }}>
                     {h.toUpperCase()}
                   </th>
                 ))}
@@ -228,55 +376,48 @@ const TableView = ({ grouped, onEdit, onDelete }) => (
               {students.map((student) => {
                 const name = student.fullName || `${student.prenom || ''} ${student.nom || ''}`.trim();
                 const matieres = student.matieres || [];
+                const avatarColor = getAvatarColor(student.id);
                 return (
-                  <tr key={student.id} className="row-hover" style={{ borderBottom: '1px solid rgba(196,150,48,0.04)' }}>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center warriors-title font-black text-xs flex-shrink-0"
-                          style={{ background: getAvatarGrad(student.id), color: '#fff' }}>
+                  <tr key={student.id} className="sv-row" style={{ borderBottom: '1px solid var(--sv-border)' }}>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className="w-8 h-8 rounded-lg flex items-center justify-center sv-heading font-bold text-[11px] flex-shrink-0"
+                          style={{ background: `${avatarColor}22`, color: avatarColor, border: `1px solid ${avatarColor}40` }}
+                        >
                           {getInitials(student)}
                         </div>
                         <div>
-                          <p className="warriors-font text-sm font-semibold" style={{ color: '#e8eaf0' }}>{name}</p>
-                          <p className="warriors-font text-[10px]" style={{ color: 'rgba(196,150,48,0.45)' }}>ID #{student.id}</p>
+                          <p className="text-[13px] font-medium" style={{ color: 'var(--sv-text)' }}>{name}</p>
+                          <p className="text-[10.5px]" style={{ color: 'var(--sv-text-faint)' }}>#{student.id}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-4"><span className="warriors-font text-[12px]" style={{ color: 'rgba(180,190,210,0.6)' }}>{student.phoneNumber || '—'}</span></td>
-                    <td className="px-5 py-4"><span className="warriors-font text-[12px]" style={{ color: 'rgba(180,190,210,0.6)' }}>{student.parentPhone || '—'}</span></td>
-                    <td className="px-5 py-4"><span className="warriors-font text-[12px] truncate block max-w-[180px]" style={{ color: 'rgba(180,190,210,0.6)' }}>{student.etablissement || '—'}</span></td>
-                    <td className="px-5 py-4"><span className="warriors-font text-[11px]" style={{ color: 'rgba(148,163,184,0.4)' }}>{student.dateInscription ? new Date(student.dateInscription).toLocaleDateString('fr-FR') : '—'}</span></td>
-                    <td className="px-5 py-4">
+                    <td className="px-5 py-3"><span className="text-[12.5px]" style={{ color: 'var(--sv-text-dim)' }}>{student.phoneNumber || '—'}</span></td>
+                    <td className="px-5 py-3"><span className="text-[12.5px]" style={{ color: 'var(--sv-text-dim)' }}>{student.parentPhone || '—'}</span></td>
+                    <td className="px-5 py-3"><span className="text-[12.5px] truncate block max-w-[180px]" style={{ color: 'var(--sv-text-dim)' }}>{student.etablissement || '—'}</span></td>
+                    <td className="px-5 py-3">
+                      <span className="text-[13px] font-semibold" style={{ color: 'var(--sv-accent)' }}>
+                        {student.abonnementMensuel != null ? `${Number(student.abonnementMensuel).toLocaleString('fr-FR')} MAD` : '—'}
+                      </span>
+                      {student.fraisInscription > 0 && (
+                        <p className="text-[10.5px] mt-0.5" style={{ color: 'var(--sv-text-faint)' }}>+ {Number(student.fraisInscription).toLocaleString('fr-FR')} MAD inscription</p>
+                      )}
+                    </td>
+                    <td className="px-5 py-3">
                       <div className="flex flex-wrap gap-1">
-                        {matieres.slice(0, 2).map(s => {
-                          const sc = getSubjectStyle(s);
-                          return (
-                            <span key={s} className="warriors-font text-[10px] px-2 py-0.5 rounded-full"
-                              style={{ background: sc.bg, border: `1px solid ${sc.border}`, color: sc.color }}>
-                              {s}
-                            </span>
-                          );
-                        })}
+                        {matieres.slice(0, 2).map(s => <SubjectChip key={s} subject={s} />)}
                         {matieres.length > 2 && (
-                          <span className="warriors-font text-[10px] px-2 py-0.5 rounded-full"
-                            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: 'rgba(148,163,184,0.4)' }}>
+                          <span className="sv-tag" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid var(--sv-border)', color: 'var(--sv-text-faint)' }}>
                             +{matieres.length - 2}
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2 justify-end" style={{ opacity: 1 }}>
-                        <button onClick={() => onEdit(student)}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-xs transition-all"
-                          style={{ background: 'rgba(196,150,48,0.08)', border: '1px solid rgba(196,150,48,0.15)', color: '#f0c84a' }}
-                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(196,150,48,0.18)'}
-                          onMouseLeave={e => e.currentTarget.style.background = 'rgba(196,150,48,0.08)'}>✏</button>
-                        <button onClick={() => onDelete(student)}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-xs transition-all"
-                          style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: '#f87171' }}
-                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.18)'}
-                          onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}>✕</button>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <button onClick={() => onEdit(student)} className="sv-icon-btn"><Pencil size={13} strokeWidth={1.75} /></button>
+                        <button onClick={() => onDelete(student)} className="sv-icon-btn danger"><Trash2 size={13} strokeWidth={1.75} /></button>
                       </div>
                     </td>
                   </tr>
@@ -296,7 +437,7 @@ const TableView = ({ grouped, onEdit, onDelete }) => (
 const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
   const isEdit = !!student;
   const [activeSection, setActiveSection] = useState(0);
-  const sections = ['Identité', 'Contact', 'Scolarité', 'Matières'];
+  const sections = ['Identité', 'Contact', 'Scolarité', 'Facturation', 'Matières'];
   const [errors, setErrors] = useState({});
 
   const [form, setForm] = useState(() => ({
@@ -309,6 +450,8 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
     field:       student?.filiere || '',
     lycee:       student?.etablissement || '',
     subjects:    student?.matieres || [],
+    registrationFee: student?.fraisInscription != null ? String(student.fraisInscription) : '',
+    monthlyFee:      student?.abonnementMensuel != null ? String(student.abonnementMensuel) : '',
   }));
 
   const h = e => {
@@ -336,6 +479,8 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
     if (!form.level) e.level = 'Requis';
     if (!form.field) e.field = 'Requis';
     if (!form.lycee.trim()) e.lycee = 'Requis';
+    if (form.monthlyFee === '' || isNaN(form.monthlyFee) || Number(form.monthlyFee) < 0) e.monthlyFee = 'Montant mensuel valide requis';
+    if (form.registrationFee !== '' && (isNaN(form.registrationFee) || Number(form.registrationFee) < 0)) e.registrationFee = 'Montant invalide';
     if (form.subjects.length === 0) e.subjects = 'Sélectionnez au moins une matière';
     return e;
   };
@@ -349,32 +494,38 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
       email: form.email || `${form.prenom.toLowerCase()}.${form.nom.toLowerCase()}@email.com`,
       phone: form.phone, parentPhone: form.parentPhone,
       level: form.level, field: form.field, lycee: form.lycee, subjects: form.subjects,
+      registrationFee: form.registrationFee !== '' ? parseFloat(form.registrationFee) : 0,
+      monthlyFee: parseFloat(form.monthlyFee) || 0,
     });
   };
 
-  const inp = (field) => `input-warriors w-full px-4 py-3 rounded-xl text-sm warriors-font ${errors[field] ? 'border-red-500/60' : ''}`;
+  const inp = (field) => `sv-input w-full px-3.5 py-2.5 text-[13.5px] ${errors[field] ? 'error' : ''}`;
   const LabelRow = ({ name, label, req }) => (
-    <div className="flex items-center justify-between mb-2">
-      <label className="text-[10px] font-semibold tracking-[0.12em] warriors-font" style={{ color: 'rgba(196,150,48,0.45)' }}>
-        {label}{req && ' *'}
+    <div className="flex items-center justify-between mb-1.5">
+      <label className="text-[11px] font-semibold tracking-wide" style={{ color: 'var(--sv-text-faint)' }}>
+        {label}{req && <span style={{ color: 'var(--sv-danger)' }}> *</span>}
       </label>
-      {errors[name] && <span className="text-[10px] warriors-font" style={{ color: '#f87171' }}>{errors[name]}</span>}
+      {errors[name] && <span className="text-[11px]" style={{ color: 'var(--sv-danger)' }}>{errors[name]}</span>}
     </div>
   );
 
+  const avatarColor = getAvatarColor(student?.id || 0);
+
   const sectionContent = [
-    <div key="identity" className="space-y-5">
-      <div className="flex items-center gap-4 p-4 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.1)' }}>
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center warriors-title font-black text-xl"
-          style={{ background: getAvatarGrad(student?.id || 0), color: '#fff', boxShadow: '0 4px 20px rgba(0,0,0,0.4)' }}>
+    <div key="identity" className="space-y-4">
+      <div className="flex items-center gap-3.5 p-3.5 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+        <div
+          className="w-12 h-12 rounded-lg flex items-center justify-center sv-heading font-bold text-base flex-shrink-0"
+          style={{ background: `${avatarColor}22`, color: avatarColor, border: `1px solid ${avatarColor}40` }}
+        >
           {(form.prenom[0] || '?').toUpperCase()}{(form.nom[0] || '').toUpperCase()}
         </div>
         <div>
-          <p className="warriors-title font-bold text-base" style={{ color: '#e8eaf0' }}>{form.prenom || 'Prénom'} {form.nom || 'Nom'}</p>
-          <p className="warriors-font text-xs mt-0.5" style={{ color: 'rgba(196,150,48,0.5)' }}>{form.level || 'Niveau'} · {form.field || 'Filière'}</p>
+          <p className="sv-heading font-semibold text-[14px]" style={{ color: 'var(--sv-text)' }}>{form.prenom || 'Prénom'} {form.nom || 'Nom'}</p>
+          <p className="text-[12px] mt-0.5" style={{ color: 'var(--sv-text-faint)' }}>{form.level || 'Niveau'} · {form.field || 'Filière'}</p>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3.5">
         <div>
           <LabelRow name="prenom" label="PRÉNOM" req />
           <input name="prenom" value={form.prenom} onChange={h} placeholder="Prénom…" className={inp('prenom')} />
@@ -390,7 +541,7 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
       </div>
     </div>,
 
-    <div key="contact" className="space-y-5">
+    <div key="contact" className="space-y-4">
       <div>
         <LabelRow name="phone" label="TÉLÉPHONE ÉTUDIANT" req />
         <input name="phone" type="tel" value={form.phone} onChange={h} placeholder="06XXXXXXXX" className={inp('phone')} />
@@ -399,13 +550,14 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
         <LabelRow name="parentPhone" label="TÉLÉPHONE PARENT" req />
         <input name="parentPhone" type="tel" value={form.parentPhone} onChange={h} placeholder="06XXXXXXXX" className={inp('parentPhone')} />
       </div>
-      <div className="p-4 rounded-2xl" style={{ background: 'rgba(196,150,48,0.04)', border: '1px solid rgba(196,150,48,0.1)' }}>
-        <p className="warriors-font text-xs" style={{ color: 'rgba(148,163,184,0.5)' }}>📞 Format marocain accepté : 06XXXXXXXX ou 07XXXXXXXX</p>
+      <div className="flex items-start gap-2.5 p-3 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+        <Phone size={14} strokeWidth={1.75} style={{ color: 'var(--sv-text-faint)', marginTop: 1 }} />
+        <p className="text-[12px]" style={{ color: 'var(--sv-text-dim)' }}>Format marocain accepté : 06XXXXXXXX ou 07XXXXXXXX</p>
       </div>
     </div>,
 
-    <div key="scolarite" className="space-y-5">
-      <div className="grid grid-cols-2 gap-4">
+    <div key="scolarite" className="space-y-4">
+      <div className="grid grid-cols-2 gap-3.5">
         <div>
           <LabelRow name="level" label="NIVEAU" req />
           <select name="level" value={form.level} onChange={h} className={inp('level')} style={{ cursor: 'pointer' }}>
@@ -427,91 +579,107 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
       </div>
     </div>,
 
-    <div key="matieres" className="space-y-5">
-      <div className="flex items-center justify-between">
-        <p className="text-[10px] font-semibold tracking-[0.12em] warriors-font" style={{ color: 'rgba(196,150,48,0.45)' }}>MATIÈRES DE SOUTIEN *</p>
-        {errors.subjects && <span className="text-[10px] warriors-font" style={{ color: '#f87171' }}>{errors.subjects}</span>}
+    <div key="facturation" className="space-y-4">
+      <div>
+        <LabelRow name="monthlyFee" label="ABONNEMENT MENSUEL (MAD)" req />
+        <input name="monthlyFee" type="number" min="0" step="0.01" value={form.monthlyFee} onChange={h} placeholder="Ex : 400" className={inp('monthlyFee')} />
+        <p className="text-[11.5px] mt-1.5" style={{ color: 'var(--sv-text-faint)' }}>Montant payé chaque mois par l'étudiant, tous cours confondus.</p>
       </div>
-      <div className="grid grid-cols-1 gap-2">
+      <div>
+        <LabelRow name="registrationFee" label="FRAIS D'INSCRIPTION (MAD)" />
+        <input name="registrationFee" type="number" min="0" step="0.01" value={form.registrationFee} onChange={h} placeholder="Ex : 100 (0 si aucun)" className={inp('registrationFee')} />
+        <p className="text-[11.5px] mt-1.5" style={{ color: 'var(--sv-text-faint)' }}>Payé une seule fois, à l'inscription — ne se répète pas les mois suivants.</p>
+      </div>
+      {(form.monthlyFee || form.registrationFee) && (
+        <div className="p-3.5 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+          <p className="text-[10.5px] font-semibold tracking-wide mb-2" style={{ color: 'var(--sv-text-faint)' }}>APERÇU</p>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[12.5px]" style={{ color: 'var(--sv-text-dim)' }}>Ce mois-ci</span>
+            <span className="sv-heading font-bold text-[15px]" style={{ color: 'var(--sv-accent)' }}>
+              {(parseFloat(form.monthlyFee || 0) + parseFloat(form.registrationFee || 0)).toLocaleString('fr-FR')} MAD
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[12.5px]" style={{ color: 'var(--sv-text-dim)' }}>Mois suivants</span>
+            <span className="text-[13px] font-medium" style={{ color: 'var(--sv-text)' }}>{parseFloat(form.monthlyFee || 0).toLocaleString('fr-FR')} MAD</span>
+          </div>
+        </div>
+      )}
+    </div>,
+
+    <div key="matieres" className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-semibold tracking-wide" style={{ color: 'var(--sv-text-faint)' }}>MATIÈRES DE SOUTIEN *</p>
+        {errors.subjects && <span className="text-[11px]" style={{ color: 'var(--sv-danger)' }}>{errors.subjects}</span>}
+      </div>
+      <div className="grid grid-cols-2 gap-2">
         {SUBJECTS.map(s => {
           const selected = form.subjects.includes(s);
-          const sc = getSubjectStyle(s);
+          const c = getSubjectColor(s);
           return (
-            <button key={s} type="button" onClick={() => toggleSubject(s)}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-150 text-left"
-              style={{ background: selected ? sc.bg : 'rgba(255,255,255,0.02)', border: `1px solid ${selected ? sc.border : 'rgba(255,255,255,0.06)'}` }}>
-              <div className="w-4 h-4 rounded-md border flex items-center justify-center flex-shrink-0 transition-all"
-                style={{ background: selected ? 'linear-gradient(135deg,#c49630,#f0c84a)' : 'rgba(255,255,255,0.04)', border: `1.5px solid ${selected ? '#c49630' : 'rgba(196,150,48,0.2)'}` }}>
-                {selected && <span style={{ color: '#0a1628', fontSize: '9px', fontWeight: 900 }}>✓</span>}
+            <button
+              key={s} type="button" onClick={() => toggleSubject(s)}
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left transition-all"
+              style={{
+                background: selected ? `${c}14` : 'var(--sv-surface-2)',
+                border: `1px solid ${selected ? `${c}45` : 'var(--sv-border)'}`,
+              }}
+            >
+              <div
+                className="w-4 h-4 rounded flex items-center justify-center flex-shrink-0"
+                style={{ background: selected ? c : 'transparent', border: `1.5px solid ${selected ? c : 'var(--sv-border-strong)'}` }}
+              >
+                {selected && <Check size={10} strokeWidth={3} color="#0A0F1C" />}
               </div>
-              <span className="warriors-font text-sm" style={{ color: selected ? sc.color : 'rgba(180,190,210,0.55)' }}>{s}</span>
+              <span className="text-[12.5px] truncate" style={{ color: selected ? c : 'var(--sv-text-dim)' }}>{s}</span>
             </button>
           );
         })}
       </div>
       {form.subjects.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 p-3 rounded-xl" style={{ background: 'rgba(196,150,48,0.04)', border: '1px solid rgba(196,150,48,0.1)' }}>
-          {form.subjects.map(s => {
-            const sc = getSubjectStyle(s);
-            return <span key={s} className="warriors-font text-[10px] px-2.5 py-1 rounded-full" style={{ background: sc.bg, border: `1px solid ${sc.border}`, color: sc.color }}>{s}</span>;
-          })}
+        <div className="flex flex-wrap gap-1.5 p-3 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+          {form.subjects.map(s => <SubjectChip key={s} subject={s} />)}
         </div>
       )}
     </div>,
   ];
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-      style={{ background: 'rgba(4,9,20,0.9)', backdropFilter: 'blur(16px)' }}>
-      <div className="w-full max-w-2xl max-h-[92vh] flex flex-col rounded-3xl overflow-hidden shadow-2xl animate-in"
-        style={{ background: 'linear-gradient(145deg,#0d1c30 0%,#080f1e 100%)', border: '1px solid rgba(196,150,48,0.2)', boxShadow: '0 40px 100px rgba(0,0,0,0.7)' }}>
-        <div className="flex items-center justify-between px-7 py-5 flex-shrink-0"
-          style={{ borderBottom: '1px solid rgba(196,150,48,0.1)', background: 'rgba(196,150,48,0.03)' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center warriors-title font-black text-sm"
-              style={{ background: getAvatarGrad(student?.id || 0), color: '#fff' }}>
-              {isEdit ? getInitials(student) : '👤'}
-            </div>
-            <div>
-              <h2 className="warriors-title text-lg font-bold" style={{ color: '#f0c84a' }}>{isEdit ? "Modifier l'étudiant" : 'Nouvel étudiant'}</h2>
-              <p className="warriors-font text-xs mt-0.5" style={{ color: 'rgba(148,163,184,0.4)' }}>Étape {activeSection + 1} sur {sections.length} — {sections[activeSection]}</p>
-            </div>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: 'rgba(4,8,16,0.75)', backdropFilter: 'blur(6px)' }}>
+      <div className="sv-in w-full max-w-xl max-h-[90vh] flex flex-col rounded-2xl overflow-hidden" style={{ background: 'var(--sv-surface)', border: '1px solid var(--sv-border-strong)', boxShadow: 'var(--sv-shadow-md)' }}>
+        <div className="flex items-center justify-between px-6 py-4 flex-shrink-0" style={{ borderBottom: '1px solid var(--sv-border)' }}>
+          <div>
+            <h2 className="sv-heading text-[15px] font-semibold" style={{ color: 'var(--sv-text)' }}>{isEdit ? "Modifier l'étudiant" : 'Nouvel étudiant'}</h2>
+            <p className="text-[11.5px] mt-0.5" style={{ color: 'var(--sv-text-faint)' }}>Étape {activeSection + 1}/{sections.length} — {sections[activeSection]}</p>
           </div>
-          <button onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
-            style={{ border: '1px solid rgba(196,150,48,0.15)', color: 'rgba(148,163,184,0.5)', background: 'rgba(255,255,255,0.02)' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(196,150,48,0.1)'; e.currentTarget.style.color = '#f0c84a'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.color = 'rgba(148,163,184,0.5)'; }}>✕</button>
+          <button onClick={onClose} className="sv-icon-btn"><X size={15} strokeWidth={1.75} /></button>
         </div>
-        <div className="flex px-7 pt-5 gap-2 flex-shrink-0">
+
+        <div className="flex px-6 pt-4 gap-2 flex-shrink-0">
           {sections.map((s, i) => (
             <button key={s} type="button" onClick={() => setActiveSection(i)} className="flex-1 flex flex-col items-center gap-1.5">
-              <div className="w-full h-1 rounded-full transition-all duration-300"
-                style={{ background: i <= activeSection ? 'linear-gradient(90deg,#c49630,#f0c84a)' : 'rgba(196,150,48,0.1)' }} />
-              <span className="warriors-font text-[10px] font-medium" style={{ color: i === activeSection ? '#f0c84a' : 'rgba(148,163,184,0.3)' }}>{s}</span>
+              <div className="w-full h-[3px] rounded-full transition-all" style={{ background: i <= activeSection ? 'var(--sv-accent)' : 'var(--sv-border)' }} />
+              <span className="text-[10.5px] font-medium" style={{ color: i === activeSection ? 'var(--sv-accent)' : 'var(--sv-text-faint)' }}>{s}</span>
             </button>
           ))}
         </div>
+
         <form onSubmit={submit} className="flex flex-col flex-1 overflow-hidden">
-          <div className="flex-1 overflow-y-auto scrollbar-warriors px-7 py-6">{sectionContent[activeSection]}</div>
-          <div className="px-7 py-5 flex gap-3 flex-shrink-0"
-            style={{ borderTop: '1px solid rgba(196,150,48,0.1)', background: 'rgba(196,150,48,0.02)' }}>
-            <button type="button"
+          <div className="flex-1 overflow-y-auto sv-scroll px-6 py-5">{sectionContent[activeSection]}</div>
+          <div className="px-6 py-4 flex gap-3 flex-shrink-0" style={{ borderTop: '1px solid var(--sv-border)' }}>
+            <button
+              type="button"
               onClick={activeSection === 0 ? onClose : () => setActiveSection(p => p - 1)}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold warriors-font transition-all"
-              style={{ border: '1px solid rgba(196,150,48,0.15)', color: 'rgba(180,190,210,0.55)', background: 'rgba(255,255,255,0.02)' }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(196,150,48,0.06)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}>
-              {activeSection === 0 ? 'Annuler' : '← Retour'}
+              className="sv-btn sv-btn-ghost flex-1 py-2.5"
+            >
+              {activeSection === 0 ? 'Annuler' : (<><ChevronLeft size={14} strokeWidth={2} /> Retour</>)}
             </button>
             {activeSection < sections.length - 1 ? (
-              <button type="button" onClick={() => setActiveSection(p => p + 1)}
-                className="flex-1 py-3 rounded-xl text-sm font-bold warriors-title btn-gold"
-                style={{ color: '#0a1628' }}>Suivant →</button>
+              <button type="button" onClick={() => setActiveSection(p => p + 1)} className="sv-btn sv-btn-primary flex-1 py-2.5">
+                Suivant <ChevronRight size={14} strokeWidth={2} />
+              </button>
             ) : (
-              <button type="submit" disabled={loading}
-                className="flex-1 py-3 rounded-xl text-sm font-bold warriors-title btn-gold disabled:opacity-50"
-                style={{ color: '#0a1628' }}>
+              <button type="submit" disabled={loading} className="sv-btn sv-btn-primary flex-1 py-2.5">
                 {loading ? 'Enregistrement…' : isEdit ? 'Mettre à jour' : "Créer l'étudiant"}
               </button>
             )}
@@ -528,47 +696,40 @@ const FormModal = ({ student, onSave, onClose, levels, fields, loading }) => {
 const DeleteModal = ({ student, onConfirm, onClose, loading }) => {
   if (!student) return null;
   const name = student.fullName || `${student.prenom || ''} ${student.nom || ''}`.trim();
+  const avatarColor = getAvatarColor(student.id || 0);
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-      style={{ background: 'rgba(4,9,20,0.9)', backdropFilter: 'blur(16px)' }}>
-      <div className="w-full max-w-md rounded-3xl overflow-hidden animate-in"
-        style={{ background: 'linear-gradient(145deg,#0d1c30,#080f1e)', border: '1px solid rgba(239,68,68,0.2)', boxShadow: '0 40px 80px rgba(0,0,0,0.6)' }}>
-        <div className="px-7 py-5" style={{ background: 'rgba(239,68,68,0.06)', borderBottom: '1px solid rgba(239,68,68,0.12)' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl flex-shrink-0"
-              style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.2)' }}>⚠</div>
-            <div>
-              <h3 className="warriors-title font-bold text-base" style={{ color: '#f87171' }}>Supprimer cet étudiant ?</h3>
-              <p className="warriors-font text-[11px] mt-0.5" style={{ color: 'rgba(148,163,184,0.4)' }}>Action irréversible</p>
-            </div>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ background: 'rgba(4,8,16,0.75)', backdropFilter: 'blur(6px)' }}>
+      <div className="sv-in w-full max-w-sm rounded-2xl overflow-hidden" style={{ background: 'var(--sv-surface)', border: '1px solid var(--sv-danger-border)', boxShadow: 'var(--sv-shadow-md)' }}>
+        <div className="px-6 py-4 flex items-center gap-3" style={{ borderBottom: '1px solid var(--sv-border)' }}>
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'var(--sv-danger-soft)', border: '1px solid var(--sv-danger-border)' }}>
+            <AlertTriangle size={16} strokeWidth={1.75} style={{ color: 'var(--sv-danger)' }} />
+          </div>
+          <div>
+            <h3 className="sv-heading font-semibold text-[14px]" style={{ color: 'var(--sv-text)' }}>Supprimer cet étudiant ?</h3>
+            <p className="text-[11px] mt-0.5" style={{ color: 'var(--sv-text-faint)' }}>Action irréversible</p>
           </div>
         </div>
-        <div className="p-7 space-y-5">
-          <div className="flex items-center gap-4 p-4 rounded-2xl"
-            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.1)' }}>
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center warriors-title font-black text-sm"
-              style={{ background: getAvatarGrad(student.id || 0), color: '#fff' }}>
+        <div className="p-6 space-y-4">
+          <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+            <div
+              className="w-10 h-10 rounded-lg flex items-center justify-center sv-heading font-bold text-xs flex-shrink-0"
+              style={{ background: `${avatarColor}22`, color: avatarColor, border: `1px solid ${avatarColor}40` }}
+            >
               {getInitials(student)}
             </div>
             <div>
-              <p className="warriors-title font-bold text-sm" style={{ color: '#e8eaf0' }}>{name}</p>
-              <p className="warriors-font text-xs mt-0.5" style={{ color: 'rgba(196,150,48,0.5)' }}>
+              <p className="sv-heading font-semibold text-[13px]" style={{ color: 'var(--sv-text)' }}>{name}</p>
+              <p className="text-[11.5px] mt-0.5" style={{ color: 'var(--sv-text-faint)' }}>
                 {student.niveau} · {student.filiere} · {student.etablissement}
               </p>
             </div>
           </div>
-          <p className="warriors-font text-xs" style={{ color: 'rgba(248,113,113,0.6)' }}>
+          <p className="text-[12px]" style={{ color: 'var(--sv-text-dim)' }}>
             Cet étudiant et toutes ses données seront définitivement supprimés.
           </p>
           <div className="flex gap-3">
-            <button onClick={onClose} disabled={loading}
-              className="flex-1 py-3 rounded-xl text-sm font-semibold warriors-font transition-all"
-              style={{ border: '1px solid rgba(196,150,48,0.15)', color: 'rgba(180,190,210,0.55)', background: 'rgba(255,255,255,0.02)' }}>
-              Annuler
-            </button>
-            <button onClick={onConfirm} disabled={loading}
-              className="flex-1 py-3 rounded-xl text-sm font-bold warriors-title transition-all"
-              style={{ background: 'linear-gradient(135deg,#b91c1c,#ef4444)', color: '#fff' }}>
+            <button onClick={onClose} disabled={loading} className="sv-btn sv-btn-ghost flex-1 py-2.5">Annuler</button>
+            <button onClick={onConfirm} disabled={loading} className="sv-btn sv-btn-danger flex-1 py-2.5">
               {loading ? 'Suppression…' : 'Supprimer'}
             </button>
           </div>
@@ -606,9 +767,7 @@ const StudentsList = () => {
 
   // ─── Helper : unwrap { success, message, data } envelope ───
   const unwrap = (res) => {
-    // If the API returns { success, data } — return data
     if (res && typeof res === 'object' && 'data' in res) return res.data;
-    // Otherwise return as-is (local dev might return raw arrays)
     return res;
   };
 
@@ -622,11 +781,9 @@ const StudentsList = () => {
         studentAPI.getAllStudents({ size: 100 }),
       ]);
 
-      // Unwrap envelope
       const statsData   = unwrap(stRes);
       const studentsRaw = unwrap(evRes);
 
-      // Students can be array or paginated { content: [] }
       const studentsData = Array.isArray(studentsRaw)
         ? studentsRaw
         : Array.isArray(studentsRaw?.content)
@@ -635,7 +792,6 @@ const StudentsList = () => {
 
       setStudents(studentsData);
       setStats(statsData || { totalStudents: 0 });
-      // Toujours utiliser les listes complètes fixes — indépendant du backend
       setLevels(DEFAULT_LEVELS);
       setFields(DEFAULT_FIELDS);
 
@@ -686,15 +842,14 @@ const StudentsList = () => {
         filiere:      data.field,
         etablissement: data.lycee,
         matieres:     data.subjects,
+        fraisInscription:   data.registrationFee,
+        abonnementMensuel:  data.monthlyFee,
       };
-
-      console.log('➡ Payload envoyé au backend:', JSON.stringify(payload, null, 2));
 
       const rawRes = current
         ? await studentAPI.updateStudent(current.id, payload)
         : await studentAPI.createStudent(payload);
 
-      // Unwrap response envelope
       const res = rawRes && typeof rawRes === 'object' && 'success' in rawRes
         ? rawRes
         : { success: true, data: rawRes };
@@ -712,7 +867,7 @@ const StudentsList = () => {
         || (typeof backendError === 'string' ? backendError : null)
         || err.message
         || 'Erreur inconnue';
-      console.error('❌ Backend error:', backendError);
+      console.error('Backend error:', backendError);
       setSaveError(`Erreur: ${msg}`);
     } finally {
       setLoading(false);
@@ -748,135 +903,125 @@ const StudentsList = () => {
   const hasFilters = filterLevel !== 'all' || filterField !== 'all' || search;
 
   const statCards = [
-    { label: 'Total',    val: stats.totalStudents || students.length, icon: '◈', color: '#f0c84a' },
-    { label: 'Niveaux',  val: levels.length,                           icon: '🎓', color: '#c084fc' },
-    { label: 'Filières', val: fields.length,                           icon: '📚', color: '#2dd4bf' },
+    { label: 'Total étudiants', val: stats.totalStudents || students.length, icon: Users },
+    { label: 'Niveaux',         val: levels.length,                          icon: GraduationCap },
+    { label: 'Filières',        val: fields.length,                          icon: BookOpen },
   ];
 
   return (
-    <div className="min-h-screen warriors-font" style={{ background: 'linear-gradient(145deg,#080f1e 0%,#060c18 100%)' }}>
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute rounded-full" style={{ width: '700px', height: '700px', background: 'radial-gradient(circle,rgba(196,150,48,0.04),transparent 70%)', top: '-15%', left: '-10%', filter: 'blur(40px)' }} />
-        <div className="absolute rounded-full" style={{ width: '500px', height: '500px', background: 'radial-gradient(circle,rgba(29,78,216,0.05),transparent 70%)', bottom: '-10%', right: '-5%', filter: 'blur(40px)' }} />
-        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, rgba(196,150,48,0.04) 1px, transparent 1px)', backgroundSize: '42px 42px' }} />
-      </div>
-
+    <div className="sv-root min-h-screen" style={{ background: 'var(--sv-bg)' }}>
       <Sidebar activeItem="students" collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(v => !v)} />
 
       <main className="relative z-10 transition-all duration-300" style={{ marginLeft: `${sidebarW}px` }}>
-        <header className="sticky top-0 z-40 flex items-center justify-between px-8 h-[72px]"
-          style={{ background: 'rgba(6,12,24,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(196,150,48,0.08)' }}>
-          <div className="flex items-center gap-3">
-            <span className="warriors-font text-xs" style={{ color: 'rgba(148,163,184,0.35)' }}>Admin</span>
-            <span style={{ color: 'rgba(196,150,48,0.25)' }}>›</span>
-            <span className="warriors-title text-sm font-semibold" style={{ color: '#f0c84a' }}>Étudiants</span>
+        <header
+          className="sticky top-0 z-40 flex items-center justify-between px-8 h-16"
+          style={{ background: 'rgba(10,15,28,0.92)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--sv-border)' }}
+        >
+          <div className="flex items-center gap-2 text-[12.5px]">
+            <span style={{ color: 'var(--sv-text-faint)' }}>Admin</span>
+            <span style={{ color: 'var(--sv-text-faint)' }}>/</span>
+            <span className="sv-heading font-semibold" style={{ color: 'var(--sv-text)' }}>Étudiants</span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex p-1 rounded-xl gap-1" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(196,150,48,0.1)' }}>
-              {[['grid', '⊞', 'Cartes'], ['table', '≡', 'Tableau']].map(([mode, icon, label]) => (
-                <button key={mode} onClick={() => setViewMode(mode)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold warriors-font transition-all"
-                  style={viewMode === mode ? { background: 'linear-gradient(135deg,#c49630,#f0c84a)', color: '#0a1628' } : { color: 'rgba(148,163,184,0.45)' }}>
-                  {icon} <span className="hidden sm:inline ml-1">{label}</span>
+          <div className="flex items-center gap-2.5">
+            <div className="flex p-0.5 rounded-lg gap-0.5" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+              {[['grid', LayoutGrid, 'Cartes'], ['table', List, 'Tableau']].map(([mode, Icon, label]) => (
+                <button
+                  key={mode} onClick={() => setViewMode(mode)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-all"
+                  style={viewMode === mode ? { background: 'var(--sv-accent)', color: 'var(--sv-accent-ink)' } : { color: 'var(--sv-text-faint)' }}
+                >
+                  <Icon size={13} strokeWidth={1.75} /><span className="hidden sm:inline">{label}</span>
                 </button>
               ))}
             </div>
-            <button onClick={() => { setCurrent(null); setSaveError(''); setShowForm(true); }}
-              className="btn-gold flex items-center gap-2 px-5 py-2.5 rounded-2xl warriors-title text-sm font-bold"
-              style={{ color: '#0a1628', boxShadow: '0 4px 20px rgba(196,150,48,0.25)' }}>
-              <span className="font-black text-base">+</span> Nouvel étudiant
+            <button onClick={() => { setCurrent(null); setSaveError(''); setShowForm(true); }} className="sv-btn sv-btn-primary px-4 py-2">
+              <Plus size={15} strokeWidth={2} /> Nouvel étudiant
             </button>
           </div>
         </header>
 
-        <div className="px-8 py-7 space-y-6">
+        <div className="px-8 py-6 space-y-5">
           <div>
-            <h1 className="warriors-title text-3xl font-black" style={{ color: '#e8eaf0' }}>
-              Gestion des <span className="gold-text">Étudiants</span>
-            </h1>
-            <p className="warriors-font text-sm mt-1" style={{ color: 'rgba(148,163,184,0.4)' }}>
+            <h1 className="sv-heading text-[22px] font-bold" style={{ color: 'var(--sv-text)' }}>Gestion des étudiants</h1>
+            <p className="text-[13px] mt-1" style={{ color: 'var(--sv-text-faint)' }}>
               {filtered.length} étudiant{filtered.length !== 1 ? 's' : ''} · {Object.keys(grouped).length} groupe{Object.keys(grouped).length !== 1 ? 's' : ''}
             </p>
           </div>
 
           {error && (
-            <div className="flex items-center gap-3 px-5 py-4 rounded-2xl animate-in"
-              style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.15)' }}>
-              <span style={{ color: '#f87171' }}>⚠</span>
-              <span className="warriors-font text-sm" style={{ color: 'rgba(248,113,113,0.75)' }}>{error}</span>
+            <div className="flex items-center gap-2.5 px-4 py-3 rounded-lg sv-in" style={{ background: 'var(--sv-danger-soft)', border: '1px solid var(--sv-danger-border)' }}>
+              <AlertTriangle size={15} strokeWidth={1.75} style={{ color: 'var(--sv-danger)' }} />
+              <span className="text-[13px]" style={{ color: '#F0A8A2' }}>{error}</span>
             </div>
           )}
 
-          {/* Save error banner — visible in the page if modal closed */}
           {saveError && (
-            <div className="flex items-center justify-between gap-3 px-5 py-4 rounded-2xl animate-in"
-              style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.15)' }}>
-              <div className="flex items-center gap-3">
-                <span style={{ color: '#f87171' }}>⚠</span>
-                <span className="warriors-font text-sm" style={{ color: 'rgba(248,113,113,0.75)' }}>{saveError}</span>
+            <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-lg sv-in" style={{ background: 'var(--sv-danger-soft)', border: '1px solid var(--sv-danger-border)' }}>
+              <div className="flex items-center gap-2.5">
+                <AlertTriangle size={15} strokeWidth={1.75} style={{ color: 'var(--sv-danger)' }} />
+                <span className="text-[13px]" style={{ color: '#F0A8A2' }}>{saveError}</span>
               </div>
-              <button onClick={() => setSaveError('')} className="text-xs" style={{ color: 'rgba(248,113,113,0.5)' }}>✕</button>
+              <button onClick={() => setSaveError('')} className="sv-icon-btn" style={{ width: 24, height: 24 }}><X size={12} /></button>
             </div>
           )}
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {statCards.map(({ label, val, icon, color }) => (
-              <div key={label} className="p-4 rounded-2xl animate-in"
-                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.07)' }}>
-                <span className="text-xl" style={{ color }}>{icon}</span>
-                <p className="warriors-title text-2xl font-black mt-2" style={{ color: '#e8eaf0' }}>{val}</p>
-                <p className="warriors-font text-[10px] mt-1 tracking-wide" style={{ color: 'rgba(148,163,184,0.4)' }}>{label.toUpperCase()}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {statCards.map(({ label, val, icon: Icon }) => (
+              <div key={label} className="sv-card sv-in flex items-center gap-3.5 p-4">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'var(--sv-accent-soft)', border: '1px solid var(--sv-accent-border)' }}>
+                  <Icon size={16} strokeWidth={1.75} style={{ color: 'var(--sv-accent)' }} />
+                </div>
+                <div>
+                  <p className="sv-heading text-lg font-bold" style={{ color: 'var(--sv-text)' }}>{val}</p>
+                  <p className="text-[11.5px]" style={{ color: 'var(--sv-text-faint)' }}>{label}</p>
+                </div>
               </div>
             ))}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 p-5 rounded-2xl"
-            style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.1)' }}>
-            <div className="relative flex-1 min-w-[180px]">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: 'rgba(196,150,48,0.4)' }}>⊕</span>
-              <input value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="Nom, téléphone, lycée…"
-                className="input-warriors w-full pl-10 pr-4 py-2.5 rounded-xl text-sm" />
+          <div className="flex flex-wrap items-center gap-2.5 p-3.5 rounded-xl sv-card">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search size={14} strokeWidth={1.75} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--sv-text-faint)' }} />
+              <input
+                value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Nom, téléphone, établissement…"
+                className="sv-input w-full pl-9 pr-3 py-2.5 text-[13px]"
+              />
             </div>
-            <select value={filterLevel} onChange={e => setFilterLevel(e.target.value)}
-              className="input-warriors px-4 py-2.5 rounded-xl text-sm min-w-[160px]" style={{ cursor: 'pointer' }}>
+            <select value={filterLevel} onChange={e => setFilterLevel(e.target.value)} className="sv-input px-3.5 py-2.5 text-[13px] min-w-[160px]" style={{ cursor: 'pointer' }}>
               <option value="all">Tous les niveaux</option>
               {levels.map(l => <option key={l} value={l}>{l}</option>)}
             </select>
-            <select value={filterField} onChange={e => setFilterField(e.target.value)}
-              className="input-warriors px-4 py-2.5 rounded-xl text-sm min-w-[160px]" style={{ cursor: 'pointer' }}>
+            <select value={filterField} onChange={e => setFilterField(e.target.value)} className="sv-input px-3.5 py-2.5 text-[13px] min-w-[160px]" style={{ cursor: 'pointer' }}>
               <option value="all">Toutes les filières</option>
               {fields.map(f => <option key={f} value={f}>{f}</option>)}
             </select>
             {hasFilters && (
-              <button onClick={() => { setFilterLevel('all'); setFilterField('all'); setSearch(''); }}
-                className="px-4 py-2.5 rounded-xl text-xs warriors-font font-medium transition-all whitespace-nowrap"
-                style={{ color: 'rgba(196,150,48,0.6)', border: '1px solid rgba(196,150,48,0.15)', background: 'rgba(196,150,48,0.05)' }}>
-                Réinitialiser
+              <button onClick={() => { setFilterLevel('all'); setFilterField('all'); setSearch(''); }} className="sv-btn sv-btn-ghost px-3 py-2.5">
+                <RotateCcw size={13} strokeWidth={1.75} /> Réinitialiser
               </button>
             )}
           </div>
 
           {viewMode === 'grid' && (
             loading && students.length === 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="rounded-2xl p-5 space-y-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,150,48,0.07)' }}>
-                    {[['70%', 'h-4'], ['50%', 'h-3'], ['100%', 'h-2.5'], ['80%', 'h-2.5']].map(([w, h], j) => (
-                      <div key={j} className={`${h} rounded-full shimmer`} style={{ background: 'rgba(196,150,48,0.06)', width: w }} />
+                  <div key={i} className="sv-card p-4 space-y-3.5">
+                    {[['70%', 'h-3.5'], ['50%', 'h-3'], ['100%', 'h-2.5'], ['80%', 'h-2.5']].map(([w, h], j) => (
+                      <div key={j} className={`${h} rounded-full sv-shimmer`} style={{ background: 'var(--sv-surface-2)', width: w }} />
                     ))}
                   </div>
                 ))}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 rounded-2xl"
-                style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(196,150,48,0.07)' }}>
-                <span className="text-6xl mb-4 opacity-20">👥</span>
-                <p className="warriors-title font-bold text-lg" style={{ color: 'rgba(232,234,240,0.25)' }}>Aucun étudiant trouvé</p>
-                <p className="warriors-font text-sm mt-1" style={{ color: 'rgba(148,163,184,0.25)' }}>Ajustez vos filtres ou ajoutez un étudiant</p>
+              <div className="flex flex-col items-center justify-center py-16 rounded-xl sv-card">
+                <Users size={36} strokeWidth={1.5} style={{ color: 'var(--sv-text-faint)', marginBottom: 12 }} />
+                <p className="sv-heading font-semibold text-[14px]" style={{ color: 'var(--sv-text-dim)' }}>Aucun étudiant trouvé</p>
+                <p className="text-[12.5px] mt-1" style={{ color: 'var(--sv-text-faint)' }}>Ajustez vos filtres ou ajoutez un étudiant</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filtered.map((s, i) => <StudentCard key={s.id} student={s} index={i} onEdit={openEdit} onDelete={openDelete} />)}
               </div>
             )
@@ -884,10 +1029,9 @@ const StudentsList = () => {
 
           {viewMode === 'table' && (
             Object.keys(grouped).length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 rounded-2xl"
-                style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(196,150,48,0.07)' }}>
-                <span className="text-6xl mb-4 opacity-20">≡</span>
-                <p className="warriors-title font-bold text-lg" style={{ color: 'rgba(232,234,240,0.25)' }}>Aucun groupe trouvé</p>
+              <div className="flex flex-col items-center justify-center py-16 rounded-xl sv-card">
+                <List size={36} strokeWidth={1.5} style={{ color: 'var(--sv-text-faint)', marginBottom: 12 }} />
+                <p className="sv-heading font-semibold text-[14px]" style={{ color: 'var(--sv-text-dim)' }}>Aucun groupe trouvé</p>
               </div>
             ) : (
               <TableView grouped={grouped} onEdit={openEdit} onDelete={openDelete} />
@@ -904,7 +1048,6 @@ const StudentsList = () => {
           onClose={() => { setShowForm(false); setCurrent(null); setSaveError(''); }}
           levels={levels}
           fields={fields}
-          saveError={saveError}
         />
       )}
       {showDelete && current && (

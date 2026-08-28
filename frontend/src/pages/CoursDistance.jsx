@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import api from '../services/api';
 import warriosImg from "./../assets/warrios.png";
 
-
 /* ─────────────────────────────── STYLES ─────────────────────────────── */
 if (!document.getElementById('cd-pro-style')) {
   const s = document.createElement('style');
@@ -280,8 +279,6 @@ export default function CoursDistance() {
   const [lvlId,    setLvlId]    = useState(null);
   const [matId,    setMatId]    = useState(null);
   const [scrolled, setScrolled] = useState(false);
-  const [setMenuOpen] = useState(false);  
-
   /* ── Fetch data ── */
   useEffect(() => {
     setLoading(true);
@@ -309,7 +306,6 @@ export default function CoursDistance() {
   const lvl    = niveaux.find(l => l.id === lvlId);
   const effMat = matId || lvl?.matieres?.[0]?.id;
   const mat    = lvl?.matieres?.find(m => m.id === effMat) || lvl?.matieres?.[0];
-  const navTop = scrolled ? 62 : 70;
 
   return (
     <div className="cd-root relative min-h-screen bg-[#080f1e] text-white overflow-x-hidden">
@@ -508,12 +504,11 @@ export default function CoursDistance() {
     </a>
 
     {/* Email */}
-    <a href="mailto:learnwyn@gmail.com"
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '12px 24px', borderRadius: 50, fontWeight: 600, fontSize: '.85rem', textDecoration: 'none', color: '#f4d677', background: 'rgba(212,167,71,0.08)', border: '1.5px solid rgba(212,167,71,0.3)', fontFamily: 'Inter,sans-serif', transition: 'transform .2s, border-color .2s', whiteSpace: 'nowrap' }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.borderColor = 'rgba(212,167,71,0.6)'; e.currentTarget.style.background = 'rgba(212,167,71,0.13)'; }}
-      onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.borderColor = 'rgba(212,167,71,0.3)'; e.currentTarget.style.background = 'rgba(212,167,71,0.08)'; }}>
-      ✉ Email
-    </a>
+    
+<Link to="/inscription"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '12px 24px', borderRadius: 50, fontWeight: 600, fontSize: '.85rem', textDecoration: 'none', color: '#f4d677', background: 'rgba(212,167,71,0.08)', border: '1.5px solid rgba(212,167,71,0.3)', fontFamily: 'Inter,sans-serif', transition: 'transform .2s, border-color .2s', whiteSpace: 'nowrap' }}   >   
+                S'inscrire <span>→</span>
+              </Link>
   </div>
 
   {/* Social proof micro-texte */}
@@ -672,6 +667,7 @@ export default function CoursDistance() {
           <span style={{ fontSize: '.75rem', color: '#334155', fontFamily: 'Syne,sans-serif', display: 'flex', alignItems: 'center', gap: 6 }}>⚔ Excellence & Détermination</span>
         </div>
       </footer>
+
     </div>
   );
 }

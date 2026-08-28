@@ -1,39 +1,184 @@
-// src/components/ProfilePage.js
+// src/components/ProfilePage.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { profileAPI } from '../services/profileService';
 import { getAuthToken } from '../services/api';
 import Sidebar from './Sidebar';
+import {
+  Pencil, X, Phone, CheckCircle2, Clock, CalendarDays, LogOut, Save,
+  Lock, Eye, EyeOff, Shield, Hash, AlertTriangle, Sun, Moon, ChevronRight,
+  Check, Circle, Users, GraduationCap, BookOpen, User as UserIcon,
+} from 'lucide-react';
 
-/* ─── Warriors CSS injection ─── */
-if (!document.getElementById('warriors-profile-style')) {
-  const s = document.createElement('style');
-  s.id = 'warriors-profile-style';
+/* ══════════════════════════════════════════════════════════════ */
+/*  DESIGN TOKENS — shared across the app, dark + light variants */
+/* ══════════════════════════════════════════════════════════════ */
+{
+  let s = document.getElementById('sv-design-tokens');
+  if (!s) {
+    s = document.createElement('style');
+    s.id = 'sv-design-tokens';
+    document.head.appendChild(s);
+  }
   s.innerHTML = `
-    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap');
-    .warriors-font  { font-family: 'Outfit', sans-serif; }
-    .warriors-title { font-family: 'Sora', sans-serif; }
-    .gold-text { background: linear-gradient(135deg,#c49630,#f0c84a); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-    .btn-gold { background: linear-gradient(135deg,#c49630 0%,#f0c84a 100%); transition: all 0.2s; }
-    .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(196,150,48,0.35); }
-    .input-warriors { background: rgba(255,255,255,0.04); border: 1px solid rgba(196,150,48,0.15); color: #e8eaf0; font-family:'Outfit',sans-serif; transition: border-color 0.2s, box-shadow 0.2s; }
-    .input-warriors:focus { outline:none; border-color:rgba(196,150,48,0.55); box-shadow:0 0 0 3px rgba(196,150,48,0.08); }
-    .input-warriors::placeholder { color:rgba(148,163,184,0.35); }
-    .input-warriors:disabled { opacity:0.4; cursor:not-allowed; }
-    select.input-warriors option { background:#0d1c30; color:#e8eaf0; }
-    .scrollbar-warriors::-webkit-scrollbar { width:4px; }
-    .scrollbar-warriors::-webkit-scrollbar-track { background:transparent; }
-    .scrollbar-warriors::-webkit-scrollbar-thumb { background:rgba(196,150,48,0.2); border-radius:4px; }
-    @keyframes fadeInUp { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:translateY(0);} }
-    .animate-in { animation: fadeInUp 0.35s ease forwards; }
-    @keyframes shimmer { 0%,100%{opacity:1} 50%{opacity:0.4} }
-    .shimmer { animation: shimmer 1.6s ease-in-out infinite; }
-    @keyframes pulse-gold { 0%,100%{box-shadow:0 0 0 0 rgba(196,150,48,0.3);} 50%{box-shadow:0 0 0 8px rgba(196,150,48,0);} }
-    .pulse-gold { animation: pulse-gold 2s ease-in-out infinite; }
-    @keyframes spin-slow { to{transform:rotate(360deg);} }
-    .spin-slow { animation: spin-slow 1.2s linear infinite; }
+    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+      --sv-bg:            #0A0F1C;
+      --sv-surface:       #10172A;
+      --sv-surface-2:     #141C32;
+      --sv-border:        rgba(255,255,255,0.07);
+      --sv-border-strong: rgba(255,255,255,0.14);
+      --sv-text:          #E7EAF0;
+      --sv-text-dim:      #8B93A6;
+      --sv-text-faint:    #5C6478;
+      --sv-accent:        #C9A24D;
+      --sv-accent-hover:  #D8B563;
+      --sv-accent-ink:    #17130A;
+      --sv-accent-soft:   rgba(201,162,77,0.12);
+      --sv-accent-border: rgba(201,162,77,0.30);
+      --sv-success:       #5FAE83;
+      --sv-success-soft:  rgba(95,174,131,0.12);
+      --sv-success-border:rgba(95,174,131,0.30);
+      --sv-warning:       #C99A55;
+      --sv-warning-soft:  rgba(201,154,85,0.12);
+      --sv-warning-border:rgba(201,154,85,0.30);
+      --sv-danger:        #E2574C;
+      --sv-danger-soft:   rgba(226,87,76,0.10);
+      --sv-danger-border: rgba(226,87,76,0.28);
+      --sv-info:          #6AA3D9;
+      --sv-info-soft:     rgba(106,163,217,0.12);
+      --sv-info-border:   rgba(106,163,217,0.30);
+      --sv-violet:        #9E8FE0;
+      --sv-violet-soft:   rgba(158,143,224,0.12);
+      --sv-violet-border: rgba(158,143,224,0.30);
+      --sv-radius-sm:     8px;
+      --sv-radius:        10px;
+      --sv-radius-lg:     14px;
+      --sv-shadow:        0 1px 2px rgba(0,0,0,0.4);
+      --sv-shadow-md:     0 8px 24px rgba(0,0,0,0.35);
+    }
+
+    /* ── Light theme override — activated via <html data-theme="light"> ── */
+    :root[data-theme="light"] {
+      --sv-bg:            #F1F2F6;
+      --sv-surface:       #FFFFFF;
+      --sv-surface-2:     #F6F7FA;
+      --sv-border:        rgba(15,23,42,0.08);
+      --sv-border-strong: rgba(15,23,42,0.16);
+      --sv-text:          #171B26;
+      --sv-text-dim:      #5B6475;
+      --sv-text-faint:    #8A93A3;
+      --sv-accent:        #B8873A;
+      --sv-accent-hover:  #A67830;
+      --sv-accent-ink:    #FFFFFF;
+      --sv-accent-soft:   rgba(184,135,58,0.12);
+      --sv-accent-border: rgba(184,135,58,0.35);
+      --sv-success:       #3F8F68;
+      --sv-success-soft:  rgba(63,143,104,0.12);
+      --sv-success-border:rgba(63,143,104,0.32);
+      --sv-warning:       #B07F2E;
+      --sv-warning-soft:  rgba(176,127,46,0.12);
+      --sv-warning-border:rgba(176,127,46,0.32);
+      --sv-danger:        #C43D33;
+      --sv-danger-soft:   rgba(196,61,51,0.10);
+      --sv-danger-border: rgba(196,61,51,0.30);
+      --sv-info:          #3E7FB8;
+      --sv-info-soft:     rgba(62,127,184,0.12);
+      --sv-info-border:   rgba(62,127,184,0.32);
+      --sv-violet:        #7A6BC4;
+      --sv-violet-soft:   rgba(122,107,196,0.12);
+      --sv-violet-border: rgba(122,107,196,0.32);
+      --sv-shadow:        0 1px 2px rgba(15,23,42,0.07);
+      --sv-shadow-md:     0 8px 24px rgba(15,23,42,0.10);
+    }
+    :root[data-theme="light"] select.sv-input option { background: #FFFFFF; color: var(--sv-text); }
+    :root[data-theme="light"] .sv-scroll::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.14); }
+
+    .sv-root { font-family: 'Inter', sans-serif; }
+    .sv-heading { font-family: 'Manrope', sans-serif; letter-spacing: -0.01em; }
+
+    .sv-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      font-family: 'Inter', sans-serif; font-weight: 600; font-size: 13px;
+      border-radius: var(--sv-radius-sm); border: 1px solid transparent;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      cursor: pointer; white-space: nowrap;
+    }
+    .sv-btn-primary { background: var(--sv-accent); color: var(--sv-accent-ink); }
+    .sv-btn-primary:hover { background: var(--sv-accent-hover); }
+    .sv-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .sv-btn-ghost { background: transparent; border-color: var(--sv-border-strong); color: var(--sv-text-dim); }
+    .sv-btn-ghost:hover { border-color: var(--sv-text-faint); color: var(--sv-text); background: rgba(128,128,128,0.06); }
+    .sv-btn-info { background: var(--sv-info-soft); border-color: var(--sv-info-border); color: var(--sv-info); }
+    .sv-btn-info:hover { background: rgba(106,163,217,0.22); }
+    .sv-btn-danger-soft { background: var(--sv-danger-soft); border-color: var(--sv-danger-border); color: var(--sv-danger); }
+    .sv-btn-danger-soft:hover { background: rgba(226,87,76,0.2); }
+    .sv-icon-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: var(--sv-radius-sm);
+      border: 1px solid var(--sv-border); background: transparent; color: var(--sv-text-dim);
+      transition: background 0.15s, color 0.15s, border-color 0.15s; cursor: pointer;
+    }
+    .sv-icon-btn:hover { background: rgba(128,128,128,0.08); color: var(--sv-text); border-color: var(--sv-border-strong); }
+
+    input.sv-input, select.sv-input, textarea.sv-input {
+      background-color: var(--sv-surface-2) !important;
+      border: 1px solid var(--sv-border) !important;
+      color: var(--sv-text) !important;
+      font-family: 'Inter', sans-serif; font-size: 13.5px;
+      border-radius: var(--sv-radius-sm); transition: border-color 0.15s;
+      appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    }
+    select.sv-input {
+      background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%238B93A6' stroke-width='1.75'%3E%3Cpath d='M6 8l4 4 4-4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px;
+      padding-right: 34px !important;
+    }
+    input.sv-input::placeholder, textarea.sv-input::placeholder { color: var(--sv-text-faint) !important; }
+    input.sv-input:focus, select.sv-input:focus, textarea.sv-input:focus { outline: none; border-color: var(--sv-accent-border) !important; }
+    input.sv-input.error, textarea.sv-input.error { border-color: var(--sv-danger-border) !important; }
+    input.sv-input:disabled, select.sv-input:disabled, textarea.sv-input:disabled { opacity: 0.5; cursor: not-allowed; }
+    select.sv-input option { background: var(--sv-surface); color: var(--sv-text); }
+    :root[data-theme="light"] select.sv-input {
+      background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%235B6475' stroke-width='1.75'%3E%3Cpath d='M6 8l4 4 4-4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+
+    .sv-card {
+      background: var(--sv-surface); border: 1px solid var(--sv-border);
+      border-radius: var(--sv-radius-lg); transition: border-color 0.15s;
+    }
+
+    .sv-tag {
+      display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600;
+      padding: 3px 9px; border-radius: 6px; line-height: 1.4;
+    }
+
+    .sv-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+    .sv-scroll::-webkit-scrollbar-track { background: transparent; }
+    .sv-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10); border-radius: 4px; }
+
+    @keyframes sv-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .sv-in { animation: sv-in 0.22s ease forwards; }
+    @keyframes sv-spin { to { transform: rotate(360deg); } }
+    .sv-spin { animation: sv-spin 0.8s linear infinite; }
+
+    .sv-stat-btn { text-align: left; cursor: pointer; transition: border-color 0.15s, transform 0.15s; }
+    .sv-stat-btn:hover { transform: translateY(-2px); border-color: var(--sv-border-strong); }
+
+    .sv-theme-option { cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+    .sv-theme-option.active { border-color: var(--sv-accent-border) !important; background: var(--sv-accent-soft); }
   `;
-  document.head.appendChild(s);
+}
+
+/* ── Apply any previously saved theme immediately, on whichever page loads first ── */
+if (typeof window !== 'undefined') {
+  const savedTheme = localStorage.getItem('sv-theme');
+  if (savedTheme === 'light' || savedTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }
 }
 
 /* ─── Constants ─── */
@@ -42,64 +187,41 @@ const AVATARS = [
   '🦁','🐯','🦊','🐺','🦅','🦋','⚡','🌟','🔥','💎','🏆','🎯','🚀',
 ];
 
-const getAvatarGrad = (id) => {
-  const grads = [
-    'linear-gradient(135deg,#6366f1,#8b5cf6)',
-    'linear-gradient(135deg,#c49630,#f0c84a)',
-    'linear-gradient(135deg,#3b82f6,#06b6d4)',
-    'linear-gradient(135deg,#ec4899,#f43f5e)',
-    'linear-gradient(135deg,#10b981,#14b8a6)',
-  ];
-  return grads[(id || 0) % grads.length];
-};
+const AVATAR_COLORS = ['#8B93E8', '#C9A24D', '#5CADC2', '#D18BA0', '#5FAE83', '#C97A6B'];
+const getAvatarColor = (id) => AVATAR_COLORS[(id || 0) % AVATAR_COLORS.length];
 
-/* ── Password strength ── */
 const getStrength = (pw) => {
-  const checks = [
-    pw.length >= 8,
-    /[A-Z]/.test(pw),
-    /[a-z]/.test(pw),
-    /[0-9]/.test(pw),
-    /[^A-Za-z0-9]/.test(pw),
-  ];
+  const checks = [pw.length >= 8, /[A-Z]/.test(pw), /[a-z]/.test(pw), /[0-9]/.test(pw), /[^A-Za-z0-9]/.test(pw)];
   return checks.filter(Boolean).length;
 };
-const STRENGTH_LABELS = ['','Très faible','Faible','Moyen','Fort','Très fort'];
-const STRENGTH_COLORS = ['','#ef4444','#f97316','#f0c84a','#60a5fa','#4ade80'];
+const STRENGTH_LABELS = ['', 'Très faible', 'Faible', 'Moyen', 'Fort', 'Très fort'];
+const STRENGTH_TONE = ['', 'danger', 'danger', 'warning', 'info', 'success'];
+const TONE_COLOR = { danger: 'var(--sv-danger)', warning: 'var(--sv-warning)', info: 'var(--sv-info)', success: 'var(--sv-success)' };
 
 /* ══════════════════════════════════════════════════════════════ */
-/*  LABEL ROW helper                                             */
-/* ══════════════════════════════════════════════════════════════ */
 const LabelRow = ({ label, error }) => (
-  <div className="flex items-center justify-between mb-2">
-    <label className="text-[10px] font-semibold tracking-[0.12em] warriors-font"
-      style={{ color: 'rgba(196,150,48,0.45)' }}>{label}</label>
-    {error && <span className="text-[10px] warriors-font" style={{ color: '#f87171' }}>{error}</span>}
+  <div className="flex items-center justify-between mb-1.5">
+    <label className="text-[11px] font-semibold tracking-wide" style={{ color: 'var(--sv-text-faint)' }}>{label}</label>
+    {error && <span className="text-[11px]" style={{ color: 'var(--sv-danger)' }}>{error}</span>}
   </div>
 );
 
-const inp = (hasErr) =>
-  `input-warriors w-full px-4 py-3 rounded-xl text-sm warriors-font ${hasErr ? 'border-red-500/60' : ''}`;
+const inp = (hasErr) => `sv-input w-full px-3.5 py-2.5 text-[13.5px] ${hasErr ? 'error' : ''}`;
 
 /* ══════════════════════════════════════════════════════════════ */
 /*  AVATAR PICKER PANEL                                          */
 /* ══════════════════════════════════════════════════════════════ */
 const AvatarPicker = ({ current, onSelect, onClose }) => (
-  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 z-50 animate-in"
-    style={{ background: 'linear-gradient(145deg,#0d1c30,#080f1e)', border: '1px solid rgba(196,150,48,0.2)', borderRadius: '20px', padding: '16px', width: '280px', boxShadow: '0 24px 60px rgba(0,0,0,0.6)' }}>
-    <div className="flex items-center justify-between mb-3">
-      <p className="warriors-font text-[10px] font-semibold tracking-widest" style={{ color: 'rgba(196,150,48,0.5)' }}>CHOISIR UN AVATAR</p>
-      <button onClick={onClose} className="warriors-font text-xs" style={{ color: 'rgba(148,163,184,0.4)' }}>✕</button>
+  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 z-50 sv-in sv-card p-4" style={{ width: 260, boxShadow: 'var(--sv-shadow-md)' }}>
+    <div className="flex items-center justify-between mb-2.5">
+      <p className="text-[10.5px] font-semibold tracking-wide" style={{ color: 'var(--sv-text-faint)' }}>CHOISIR UN AVATAR</p>
+      <button onClick={onClose} className="sv-icon-btn" style={{ width: 22, height: 22 }}><X size={11} strokeWidth={2} /></button>
     </div>
     <div className="grid grid-cols-7 gap-1.5">
       {AVATARS.map(a => (
         <button key={a} type="button" onClick={() => { onSelect(a); onClose(); }}
-          className="w-9 h-9 rounded-xl text-lg flex items-center justify-center transition-all"
-          style={{
-            background: current === a ? 'linear-gradient(135deg,#c49630,#f0c84a)' : 'rgba(255,255,255,0.04)',
-            border: `1.5px solid ${current === a ? '#c49630' : 'transparent'}`,
-            transform: current === a ? 'scale(1.1)' : 'scale(1)',
-          }}>
+          className="w-8 h-8 rounded-lg text-base flex items-center justify-center transition-all"
+          style={{ background: current === a ? 'var(--sv-accent-soft)' : 'var(--sv-surface-2)', border: `1.5px solid ${current === a ? 'var(--sv-accent-border)' : 'var(--sv-border)'}` }}>
           {a}
         </button>
       ))}
@@ -110,20 +232,24 @@ const AvatarPicker = ({ current, onSelect, onClose }) => (
 /* ══════════════════════════════════════════════════════════════ */
 /*  STAT CARD                                                    */
 /* ══════════════════════════════════════════════════════════════ */
-const StatCard = ({ icon, label, val, color, border, textColor, path, navigate, index }) => (
-  <button onClick={() => path && navigate(path)}
-    className="p-5 rounded-2xl text-left transition-all duration-200 animate-in hover:-translate-y-1 group"
-    style={{
-      background: 'rgba(255,255,255,0.02)',
-      border: `1px solid ${border}`,
-      animationDelay: `${index * 60}ms`,
-    }}>
-    <span className="text-2xl">{icon}</span>
-    <p className="warriors-title text-3xl font-black mt-3" style={{ color: textColor }}>{val ?? 0}</p>
-    <p className="warriors-font text-[10px] mt-1 tracking-widest" style={{ color: 'rgba(148,163,184,0.4)' }}>{label.toUpperCase()}</p>
-    <p className="warriors-font text-[10px] mt-1 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: textColor }}>→ Voir</p>
-  </button>
-);
+const StatCard = ({ icon: Icon, label, val, tone, path, navigate, index }) => {
+  const TONE = {
+    info: { color: 'var(--sv-info)', soft: 'var(--sv-info-soft)', border: 'var(--sv-info-border)' },
+    success: { color: 'var(--sv-success)', soft: 'var(--sv-success-soft)', border: 'var(--sv-success-border)' },
+    violet: { color: 'var(--sv-violet)', soft: 'var(--sv-violet-soft)', border: 'var(--sv-violet-border)' },
+    accent: { color: 'var(--sv-accent)', soft: 'var(--sv-accent-soft)', border: 'var(--sv-accent-border)' },
+  }[tone];
+  return (
+    <button onClick={() => path && navigate(path)} className="sv-stat-btn sv-card sv-in p-4" style={{ animationDelay: `${index * 50}ms` }}>
+      <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-3" style={{ background: TONE.soft, border: `1px solid ${TONE.border}` }}>
+        <Icon size={15} strokeWidth={1.75} style={{ color: TONE.color }} />
+      </div>
+      <p className="sv-heading text-xl font-bold" style={{ color: 'var(--sv-text)' }}>{val ?? 0}</p>
+      <p className="text-[11px] mt-1" style={{ color: 'var(--sv-text-faint)' }}>{label}</p>
+      <p className="flex items-center gap-0.5 text-[10.5px] mt-1.5" style={{ color: TONE.color }}>Voir <ChevronRight size={11} strokeWidth={2} /></p>
+    </button>
+  );
+};
 
 /* ══════════════════════════════════════════════════════════════ */
 /*  MAIN PAGE                                                    */
@@ -139,21 +265,24 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState('info');
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
-  /* ── Profil form ── */
-  const [form, setForm] = useState({
-    prenom: '', nom: '', email: '', phoneNumber: '', bio: '', avatarEmoji: '👤',
-  });
+  const [theme, setTheme] = useState(() => (typeof window !== 'undefined' && localStorage.getItem('sv-theme')) || 'dark');
+
+  const [form, setForm] = useState({ prenom: '', nom: '', email: '', phoneNumber: '', bio: '', avatarEmoji: '👤' });
   const [formErrors, setFormErrors] = useState({});
 
-  /* ── Password form ── */
   const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
   const [pwErrors, setPwErrors] = useState({});
-  const [showPw, setShowPw]     = useState({ cur: false, nw: false, conf: false });
+  const [showPw, setShowPw] = useState({ cur: false, nw: false, conf: false });
 
   useEffect(() => {
     if (!getAuthToken()) { navigate('/login'); return; }
     loadProfile();
   }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('sv-theme', theme);
+  }, [theme]);
 
   const loadProfile = async () => {
     try {
@@ -171,7 +300,7 @@ const ProfilePage = () => {
         });
       }
     } catch { setError('Impossible de charger le profil.'); }
-    finally   { setLoading(false); }
+    finally { setLoading(false); }
   };
 
   const handleFormChange = (e) => {
@@ -246,248 +375,178 @@ const ProfilePage = () => {
 
   const sidebarW = sidebarCollapsed ? 72 : 240;
   const strength = getStrength(pwForm.newPassword);
+  const strengthTone = STRENGTH_TONE[strength];
   const fullName = profile ? `${profile.prenom || ''} ${profile.nom || ''}`.trim() : '—';
+  const avatarColor = getAvatarColor(profile?.id || 0);
 
-  /* ── Loading ── */
+  const TABS = [
+    { key: 'info',     label: 'Informations', icon: UserIcon },
+    { key: 'password', label: 'Mot de passe',  icon: Lock },
+    { key: 'account',  label: 'Compte',        icon: Shield },
+  ];
+
   if (loading) return (
-    <div className="min-h-screen warriors-font flex items-center justify-center"
-      style={{ background: 'linear-gradient(145deg,#080f1e,#060c18)' }}>
+    <div className="sv-root min-h-screen flex items-center justify-center" style={{ background: 'var(--sv-bg)' }}>
       <div className="text-center">
-        <div className="w-14 h-14 rounded-full border-4 mx-auto mb-4 spin-slow"
-          style={{ borderColor: 'rgba(196,150,48,0.15)', borderTopColor: '#f0c84a' }} />
-        <p className="warriors-font text-sm" style={{ color: 'rgba(196,150,48,0.6)' }}>Chargement du profil…</p>
+        <div className="w-10 h-10 rounded-full border-[3px] mx-auto mb-3 sv-spin" style={{ borderColor: 'var(--sv-border-strong)', borderTopColor: 'var(--sv-accent)' }} />
+        <p className="text-[13px]" style={{ color: 'var(--sv-text-faint)' }}>Chargement du profil…</p>
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen warriors-font" style={{ background: 'linear-gradient(145deg,#080f1e 0%,#060c18 100%)' }}>
-
-      {/* ── Ambient bg ── */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute rounded-full" style={{ width:'700px',height:'700px',background:'radial-gradient(circle,rgba(196,150,48,0.04),transparent 70%)',top:'-15%',left:'-10%',filter:'blur(40px)' }} />
-        <div className="absolute rounded-full" style={{ width:'500px',height:'500px',background:'radial-gradient(circle,rgba(99,102,241,0.04),transparent 70%)',bottom:'-10%',right:'-5%',filter:'blur(40px)' }} />
-        <div className="absolute inset-0" style={{ backgroundImage:'radial-gradient(circle,rgba(196,150,48,0.04) 1px,transparent 1px)',backgroundSize:'42px 42px' }} />
-      </div>
-
+    <div className="sv-root min-h-screen" style={{ background: 'var(--sv-bg)' }}>
       <Sidebar activeItem="settings" collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(v => !v)} />
 
       <main className="relative z-10 transition-all duration-300" style={{ marginLeft: `${sidebarW}px` }}>
-
-        {/* ── Top Bar ── */}
-        <header className="sticky top-0 z-40 flex items-center justify-between px-8 h-[72px]"
-          style={{ background:'rgba(6,12,24,0.9)',backdropFilter:'blur(20px)',borderBottom:'1px solid rgba(196,150,48,0.08)' }}>
-          <div className="flex items-center gap-3">
-            <span className="warriors-font text-xs" style={{ color:'rgba(148,163,184,0.35)' }}>Admin</span>
-            <span style={{ color:'rgba(196,150,48,0.25)' }}>›</span>
-            <span className="warriors-title text-sm font-semibold" style={{ color:'#f0c84a' }}>Mon Profil</span>
+        <header
+          className="sticky top-0 z-40 flex items-center justify-between px-8 h-16"
+          style={{ background: 'color-mix(in srgb, var(--sv-bg) 92%, transparent)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--sv-border)' }}
+        >
+          <div className="flex items-center gap-2 text-[12.5px]">
+            <span style={{ color: 'var(--sv-text-faint)' }}>Admin</span>
+            <span style={{ color: 'var(--sv-text-faint)' }}>/</span>
+            <span className="sv-heading font-semibold" style={{ color: 'var(--sv-text)' }}>Mon profil</span>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="warriors-font text-xs" style={{ color:'rgba(148,163,184,0.3)' }}>{getMembershipDuration()}</span>
-            <button onClick={() => { localStorage.clear(); navigate('/login'); }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs warriors-font transition-all"
-              style={{ border:'1px solid rgba(239,68,68,0.2)',color:'rgba(248,113,113,0.5)',background:'rgba(239,68,68,0.06)' }}
-              onMouseEnter={e => e.currentTarget.style.background='rgba(239,68,68,0.12)'}
-              onMouseLeave={e => e.currentTarget.style.background='rgba(239,68,68,0.06)'}>
-              🚪 <span className="hidden sm:inline">Déconnexion</span>
+          <div className="flex items-center gap-2.5">
+            <span className="text-[12px]" style={{ color: 'var(--sv-text-faint)' }}>{getMembershipDuration()}</span>
+            <button onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} className="sv-icon-btn" title="Changer de thème">
+              {theme === 'dark' ? <Sun size={15} strokeWidth={1.75} /> : <Moon size={15} strokeWidth={1.75} />}
+            </button>
+            <button onClick={() => { localStorage.clear(); navigate('/login'); }} className="sv-btn sv-btn-danger-soft px-3.5 py-2">
+              <LogOut size={13} strokeWidth={1.75} /> <span className="hidden sm:inline">Déconnexion</span>
             </button>
           </div>
         </header>
 
-        <div className="px-8 py-7 space-y-6">
-
-          {/* ── Page title ── */}
+        <div className="px-8 py-6 space-y-5">
           <div>
-            <h1 className="warriors-title text-3xl font-black" style={{ color:'#e8eaf0' }}>
-              Mon <span className="gold-text">Profil</span>
-            </h1>
-            <p className="warriors-font text-sm mt-1" style={{ color:'rgba(148,163,184,0.4)' }}>
-              Gérez vos informations personnelles et la sécurité de votre compte
-            </p>
+            <h1 className="sv-heading text-[22px] font-bold" style={{ color: 'var(--sv-text)' }}>Mon profil</h1>
+            <p className="text-[13px] mt-1" style={{ color: 'var(--sv-text-faint)' }}>Gérez vos informations personnelles et la sécurité de votre compte</p>
           </div>
 
-          {/* ── Notifications ── */}
           {successMsg && (
-            <div className="flex items-center gap-3 px-5 py-4 rounded-2xl animate-in"
-              style={{ background:'rgba(34,197,94,0.08)',border:'1px solid rgba(34,197,94,0.2)' }}>
-              <span style={{ color:'#4ade80',fontSize:'18px' }}>✓</span>
-              <span className="warriors-font text-sm font-semibold" style={{ color:'#4ade80' }}>{successMsg}</span>
+            <div className="flex items-center gap-2.5 px-4 py-3 rounded-lg sv-in" style={{ background: 'var(--sv-success-soft)', border: '1px solid var(--sv-success-border)' }}>
+              <CheckCircle2 size={16} strokeWidth={1.75} style={{ color: 'var(--sv-success)' }} />
+              <span className="text-[13px] font-medium" style={{ color: 'var(--sv-success)' }}>{successMsg}</span>
             </div>
           )}
           {error && (
-            <div className="flex items-center gap-3 px-5 py-4 rounded-2xl animate-in"
-              style={{ background:'rgba(239,68,68,0.07)',border:'1px solid rgba(239,68,68,0.15)' }}>
-              <span style={{ color:'#f87171' }}>⚠</span>
-              <span className="warriors-font text-sm" style={{ color:'rgba(248,113,113,0.8)' }}>{error}</span>
-              <button onClick={() => setError('')} className="ml-auto warriors-font text-xs" style={{ color:'rgba(248,113,113,0.4)' }}>✕</button>
+            <div className="flex items-center gap-2.5 px-4 py-3 rounded-lg sv-in" style={{ background: 'var(--sv-danger-soft)', border: '1px solid var(--sv-danger-border)' }}>
+              <AlertTriangle size={15} strokeWidth={1.75} style={{ color: 'var(--sv-danger)' }} />
+              <span className="text-[13px]" style={{ color: 'var(--sv-danger)' }}>{error}</span>
+              <button onClick={() => setError('')} className="ml-auto sv-icon-btn" style={{ width: 22, height: 22 }}><X size={11} strokeWidth={2} /></button>
             </div>
           )}
 
-          {/* ── Layout ── */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
 
             {/* ════ COLONNE GAUCHE ════ */}
-            <div className="xl:col-span-1 space-y-5">
+            <div className="xl:col-span-1 space-y-4">
 
               {/* Hero card */}
-              <div className="relative rounded-3xl overflow-hidden animate-in"
-                style={{ background:'linear-gradient(145deg,rgba(13,24,44,0.98),rgba(8,15,30,0.95))',border:'1px solid rgba(196,150,48,0.12)' }}>
-                {/* Gold stripe top */}
-                <div className="h-0.5 bg-gradient-to-r from-[#c49630] via-[#f0c84a] to-transparent" />
-                {/* Ambient glow */}
-                <div className="absolute top-0 left-0 right-0 h-32 pointer-events-none"
-                  style={{ background:'radial-gradient(ellipse at 50% -10%,rgba(196,150,48,0.12),transparent 70%)' }} />
-
-                <div className="relative p-7 text-center">
-                  {/* Avatar */}
-                  <div className="relative inline-block mb-5">
-                    <div className="w-24 h-24 rounded-3xl mx-auto flex items-center justify-center text-5xl pulse-gold"
-                      style={{ background:`${getAvatarGrad(profile?.id || 0)}`, boxShadow:'0 12px 40px rgba(0,0,0,0.5)' }}>
+              <div className="sv-card sv-in overflow-hidden">
+                <div className="h-[3px]" style={{ background: 'var(--sv-accent)' }} />
+                <div className="p-6 text-center">
+                  <div className="relative inline-block mb-4">
+                    <div className="w-20 h-20 rounded-2xl mx-auto flex items-center justify-center text-4xl" style={{ background: `${avatarColor}22`, border: `1px solid ${avatarColor}40` }}>
                       {form.avatarEmoji}
                     </div>
                     <button type="button" onClick={() => setShowAvatarPicker(s => !s)}
-                      className="absolute -bottom-2 -right-2 w-8 h-8 rounded-xl btn-gold flex items-center justify-center text-xs font-black shadow-lg"
-                      style={{ color:'#0a1628' }}>
-                      ✏
+                      className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-lg flex items-center justify-center"
+                      style={{ background: 'var(--sv-accent)', color: 'var(--sv-accent-ink)' }}>
+                      <Pencil size={12} strokeWidth={2} />
                     </button>
-                    {/* Avatar picker dropdown */}
                     <div className="relative">
                       {showAvatarPicker && (
-                        <AvatarPicker
-                          current={form.avatarEmoji}
-                          onSelect={a => setForm(p => ({ ...p, avatarEmoji: a }))}
-                          onClose={() => setShowAvatarPicker(false)}
-                        />
+                        <AvatarPicker current={form.avatarEmoji} onSelect={a => setForm(p => ({ ...p, avatarEmoji: a }))} onClose={() => setShowAvatarPicker(false)} />
                       )}
                     </div>
                   </div>
 
-                  {/* Name + role */}
-                  <h2 className="warriors-title text-xl font-black" style={{ color:'#e8eaf0' }}>{fullName}</h2>
-                  <p className="warriors-font text-sm mt-1" style={{ color:'rgba(148,163,184,0.4)' }}>{profile?.email}</p>
+                  <h2 className="sv-heading text-[16px] font-bold" style={{ color: 'var(--sv-text)' }}>{fullName}</h2>
+                  <p className="text-[12.5px] mt-1" style={{ color: 'var(--sv-text-faint)' }}>{profile?.email}</p>
 
-                  <div className="inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-full"
-                    style={{ background:'rgba(196,150,48,0.08)',border:'1px solid rgba(196,150,48,0.2)' }}>
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ background:'#f0c84a' }} />
-                    <span className="warriors-font text-[11px] font-bold" style={{ color:'#f0c84a' }}>{profile?.role || 'ADMIN'}</span>
-                  </div>
+                  <span className="sv-tag mt-3" style={{ background: 'var(--sv-accent-soft)', border: '1px solid var(--sv-accent-border)', color: 'var(--sv-accent)' }}>
+                    {profile?.role || 'ADMIN'}
+                  </span>
 
                   {form.bio && (
-                    <p className="mt-4 warriors-font text-xs leading-relaxed italic"
-                      style={{ color:'rgba(148,163,184,0.35)' }}>"{form.bio}"</p>
+                    <p className="mt-3.5 text-[12px] leading-relaxed italic" style={{ color: 'var(--sv-text-faint)' }}>"{form.bio}"</p>
                   )}
                 </div>
 
-                {/* Info rapide */}
-                <div className="px-7 pb-7 space-y-2">
-                  <div className="h-px mb-4" style={{ background:'linear-gradient(90deg,transparent,rgba(196,150,48,0.15),transparent)' }} />
+                <div className="px-5 pb-5 space-y-0.5">
+                  <div className="h-px mb-2" style={{ background: 'var(--sv-border)' }} />
                   {[
-                    { icon:'📞', label:'Téléphone', val: profile?.phoneNumber || 'Non renseigné' },
-                    { icon:'✅', label:'Statut',    val: profile?.isEnabled ? 'Actif' : 'Inactif' },
-                    { icon:'🕐', label:'Dernière connexion',
-                      val: profile?.lastLogin
-                        ? new Date(profile.lastLogin).toLocaleDateString('fr-FR', { dateStyle:'medium' })
-                        : 'Inconnue' },
-                    { icon:'📅', label:'Membre depuis',
-                      val: profile?.createdAt
-                        ? new Date(profile.createdAt).toLocaleDateString('fr-FR', { dateStyle:'medium' })
-                        : '—' },
-                  ].map(({ icon, label, val }) => (
-                    <div key={label} className="flex items-center gap-3 py-2"
-                      style={{ borderBottom:'1px solid rgba(196,150,48,0.05)' }}>
-                      <span className="text-sm w-5 text-center flex-shrink-0" style={{ color:'rgba(196,150,48,0.45)' }}>{icon}</span>
-                      <span className="warriors-font text-[11px] flex-1" style={{ color:'rgba(148,163,184,0.4)' }}>{label}</span>
-                      <span className="warriors-font text-[11px] font-semibold truncate" style={{ color:'rgba(200,210,225,0.7)' }}>{val}</span>
+                    { icon: Phone, label: 'Téléphone', val: profile?.phoneNumber || 'Non renseigné' },
+                    { icon: CheckCircle2, label: 'Statut', val: profile?.isEnabled ? 'Actif' : 'Inactif' },
+                    { icon: Clock, label: 'Dernière connexion', val: profile?.lastLogin ? new Date(profile.lastLogin).toLocaleDateString('fr-FR', { dateStyle: 'medium' }) : 'Inconnue' },
+                    { icon: CalendarDays, label: 'Membre depuis', val: profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('fr-FR', { dateStyle: 'medium' }) : '—' },
+                  ].map(({ icon: Icon, label, val }) => (
+                    <div key={label} className="flex items-center gap-2.5 py-2" style={{ borderBottom: '1px solid var(--sv-border)' }}>
+                      <Icon size={13} strokeWidth={1.75} style={{ color: 'var(--sv-text-faint)', flexShrink: 0 }} />
+                      <span className="text-[11.5px] flex-1" style={{ color: 'var(--sv-text-faint)' }}>{label}</span>
+                      <span className="text-[11.5px] font-medium truncate" style={{ color: 'var(--sv-text-dim)' }}>{val}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Stats card */}
-              <div className="rounded-3xl p-5 animate-in"
-                style={{ background:'rgba(255,255,255,0.02)',border:'1px solid rgba(196,150,48,0.08)',animationDelay:'100ms' }}>
-                <p className="warriors-font text-[10px] font-semibold tracking-widest mb-4" style={{ color:'rgba(196,150,48,0.4)' }}>APERÇU DU CENTRE</p>
-                <div className="grid grid-cols-2 gap-3">
+              <div className="sv-card sv-in p-4" style={{ animationDelay: '80ms' }}>
+                <p className="text-[10.5px] font-semibold tracking-wide mb-3" style={{ color: 'var(--sv-text-faint)' }}>APERÇU DU CENTRE</p>
+                <div className="grid grid-cols-2 gap-2.5">
                   {[
-                    { icon:'👥', label:'Étudiants',   val: profile?.totalStudents,   textColor:'#60a5fa', border:'rgba(59,130,246,0.2)',  path:'/admin/students' },
-                    { icon:'👨‍🏫', label:'Professeurs', val: profile?.totalProfessors, textColor:'#4ade80', border:'rgba(34,197,94,0.2)',   path:'/admin/professors' },
-                    { icon:'📚', label:'Cours',        val: profile?.totalCourses,    textColor:'#c084fc', border:'rgba(168,85,247,0.2)',  path:'/admin/courses' },
-                    { icon:'📅', label:'Événements',  val: profile?.totalEvents,     textColor:'#f0c84a', border:'rgba(196,150,48,0.2)', path:'/admin/events' },
-                  ].map((s, i) => (
-                    <StatCard key={s.label} {...s} navigate={navigate} index={i} />
-                  ))}
+                    { icon: Users,         label: 'Étudiants',   val: profile?.totalStudents,   tone: 'info',    path: '/admin/students' },
+                    { icon: GraduationCap, label: 'Professeurs', val: profile?.totalProfessors, tone: 'violet',  path: '/admin/professors' },
+                    { icon: BookOpen,      label: 'Cours',       val: profile?.totalCourses,    tone: 'success', path: '/admin/courses' },
+                    { icon: CalendarDays,  label: 'Événements',  val: profile?.totalEvents,     tone: 'accent',  path: '/admin/events' },
+                  ].map((s, i) => <StatCard key={s.label} {...s} navigate={navigate} index={i} />)}
                 </div>
               </div>
             </div>
 
             {/* ════ COLONNE DROITE ════ */}
-            <div className="xl:col-span-2 space-y-5">
+            <div className="xl:col-span-2 space-y-4">
 
               {/* Tabs */}
-              <div className="flex gap-1 p-1 rounded-2xl"
-                style={{ background:'rgba(255,255,255,0.03)',border:'1px solid rgba(196,150,48,0.1)' }}>
-                {[
-                  { key:'info',     label:'👤 Informations' },
-                  { key:'password', label:'🔒 Mot de passe' },
-                  { key:'account',  label:'🛡️ Compte' },
-                ].map(tab => (
+              <div className="flex gap-1 p-1 rounded-xl sv-card">
+                {TABS.map(tab => (
                   <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                    className="flex-1 py-2.5 rounded-xl text-xs font-bold warriors-font transition-all"
-                    style={activeTab === tab.key
-                      ? { background:'linear-gradient(135deg,#c49630,#f0c84a)',color:'#0a1628' }
-                      : { color:'rgba(148,163,184,0.45)' }}>
-                    {tab.label}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[12.5px] font-semibold transition-all"
+                    style={activeTab === tab.key ? { background: 'var(--sv-accent)', color: 'var(--sv-accent-ink)' } : { color: 'var(--sv-text-faint)' }}>
+                    <tab.icon size={13} strokeWidth={1.75} /> {tab.label}
                   </button>
                 ))}
               </div>
 
               {/* ══ ONGLET INFORMATIONS ══ */}
               {activeTab === 'info' && (
-                <form onSubmit={handleSaveProfile} className="rounded-3xl p-7 animate-in space-y-5"
-                  style={{ background:'rgba(255,255,255,0.02)',border:'1px solid rgba(196,150,48,0.1)' }}>
-
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="warriors-title font-bold text-base" style={{ color:'#e8eaf0' }}>Informations personnelles</h3>
-                    <span className="warriors-font text-[10px] px-2.5 py-1 rounded-full"
-                      style={{ background:'rgba(196,150,48,0.08)',border:'1px solid rgba(196,150,48,0.18)',color:'rgba(196,150,48,0.6)' }}>
-                      Modifiable
-                    </span>
+                <form onSubmit={handleSaveProfile} className="sv-card sv-in p-6 space-y-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="sv-heading font-semibold text-[14.5px]" style={{ color: 'var(--sv-text)' }}>Informations personnelles</h3>
+                    <span className="sv-tag" style={{ background: 'rgba(128,128,128,0.08)', border: '1px solid var(--sv-border-strong)', color: 'var(--sv-text-faint)' }}>Modifiable</span>
                   </div>
 
-                  {/* Avatar section dans le form */}
-                  <div className="flex items-center gap-5 p-4 rounded-2xl"
-                    style={{ background:'rgba(196,150,48,0.03)',border:'1px solid rgba(196,150,48,0.1)' }}>
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-4xl flex-shrink-0"
-                      style={{ background: getAvatarGrad(profile?.id || 0), boxShadow:'0 4px 20px rgba(0,0,0,0.35)' }}>
+                  <div className="flex items-center gap-4 p-3.5 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
+                    <div className="w-14 h-14 rounded-xl flex items-center justify-center text-3xl flex-shrink-0" style={{ background: `${avatarColor}22`, border: `1px solid ${avatarColor}40` }}>
                       {form.avatarEmoji}
                     </div>
                     <div className="flex-1">
-                      <p className="warriors-title font-bold text-sm" style={{ color:'#e8eaf0' }}>
-                        {form.prenom || 'Prénom'} {form.nom || 'Nom'}
-                      </p>
-                      <p className="warriors-font text-xs mt-0.5" style={{ color:'rgba(196,150,48,0.5)' }}>{profile?.role || 'ADMIN'}</p>
+                      <p className="sv-heading font-semibold text-[13.5px]" style={{ color: 'var(--sv-text)' }}>{form.prenom || 'Prénom'} {form.nom || 'Nom'}</p>
+                      <p className="text-[12px] mt-0.5" style={{ color: 'var(--sv-accent)' }}>{profile?.role || 'ADMIN'}</p>
                     </div>
-                    <button type="button" onClick={() => setShowAvatarPicker(s => !s)}
-                      className="px-3 py-2 rounded-xl warriors-font text-xs font-semibold transition-all"
-                      style={{ background:'rgba(196,150,48,0.08)',border:'1px solid rgba(196,150,48,0.2)',color:'#f0c84a' }}>
-                      Changer l'icône
-                    </button>
+                    <button type="button" onClick={() => setShowAvatarPicker(s => !s)} className="sv-btn sv-btn-ghost px-3 py-2">Changer l'icône</button>
                   </div>
 
-                  {/* Inline avatar picker in form */}
                   {showAvatarPicker && (
-                    <div className="p-4 rounded-2xl animate-in"
-                      style={{ background:'rgba(255,255,255,0.02)',border:'1px solid rgba(196,150,48,0.1)' }}>
+                    <div className="p-3.5 rounded-lg sv-in" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
                       <div className="grid grid-cols-11 gap-1.5">
                         {AVATARS.map(a => (
-                          <button key={a} type="button"
-                            onClick={() => { setForm(p => ({ ...p, avatarEmoji: a })); setShowAvatarPicker(false); }}
-                            className="w-9 h-9 rounded-xl text-lg flex items-center justify-center transition-all"
-                            style={{
-                              background: form.avatarEmoji === a ? 'linear-gradient(135deg,#c49630,#f0c84a)' : 'rgba(255,255,255,0.04)',
-                              border: `1.5px solid ${form.avatarEmoji === a ? '#c49630' : 'transparent'}`,
-                              transform: form.avatarEmoji === a ? 'scale(1.1)' : 'scale(1)',
-                            }}>
+                          <button key={a} type="button" onClick={() => { setForm(p => ({ ...p, avatarEmoji: a })); setShowAvatarPicker(false); }}
+                            className="w-8 h-8 rounded-lg text-base flex items-center justify-center transition-all"
+                            style={{ background: form.avatarEmoji === a ? 'var(--sv-accent-soft)' : 'var(--sv-surface)', border: `1.5px solid ${form.avatarEmoji === a ? 'var(--sv-accent-border)' : 'var(--sv-border)'}` }}>
                             {a}
                           </button>
                         ))}
@@ -495,49 +554,33 @@ const ProfilePage = () => {
                     </div>
                   )}
 
-                  {/* Champs */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div>
                       <LabelRow label="PRÉNOM *" error={formErrors.prenom} />
-                      <input name="prenom" value={form.prenom} onChange={handleFormChange}
-                        placeholder="Votre prénom…" className={inp(!!formErrors.prenom)} />
+                      <input name="prenom" value={form.prenom} onChange={handleFormChange} placeholder="Votre prénom…" className={inp(!!formErrors.prenom)} />
                     </div>
                     <div>
                       <LabelRow label="NOM *" error={formErrors.nom} />
-                      <input name="nom" value={form.nom} onChange={handleFormChange}
-                        placeholder="Votre nom…" className={inp(!!formErrors.nom)} />
+                      <input name="nom" value={form.nom} onChange={handleFormChange} placeholder="Votre nom…" className={inp(!!formErrors.nom)} />
                     </div>
                     <div className="sm:col-span-2">
                       <LabelRow label="EMAIL *" error={formErrors.email} />
-                      <input name="email" type="email" value={form.email} onChange={handleFormChange}
-                        placeholder="votre@email.com" className={inp(!!formErrors.email)} />
+                      <input name="email" type="email" value={form.email} onChange={handleFormChange} placeholder="votre@email.com" className={inp(!!formErrors.email)} />
                     </div>
                     <div className="sm:col-span-2">
                       <LabelRow label="TÉLÉPHONE" />
-                      <input name="phoneNumber" value={form.phoneNumber} onChange={handleFormChange}
-                        placeholder="+212 6XX XXX XXX" className={inp(false)} />
+                      <input name="phoneNumber" value={form.phoneNumber} onChange={handleFormChange} placeholder="+212 6XX XXX XXX" className={inp(false)} />
                     </div>
                     <div className="sm:col-span-2">
                       <LabelRow label="BIO" />
-                      <textarea name="bio" value={form.bio} onChange={handleFormChange} rows={3}
-                        placeholder="Quelques mots sur vous…"
-                        className={`${inp(false)} resize-none`} />
-                      <p className="warriors-font text-[10px] mt-1.5" style={{ color:'rgba(148,163,184,0.3)' }}>
-                        Apparaît sur votre carte de profil
-                      </p>
+                      <textarea name="bio" value={form.bio} onChange={handleFormChange} rows={3} placeholder="Quelques mots sur vous…" className={`${inp(false)} resize-none`} />
+                      <p className="text-[11px] mt-1.5" style={{ color: 'var(--sv-text-faint)' }}>Apparaît sur votre carte de profil</p>
                     </div>
                   </div>
 
-                  <div className="flex justify-end pt-2">
-                    <button type="submit" disabled={saving}
-                      className="btn-gold flex items-center gap-2 px-8 py-3 rounded-xl warriors-title text-sm font-bold disabled:opacity-50"
-                      style={{ color:'#0a1628' }}>
-                      {saving ? (
-                        <>
-                          <span className="w-4 h-4 rounded-full border-2 border-[#0a1628]/30 border-t-[#0a1628] spin-slow" />
-                          Sauvegarde…
-                        </>
-                      ) : '💾 Sauvegarder le profil'}
+                  <div className="flex justify-end pt-1">
+                    <button type="submit" disabled={saving} className="sv-btn sv-btn-primary px-6 py-2.5">
+                      {saving ? (<><span className="w-3.5 h-3.5 rounded-full border-2 sv-spin" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'currentColor' }} /> Sauvegarde…</>) : (<><Save size={14} strokeWidth={1.75} /> Sauvegarder le profil</>)}
                     </button>
                   </div>
                 </form>
@@ -545,40 +588,28 @@ const ProfilePage = () => {
 
               {/* ══ ONGLET MOT DE PASSE ══ */}
               {activeTab === 'password' && (
-                <form onSubmit={handleChangePassword} className="rounded-3xl p-7 animate-in space-y-5"
-                  style={{ background:'rgba(255,255,255,0.02)',border:'1px solid rgba(196,150,48,0.1)' }}>
+                <form onSubmit={handleChangePassword} className="sv-card sv-in p-6 space-y-4">
+                  <h3 className="sv-heading font-semibold text-[14.5px]" style={{ color: 'var(--sv-text)' }}>Changer le mot de passe</h3>
+                  <p className="text-[13px]" style={{ color: 'var(--sv-text-faint)' }}>Choisissez un mot de passe fort d'au moins 8 caractères.</p>
 
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="warriors-title font-bold text-base" style={{ color:'#e8eaf0' }}>Changer le mot de passe</h3>
-                  </div>
-                  <p className="warriors-font text-sm" style={{ color:'rgba(148,163,184,0.4)' }}>
-                    Choisissez un mot de passe fort d'au moins 8 caractères.
-                  </p>
-
-                  {/* Indicateur de force */}
                   {pwForm.newPassword && (
-                    <div className="p-4 rounded-2xl animate-in"
-                      style={{ background:'rgba(255,255,255,0.02)',border:'1px solid rgba(196,150,48,0.1)' }}>
+                    <div className="p-3.5 rounded-lg sv-in" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
                       <div className="flex items-center justify-between mb-2">
-                        <p className="warriors-font text-[10px] tracking-widest" style={{ color:'rgba(148,163,184,0.4)' }}>FORCE DU MOT DE PASSE</p>
-                        <p className="warriors-font text-[11px] font-bold" style={{ color: STRENGTH_COLORS[strength] }}>
-                          {STRENGTH_LABELS[strength]}
-                        </p>
+                        <p className="text-[10.5px] font-semibold tracking-wide" style={{ color: 'var(--sv-text-faint)' }}>FORCE DU MOT DE PASSE</p>
+                        <p className="text-[11.5px] font-semibold" style={{ color: TONE_COLOR[strengthTone] }}>{STRENGTH_LABELS[strength]}</p>
                       </div>
                       <div className="flex gap-1">
-                        {[1,2,3,4,5].map(i => (
-                          <div key={i} className="h-1.5 flex-1 rounded-full transition-all duration-300"
-                            style={{ background: i <= strength ? STRENGTH_COLORS[strength] : 'rgba(255,255,255,0.07)' }} />
+                        {[1, 2, 3, 4, 5].map(i => (
+                          <div key={i} className="h-1.5 flex-1 rounded-full transition-all duration-300" style={{ background: i <= strength ? TONE_COLOR[strengthTone] : 'var(--sv-border-strong)' }} />
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Champs mot de passe */}
                   {[
-                    { key:'cur',  name:'currentPassword', label:'MOT DE PASSE ACTUEL',  showKey:'cur' },
-                    { key:'nw',   name:'newPassword',      label:'NOUVEAU MOT DE PASSE', showKey:'nw'  },
-                    { key:'conf', name:'confirmPassword',  label:'CONFIRMER',            showKey:'conf' },
+                    { key: 'cur', name: 'currentPassword', label: 'MOT DE PASSE ACTUEL', showKey: 'cur' },
+                    { key: 'nw', name: 'newPassword', label: 'NOUVEAU MOT DE PASSE', showKey: 'nw' },
+                    { key: 'conf', name: 'confirmPassword', label: 'CONFIRMER', showKey: 'conf' },
                   ].map(field => (
                     <div key={field.key}>
                       <LabelRow label={field.label} error={pwErrors[field.key]} />
@@ -587,52 +618,34 @@ const ProfilePage = () => {
                           name={field.name}
                           type={showPw[field.showKey] ? 'text' : 'password'}
                           value={pwForm[field.name]}
-                          onChange={e => {
-                            setPwForm(p => ({ ...p, [field.name]: e.target.value }));
-                            if (pwErrors[field.key]) setPwErrors(p => ({ ...p, [field.key]: '' }));
-                          }}
+                          onChange={e => { setPwForm(p => ({ ...p, [field.name]: e.target.value })); if (pwErrors[field.key]) setPwErrors(p => ({ ...p, [field.key]: '' })); }}
                           placeholder="••••••••"
-                          className={`${inp(!!pwErrors[field.key])} pr-12`}
+                          className={`${inp(!!pwErrors[field.key])} pr-11`}
                         />
-                        <button type="button"
-                          onClick={() => setShowPw(p => ({ ...p, [field.showKey]: !p[field.showKey] }))}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 warriors-font text-sm transition-colors"
-                          style={{ color:'rgba(148,163,184,0.3)' }}
-                          onMouseEnter={e => e.currentTarget.style.color='rgba(196,150,48,0.6)'}
-                          onMouseLeave={e => e.currentTarget.style.color='rgba(148,163,184,0.3)'}>
-                          {showPw[field.showKey] ? '🙈' : '👁'}
+                        <button type="button" onClick={() => setShowPw(p => ({ ...p, [field.showKey]: !p[field.showKey] }))}
+                          className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--sv-text-faint)' }}>
+                          {showPw[field.showKey] ? <EyeOff size={15} strokeWidth={1.75} /> : <Eye size={15} strokeWidth={1.75} />}
                         </button>
                       </div>
                     </div>
                   ))}
 
-                  {/* Règles */}
-                  <div className="grid grid-cols-2 gap-2 p-4 rounded-2xl"
-                    style={{ background:'rgba(255,255,255,0.02)',border:'1px solid rgba(196,150,48,0.08)' }}>
+                  <div className="grid grid-cols-2 gap-2 p-3.5 rounded-lg" style={{ background: 'var(--sv-surface-2)', border: '1px solid var(--sv-border)' }}>
                     {[
-                      { rule: pwForm.newPassword.length >= 8,          label:'8 caractères min.' },
-                      { rule: /[A-Z]/.test(pwForm.newPassword),         label:'Une majuscule' },
-                      { rule: /[0-9]/.test(pwForm.newPassword),         label:'Un chiffre' },
-                      { rule: /[^A-Za-z0-9]/.test(pwForm.newPassword),  label:'Caractère spécial' },
+                      { rule: pwForm.newPassword.length >= 8, label: '8 caractères min.' },
+                      { rule: /[A-Z]/.test(pwForm.newPassword), label: 'Une majuscule' },
+                      { rule: /[0-9]/.test(pwForm.newPassword), label: 'Un chiffre' },
+                      { rule: /[^A-Za-z0-9]/.test(pwForm.newPassword), label: 'Caractère spécial' },
                     ].map((r, i) => (
-                      <div key={i} className="flex items-center gap-2 warriors-font text-xs transition-colors"
-                        style={{ color: r.rule ? '#4ade80' : 'rgba(148,163,184,0.3)' }}>
-                        <span>{r.rule ? '✓' : '○'}</span>
-                        <span>{r.label}</span>
+                      <div key={i} className="flex items-center gap-2 text-[12px]" style={{ color: r.rule ? 'var(--sv-success)' : 'var(--sv-text-faint)' }}>
+                        {r.rule ? <Check size={13} strokeWidth={2} /> : <Circle size={13} strokeWidth={1.75} />} {r.label}
                       </div>
                     ))}
                   </div>
 
-                  <div className="flex justify-end pt-2">
-                    <button type="submit" disabled={saving}
-                      className="flex items-center gap-2 px-8 py-3 rounded-xl warriors-title text-sm font-bold disabled:opacity-50 transition-all"
-                      style={{ background:'linear-gradient(135deg,#1d4ed8,#3b82f6)',color:'#fff',boxShadow:'0 4px 20px rgba(59,130,246,0.25)' }}>
-                      {saving ? (
-                        <>
-                          <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white spin-slow" />
-                          Modification…
-                        </>
-                      ) : '🔒 Changer le mot de passe'}
+                  <div className="flex justify-end pt-1">
+                    <button type="submit" disabled={saving} className="sv-btn sv-btn-info px-6 py-2.5">
+                      {saving ? (<><span className="w-3.5 h-3.5 rounded-full border-2 sv-spin" style={{ borderColor: 'rgba(106,163,217,0.3)', borderTopColor: 'currentColor' }} /> Modification…</>) : (<><Lock size={14} strokeWidth={1.75} /> Changer le mot de passe</>)}
                     </button>
                   </div>
                 </form>
@@ -640,51 +653,66 @@ const ProfilePage = () => {
 
               {/* ══ ONGLET COMPTE ══ */}
               {activeTab === 'account' && (
-                <div className="space-y-5 animate-in">
-                  {/* Infos compte */}
-                  <div className="rounded-3xl p-7"
-                    style={{ background:'rgba(255,255,255,0.02)',border:'1px solid rgba(196,150,48,0.1)' }}>
-                    <h3 className="warriors-title font-bold text-base mb-6" style={{ color:'#e8eaf0' }}>Informations du Compte</h3>
-                    <div className="space-y-1">
+                <div className="space-y-4 sv-in">
+
+                  {/* Apparence — theme switch */}
+                  <div className="sv-card p-6">
+                    <h3 className="sv-heading font-semibold text-[14.5px] mb-1" style={{ color: 'var(--sv-text)' }}>Apparence</h3>
+                    <p className="text-[12.5px] mb-4" style={{ color: 'var(--sv-text-faint)' }}>Choisissez comment le site s'affiche pour vous.</p>
+                    <div className="grid grid-cols-2 gap-3">
                       {[
-                        { icon:'🏷️', label:'Identifiant',         val:`#${profile?.id || '—'}` },
-                        { icon:'🛡️', label:"Niveau d'accès",      val: profile?.role || 'ADMIN' },
-                        { icon:'✅', label:'Statut du compte',      val: profile?.isEnabled ? 'Actif et vérifié' : 'Inactif' },
-                        { icon:'📅', label:'Compte créé le',        val: profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('fr-FR',{dateStyle:'long'}) : '—' },
-                        { icon:'🕐', label:'Dernière connexion',    val: profile?.lastLogin ? new Date(profile.lastLogin).toLocaleString('fr-FR',{dateStyle:'medium',timeStyle:'short'}) : '—' },
-                      ].map(({ icon, label, val }) => (
-                        <div key={label} className="flex items-center gap-4 py-3"
-                          style={{ borderBottom:'1px solid rgba(196,150,48,0.06)' }}>
-                          <span className="text-base w-6 text-center flex-shrink-0">{icon}</span>
-                          <span className="warriors-font text-sm flex-1" style={{ color:'rgba(148,163,184,0.45)' }}>{label}</span>
-                          <span className="warriors-font text-sm font-semibold" style={{ color:'rgba(200,210,225,0.7)' }}>{val}</span>
+                        { key: 'dark', label: 'Sombre', icon: Moon, desc: 'Fond profond, contrastes doux' },
+                        { key: 'light', label: 'Clair', icon: Sun, desc: 'Fond clair, contrastes nets' },
+                      ].map(opt => (
+                        <button key={opt.key} type="button" onClick={() => setTheme(opt.key)}
+                          className={`sv-theme-option p-4 rounded-lg text-left ${theme === opt.key ? 'active' : ''}`}
+                          style={{ border: '1px solid var(--sv-border)', background: 'var(--sv-surface-2)' }}>
+                          <div className="flex items-center justify-between mb-2">
+                            <opt.icon size={18} strokeWidth={1.75} style={{ color: theme === opt.key ? 'var(--sv-accent)' : 'var(--sv-text-faint)' }} />
+                            {theme === opt.key && <CheckCircle2 size={15} strokeWidth={1.75} style={{ color: 'var(--sv-accent)' }} />}
+                          </div>
+                          <p className="text-[13px] font-semibold" style={{ color: 'var(--sv-text)' }}>{opt.label}</p>
+                          <p className="text-[11px] mt-0.5" style={{ color: 'var(--sv-text-faint)' }}>{opt.desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Infos compte */}
+                  <div className="sv-card p-6">
+                    <h3 className="sv-heading font-semibold text-[14.5px] mb-4" style={{ color: 'var(--sv-text)' }}>Informations du compte</h3>
+                    <div className="space-y-0.5">
+                      {[
+                        { icon: Hash, label: 'Identifiant', val: `#${profile?.id || '—'}` },
+                        { icon: Shield, label: "Niveau d'accès", val: profile?.role || 'ADMIN' },
+                        { icon: CheckCircle2, label: 'Statut du compte', val: profile?.isEnabled ? 'Actif et vérifié' : 'Inactif' },
+                        { icon: CalendarDays, label: 'Compte créé le', val: profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('fr-FR', { dateStyle: 'long' }) : '—' },
+                        { icon: Clock, label: 'Dernière connexion', val: profile?.lastLogin ? new Date(profile.lastLogin).toLocaleString('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }) : '—' },
+                      ].map(({ icon: Icon, label, val }) => (
+                        <div key={label} className="flex items-center gap-3 py-2.5" style={{ borderBottom: '1px solid var(--sv-border)' }}>
+                          <Icon size={14} strokeWidth={1.75} style={{ color: 'var(--sv-text-faint)', flexShrink: 0 }} />
+                          <span className="text-[13px] flex-1" style={{ color: 'var(--sv-text-faint)' }}>{label}</span>
+                          <span className="text-[13px] font-medium" style={{ color: 'var(--sv-text)' }}>{val}</span>
                         </div>
                       ))}
                     </div>
                   </div>
 
                   {/* Zone danger */}
-                  <div className="rounded-3xl p-7"
-                    style={{ background:'rgba(239,68,68,0.04)',border:'1px solid rgba(239,68,68,0.12)' }}>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                        style={{ background:'rgba(239,68,68,0.12)',border:'1px solid rgba(239,68,68,0.2)' }}>⚠</div>
-                      <h3 className="warriors-title font-bold text-sm" style={{ color:'rgba(248,113,113,0.8)' }}>Zone de danger</h3>
+                  <div className="sv-card p-6" style={{ borderColor: 'var(--sv-danger-border)' }}>
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--sv-danger-soft)', border: '1px solid var(--sv-danger-border)' }}>
+                        <AlertTriangle size={15} strokeWidth={1.75} style={{ color: 'var(--sv-danger)' }} />
+                      </div>
+                      <h3 className="sv-heading font-semibold text-[13.5px]" style={{ color: 'var(--sv-danger)' }}>Zone de danger</h3>
                     </div>
-                    <p className="warriors-font text-xs mb-5" style={{ color:'rgba(148,163,184,0.35)' }}>
-                      Ces actions sont irréversibles. Procédez avec précaution.
-                    </p>
-                    <button onClick={() => { localStorage.clear(); navigate('/login'); }}
-                      className="flex items-center gap-2 px-5 py-3 rounded-xl warriors-font text-sm font-bold transition-all"
-                      style={{ background:'rgba(239,68,68,0.08)',border:'1px solid rgba(239,68,68,0.2)',color:'#f87171' }}
-                      onMouseEnter={e => e.currentTarget.style.background='rgba(239,68,68,0.16)'}
-                      onMouseLeave={e => e.currentTarget.style.background='rgba(239,68,68,0.08)'}>
-                      🚪 Se déconnecter de toutes les sessions
+                    <p className="text-[12px] mb-4" style={{ color: 'var(--sv-text-faint)' }}>Ces actions sont irréversibles. Procédez avec précaution.</p>
+                    <button onClick={() => { localStorage.clear(); navigate('/login'); }} className="sv-btn sv-btn-danger-soft px-4 py-2.5">
+                      <LogOut size={14} strokeWidth={1.75} /> Se déconnecter de toutes les sessions
                     </button>
                   </div>
                 </div>
               )}
-
             </div>
           </div>
         </div>

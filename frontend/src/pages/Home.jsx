@@ -28,6 +28,22 @@ const fetchEvents     = () => api.get('/api/events/upcoming').then(r => r.data);
 const fetchStats      = () => api.get('/api/students/stats').then(r => r.data);
 const fetchCourses    = () => api.get('/api/courses').then(r => r.data);
 
+/* ─────────────────────────────────────────────────────────────
+   AVIS / TÉMOIGNAGES — dépose tes captures d'écran de messages
+   d'élèves (WhatsApp, SMS...) dans src/assets/temoignages/, puis
+   importe-les en haut de ce fichier, par exemple :
+     import temoin1 from '../assets/temoignages/temoin1.png';
+   Remplace ensuite { image: null } par { image: temoin1 } ci-dessous.
+   Tant que c'est null, un emplacement "Capture bientôt disponible"
+   s'affiche à la place.
+───────────────────────────────────────────────────────────── */
+const TESTIMONIALS = [
+  { image: null },
+  { image: null },
+  { image: null },
+  { image: null },
+];
+
 /* ─── Skeleton loader ─── */
 const Skeleton = ({ w = '100%', h = '1rem', rounded = 'rounded-lg', className = '' }) => (
   <div
@@ -226,12 +242,19 @@ const Home = () => {
   return (
     <div className="relative min-h-screen bg-[#0a1628] text-white overflow-x-hidden" style={{ fontFamily: 'Inter, sans-serif' }}>
 
-      {/* ── Animated background ── */}
+      {/* ── Animated background (ciel densifié) ── */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-[#1a2942] to-[#0a1628]" />
-        <div className="absolute inset-0 opacity-60" style={{
+        {/* Couche 1 — petites étoiles nombreuses, tuile serrée */}
+        <div className="absolute inset-0 opacity-70" style={{
           animation: 'twinkle 15s ease-in-out infinite',
-          backgroundImage: `radial-gradient(2px 2px at 20% 30%,white,transparent),radial-gradient(2px 2px at 60% 70%,white,transparent),radial-gradient(1px 1px at 50% 50%,white,transparent),radial-gradient(1px 1px at 80% 10%,white,transparent),radial-gradient(2px 2px at 90% 60%,#f4d677,transparent),radial-gradient(1px 1px at 33% 80%,#d4a747,transparent)`,
+          backgroundImage: `radial-gradient(1.5px 1.5px at 10% 20%,white,transparent),radial-gradient(1px 1px at 25% 65%,white,transparent),radial-gradient(1.5px 1.5px at 40% 15%,white,transparent),radial-gradient(1px 1px at 55% 80%,white,transparent),radial-gradient(1.5px 1.5px at 70% 35%,white,transparent),radial-gradient(1px 1px at 85% 55%,white,transparent),radial-gradient(1.5px 1.5px at 95% 90%,white,transparent),radial-gradient(1px 1px at 15% 90%,white,transparent),radial-gradient(1.5px 1.5px at 60% 5%,#f4d677,transparent),radial-gradient(1px 1px at 30% 40%,#d4a747,transparent)`,
+          backgroundSize: '120px 120px', backgroundRepeat: 'repeat',
+        }} />
+        {/* Couche 2 — étoiles plus grosses, pour la profondeur */}
+        <div className="absolute inset-0 opacity-60" style={{
+          animation: 'twinkle 12s ease-in-out infinite 3s',
+          backgroundImage: `radial-gradient(2px 2px at 20% 30%,white,transparent),radial-gradient(2px 2px at 60% 70%,white,transparent),radial-gradient(2px 2px at 50% 50%,white,transparent),radial-gradient(2px 2px at 80% 10%,white,transparent),radial-gradient(2.5px 2.5px at 90% 60%,#f4d677,transparent),radial-gradient(2px 2px at 33% 80%,#d4a747,transparent),radial-gradient(2px 2px at 5% 55%,white,transparent),radial-gradient(2.5px 2.5px at 75% 85%,#f4d677,transparent)`,
           backgroundSize: '250px 250px', backgroundRepeat: 'repeat',
         }} />
         <div className="absolute w-[500px] h-[500px] bg-[#d4a747] rounded-full -top-[10%] -left-[10%] blur-[80px] opacity-[0.12]" style={{ animation: 'floatOrb 20s ease-in-out infinite' }} />
@@ -255,7 +278,7 @@ const Home = () => {
     {/* Desktop nav */}
     <ul className="hidden md:flex gap-10 list-none items-center m-0 p-0">
       {[
-        { label: 'À Propos',    href: '#about' },
+        { label: 'Avis',        href: '#avis' },
         { label: 'Professeurs', href: '#professeurs' },
         { label: 'Programmes',  href: '#programmes' },
         { label: 'Événements',  href: '#evenements' },
@@ -275,6 +298,9 @@ const Home = () => {
     </ul>
 
     <div className="flex items-center gap-3">
+      <Link to="/inscription" className="hidden sm:inline-flex px-5 py-2.5 rounded-full font-bold text-[0.85rem] no-underline border-2 border-yellow-500/30 text-[#f4d677] hover:bg-yellow-500/10 hover:border-[#d4a747] transition-all duration-250">
+        S'inscrire
+      </Link>
       <Link to="/login" className="px-5 py-2.5 bg-gradient-to-br from-[#d4a747] to-[#f4d677] text-[#0a1628] rounded-full font-bold text-[0.85rem] no-underline shadow-[0_4px_12px_rgba(212,167,71,0.3)] hover:-translate-y-0.5 transition-all duration-250">
         Connexion
       </Link>
@@ -296,7 +322,7 @@ const Home = () => {
     style={{ background: 'rgba(10,22,40,0.98)', borderTop: menuOpen ? '1px solid rgba(212,167,71,0.1)' : 'none' }}>
     <div className="px-6 py-4 flex flex-col gap-1">
       {[
-        { label: 'À Propos',    href: '#about' },
+        { label: 'Avis',        href: '#avis' },
         { label: 'Professeurs', href: '#professeurs' },
         { label: 'Programmes',  href: '#programmes' },
         { label: 'Événements',  href: '#evenements' },
@@ -309,6 +335,10 @@ const Home = () => {
           {label}
         </a>
       ))}
+      <Link to="/inscription" onClick={() => setMenuOpen(false)}
+        className="text-[#0a1628] no-underline font-semibold text-base py-3 px-4 rounded-xl bg-gradient-to-br from-[#d4a747] to-[#f4d677] mt-1 flex items-center gap-3">
+        S'inscrire
+      </Link>
       <Link to="/cours-distance" onClick={() => setMenuOpen(false)}
         className="text-[#f4d677] no-underline font-semibold text-base py-3 px-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20 mt-1 flex items-center gap-3">
         <span className="w-1.5 h-1.5 rounded-full bg-[#d4a747]" />
@@ -342,10 +372,10 @@ const Home = () => {
             </p>
 
             <div className="flex gap-5 flex-wrap mb-12">
-              <a href="#programmes"
+              <Link to="/inscription"
                 className="px-8 py-4 rounded-full font-bold text-base no-underline inline-flex items-center gap-2 bg-gradient-to-br from-[#d4a747] to-[#f4d677] text-[#0a1628] shadow-[0_8px_20px_rgba(212,167,71,0.3)] hover:-translate-y-1 hover:shadow-[0_12px_30px_rgba(212,167,71,0.4)] transition-all duration-250">
-                Découvrir nos Programmes <span>→</span>
-              </a>
+                S'inscrire <span>→</span>
+              </Link>
               <a href="#contact"
                 className="px-8 py-4 rounded-full font-bold text-base no-underline inline-flex items-center gap-2 bg-white/5 text-white border-2 border-yellow-500/30 hover:bg-yellow-500/10 hover:border-[#d4a747] hover:-translate-y-1 transition-all duration-250">
                 Prendre Rendez-vous
@@ -374,45 +404,37 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ══ ABOUT ══ */}
-      <section id="about" className="relative px-[5%] py-24 z-[1]">
+      {/* ══ AVIS ══ */}
+      <section id="avis" className="relative px-[5%] py-24 z-[1]">
         <div className="max-w-[1400px] mx-auto">
           <div className="text-center mb-20">
-            <div className="inline-block px-5 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full text-[#f4d677] text-[0.85rem] font-semibold tracking-wider mb-6">NOTRE MISSION</div>
+            <div className="inline-block px-5 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-full text-[#f4d677] text-[0.85rem] font-semibold tracking-wider mb-6">ILS NOUS FONT CONFIANCE</div>
             <h2 className="font-['Space_Grotesk'] text-5xl font-extrabold mb-6">
-              À Propos du <span className="bg-gradient-to-br from-[#d4a747] to-[#f4d677] bg-clip-text text-transparent">Centre Warriors</span>
+              Ce que disent nos <span className="bg-gradient-to-br from-[#d4a747] to-[#f4d677] bg-clip-text text-transparent">étudiants</span>
             </h2>
             <p className="text-lg text-[#cbd5e1] max-w-[700px] mx-auto leading-relaxed">
-              Depuis plus de 15 ans, nous cultivons l'excellence éducative en transformant chaque étudiant en un guerrier académique doté des compétences et de la détermination nécessaires.
+              Les messages de remerciement qu'on reçoit de nos élèves — la meilleure preuve de notre travail.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div>
-              <h3 className="font-['Space_Grotesk'] text-3xl font-bold mb-5 text-[#f4d677]">Notre Vision</h3>
-              <p className="text-[#cbd5e1] leading-relaxed mb-5">
-                Nous croyons fermement que chaque individu possède un potentiel unique qui ne demande qu'à être révélé. Notre approche pédagogique innovante combine rigueur académique, développement personnel et préparation professionnelle pour créer des leaders de demain.
-              </p>
-              <p className="text-[#cbd5e1] leading-relaxed">
-                Au Centre Warriors, nous ne formons pas seulement des étudiants — nous forgeons des champions capables de relever les défis du XXIe siècle avec confiance, créativité et détermination.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-7">
-              {[
-                { icon: '🎯', title: 'Excellence Académique',       desc: 'Programmes certifiés et reconnus' },
-                { icon: '💡', title: 'Innovation Pédagogique',      desc: 'Méthodes d\'enseignement modernes' },
-                { icon: '🤝', title: 'Accompagnement Personnalisé', desc: 'Suivi individuel et coaching' },
-                { icon: '🌍', title: 'Réseau International',        desc: 'Partenariats avec institutions mondiales' },
-              ].map(({ icon, title, desc }) => (
-                <div key={title} className="flex items-start gap-4">
-                  <div className="w-11 h-11 bg-gradient-to-br from-[#d4a747] to-[#f4d677] rounded-lg flex items-center justify-center text-xl flex-shrink-0">{icon}</div>
-                  <div>
-                    <h4 className="text-base font-bold mb-0.5 text-white">{title}</h4>
-                    <p className="text-sm text-[#94a3b8] m-0">{desc}</p>
-                  </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {TESTIMONIALS.map((t, i) => (
+              <div key={i}
+                className="relative bg-white/[0.03] backdrop-blur-xl border border-yellow-500/10 rounded-3xl overflow-hidden transition-all duration-300"
+                onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.borderColor = 'rgba(212,167,71,0.3)'; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(212,167,71,0.1)'; }}>
+                <div className="aspect-[9/16] w-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#12203a,#0a1628)' }}>
+                  {t.image ? (
+                    <img src={t.image} alt="Message d'un étudiant" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-center px-6">
+                      <div className="w-12 h-12 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-2xl mx-auto mb-3">💬</div>
+                      <p className="text-[#94a3b8] text-xs">Capture bientôt disponible</p>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -627,7 +649,7 @@ const Home = () => {
             </div>
 
             {[
-              { title: 'Navigation',  items: ['À Propos', 'Professeurs', 'Programmes', 'Événements', 'Contact'] },
+              { title: 'Navigation',  items: ['Avis', 'Professeurs', 'Programmes', 'Événements', 'Contact'] },
               
               { title: 'Programmes',  items: courses.slice(0, 4).map(c => c.title).filter(Boolean).concat(['Tous les cours']) },
               { title: 'Ressources',  items: ['Blog', 'Actualités', 'Témoignages', 'FAQ'] },
@@ -650,6 +672,29 @@ const Home = () => {
           </div>
         </div>
       </footer>
+
+      {/* WhatsApp — toujours visible, suit le défilement */}
+      <div className="fixed bottom-8 left-8 z-[999]">
+        <div className="relative">
+          {/* Bulle "Contactez-nous" */}
+          <div className="absolute -top-14 left-1/2 -translate-x-1/2 whitespace-nowrap px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-1.5"
+            style={{ background: '#ffffff', color: '#0a1628', boxShadow: '0 8px 20px rgba(0,0,0,0.3)' }}>
+            Contactez-nous
+            <span className="text-base leading-none">↓</span>
+            <span className="absolute left-1/2 -translate-x-1/2 -bottom-[6px] w-3 h-3 rotate-45" style={{ background: '#ffffff' }} />
+          </div>
+
+          <a href="https://wa.me/212614145517" target="_blank" rel="noopener noreferrer" aria-label="Discuter sur WhatsApp"
+            className="relative w-20 h-20 rounded-full flex items-center justify-center cursor-pointer transition-all duration-250 shadow-xl hover:-translate-y-1"
+            style={{ background: '#25D366', boxShadow: '0 8px 24px rgba(37,211,102,0.4)' }}>
+            <span className="absolute inset-0 rounded-full" style={{ animation: 'ip-pulse-ring 2.2s ease-out infinite', border: '2px solid #25D366' }} />
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17.6 6.32A7.85 7.85 0 0 0 12.02 4a7.94 7.94 0 0 0-6.87 11.89L4 20l4.24-1.11a7.9 7.9 0 0 0 3.78.96h.01A7.94 7.94 0 0 0 20 12.06a7.87 7.87 0 0 0-2.4-5.74Zm-5.58 12.2h-.01a6.6 6.6 0 0 1-3.36-.92l-.24-.14-2.5.66.67-2.44-.16-.25a6.6 6.6 0 0 1 10.2-8.2 6.55 6.55 0 0 1 1.94 4.67 6.62 6.62 0 0 1-6.54 6.62Zm3.6-4.94c-.2-.1-1.16-.57-1.34-.64-.18-.07-.31-.1-.44.1-.13.2-.5.63-.62.77-.11.13-.23.15-.42.05a5.4 5.4 0 0 1-1.6-.98 6 6 0 0 1-1.1-1.37c-.12-.2 0-.3.09-.4.1-.1.2-.24.3-.36.1-.12.13-.2.2-.34.07-.13.03-.25-.02-.36-.05-.1-.44-1.06-.6-1.45-.16-.38-.32-.33-.44-.34h-.38c-.13 0-.34.05-.52.24-.18.2-.68.66-.68 1.6s.7 1.86.8 2c.1.13 1.38 2.1 3.34 2.95.47.2.83.32 1.12.4.47.15.9.13 1.24.08.38-.06 1.16-.47 1.32-.93.16-.45.16-.85.11-.93-.05-.08-.18-.13-.38-.23Z" fill="white"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <style>{` @keyframes ip-pulse-ring { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(1.5); opacity: 0; } } `}</style>
 
       {/* Scroll to top */}
       <button onClick={scrollToTop}

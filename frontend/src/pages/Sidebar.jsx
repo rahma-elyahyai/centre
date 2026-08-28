@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import logo from '../assets/warrios.png';
 const menuItems = [
   { id: 'dashboard', icon: '▦', label: 'Dashboard', path: '/admin/dashboard' },
+  { id: 'inscriptions', icon: '✉', label: "Demandes d'inscription", path: '/admin/inscriptions' },
   { id: 'students', icon: '◎', label: 'Étudiants', path: '/admin/students' },
   { id: 'professors', icon: '✦', label: 'Professeurs', path: '/admin/professors' },
   { id: 'courses', icon: '▣', label: 'Cours', path: '/admin/courses' },

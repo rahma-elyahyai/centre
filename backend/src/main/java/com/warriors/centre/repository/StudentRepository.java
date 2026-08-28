@@ -83,9 +83,14 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     
     // Compter les étudiants par niveau et filière
     long countByNiveauAndFiliere(String niveau, String filiere);
- long countByCreatedAtAfter(LocalDateTime date);
- long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
- List<Student> findTop5ByOrderByCreatedAtDesc();
- // Dans StudentRepository.java — ajoute cette méthode
+    long countByCreatedAtAfter(LocalDateTime date);
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+    List<Student> findTop5ByOrderByCreatedAtDesc();
+
+    // Compte les étudiants d'un niveau donné inscrits à une matière donnée
+    // - utilisé pour calculer automatiquement le revenu d'un professeur
+    @Query("SELECT COUNT(DISTINCT s) FROM Student s JOIN s.matieres m " +
+           "WHERE s.niveau = :niveau AND m = :matiere")
+    long countByNiveauAndMatiere(@Param("niveau") String niveau, @Param("matiere") String matiere);
 
 }
